@@ -68,7 +68,7 @@
   --font-weight-medium:    500;
   --font-weight-semibold:  600;
 
-  /* Sizes (desktop reference — clamp() applied later for mobile fluidity) */
+  /* Sizes (desktop — mobile overrides in @media block at bottom of this file) */
   --font-size-h1:           48px;
   --font-size-h2:           40px;
   --font-size-h3:           32px;
@@ -76,7 +76,10 @@
   --font-size-headline:     20px;
   --font-size-body-large:   18px;
   --font-size-body-medium:  16px;
+  --font-size-label:        16px; /* label / button text; mobile → 14px */
   --font-size-caption:      14px;
+  --font-size-caption-mono: 14px; /* Fira Code captions — stable, no mobile override */
+  --font-size-body-mono-lg: 20px; /* Fira Code large body; mobile → 16px */
 
   /* Line heights */
   --line-height-tight:  1.1;
@@ -207,8 +210,74 @@
   --container-padding-tablet:   32px;
   --container-padding-desktop:  64px;
 
+  /* Page margin — horizontal padding of the main content wrapper.
+     Mobile: always 20px (= --container-padding-mobile).
+     Desktop: depends on layout (= --container-padding-desktop = 64px). */
+  --page-margin: 64px;
+
   /* Optimal reading width for prose */
   --max-content-width:  65ch;
+}
+
+/* ============================================================
+   Mobile overrides (max-width: 767px) — per mobile-adaptation.md
+   Desktop-first: base values above, mobile overrides here.
+   Rule: only override tokens that actually change on mobile.
+   ============================================================ */
+
+@media (max-width: 767px) {
+  :root {
+    /* ── Typography ──────────────────────────────────────────
+       Only font-size changes. font-weight / line-height /
+       letter-spacing stay identical to desktop.             */
+    --font-size-h1:           32px;
+    --font-size-h2:           28px;
+    --font-size-h3:           24px;
+    --font-size-h4:           20px;
+    --font-size-headline:     18px;
+    --font-size-body-large:   16px;
+    --font-size-body-medium:  15px;
+    --font-size-label:        14px;
+    --font-size-body-mono-lg: 16px;
+    /* --font-size-caption (14px) and --font-size-caption-mono (14px)
+       are identical on mobile — not included per rule #1.  */
+
+    /* ── Stack (vertical spacing) ────────────────────────────
+       xs (4px) and sm (8px) are stable — not included.     */
+    --space-stack-md:  8px;
+    --space-stack-lg:  12px;
+    --space-stack-xl:  16px;
+    --space-stack-2xl: 20px;
+    --space-stack-3xl: 24px;
+    --space-stack-5xl: 32px;
+
+    /* ── Inline (horizontal spacing) ─────────────────────────
+       sm (8px) is stable — not included.                   */
+    --space-inline-md:  8px;
+    --space-inline-lg:  12px;
+    --space-inline-xl:  16px;
+    --space-inline-2xl: 20px;
+    --space-inline-3xl: 24px;
+    --space-inline-4xl: 32px;
+    --space-inline-5xl: 40px;
+    --space-inline-6xl: 48px;
+
+    /* ── Inset (padding) ─────────────────────────────────────
+       xs (4px) and sm (8px) are stable — not included.     */
+    --space-inset-md:  8px;
+    --space-inset-lg:  12px;
+    --space-inset-xl:  16px;
+    --space-inset-2xl: 20px;
+
+    /* ── Radii ───────────────────────────────────────────────
+       --radius-m (8px) and --radius-pill (999px) are stable. */
+    --radius-l:   8px;
+    --radius-xl:  12px;
+    --radius-2xl: 16px;
+
+    /* ── Layout ──────────────────────────────────────────────*/
+    --page-margin: 20px;
+  }
 }
 
 /* ============================================================

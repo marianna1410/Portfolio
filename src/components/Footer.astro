@@ -1,0 +1,243 @@
+---
+import { Image } from 'astro:assets';
+import diagonalArrow from '../assets/icons/diagonal-arrow-dark-grey.svg';
+import footerDottedLine from '../assets/icons/footer-dotted-line.svg';
+import footerBird from '../assets/icons/footer-bird.svg';
+import { CONTACT, RESUME_URL } from '../lib/config.ts';
+---
+
+<footer class="footer" aria-label="Site footer">
+  <div class="footer__card">
+    <div class="footer__row">
+
+      <div class="footer__cta-title">
+        <p class="text-h4-medium">Ready to start building?</p>
+      </div>
+
+      <div class="footer__illustration" aria-hidden="true">
+        <Image
+          src={footerDottedLine}
+          alt=""
+          width={273}
+          height={2}
+          class="footer__illustration-line"
+        />
+        <Image
+          src={footerBird}
+          alt=""
+          width={27}
+          height={34}
+          class="footer__illustration-bird"
+        />
+      </div>
+
+      <div class="footer__links-group">
+        <p class="footer__links-heading text-headline-medium">Let&#8217;s get in touch</p>
+        <ul class="footer__links">
+          <li>
+            <a
+              href={`mailto:${CONTACT.email}`}
+              class="footer__link text-label"
+              aria-label={`Email Marianna at ${CONTACT.email} (opens mail client)`}
+            >
+              <span>Email</span>
+              <Image src={diagonalArrow} alt="" width={20} height={20} class="footer__link-arrow" />
+            </a>
+          </li>
+          <li>
+            <a
+              href={CONTACT.linkedin}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="footer__link text-label"
+            >
+              <span>LinkedIn</span>
+              <Image src={diagonalArrow} alt="" width={20} height={20} class="footer__link-arrow" />
+              <span class="sr-only">(opens in new tab)</span>
+            </a>
+          </li>
+          <li>
+            <a
+              href={CONTACT.telegram}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="footer__link text-label"
+            >
+              <span>Telegram</span>
+              <Image src={diagonalArrow} alt="" width={20} height={20} class="footer__link-arrow" />
+              <span class="sr-only">(opens in new tab)</span>
+            </a>
+          </li>
+          <li>
+            <a
+              href={RESUME_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="footer__link text-label"
+            >
+              <span>Resume</span>
+              <Image src={diagonalArrow} alt="" width={20} height={20} class="footer__link-arrow" />
+              <span class="sr-only">(opens in new tab)</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+</footer>
+
+<style>
+  /* ====== Outer footer shell ====== */
+  .footer {
+    background-color: var(--color-bg-light-grey);
+    padding-top: var(--space-stack-md);       /* 12px — matches Figma pt */
+    padding-bottom: var(--space-stack-3xl);   /* 32px — matches Figma pb */
+    padding-inline: var(--container-padding-mobile); /* 20px mobile */
+  }
+
+  @media (min-width: 768px) {
+    .footer {
+      padding-inline: var(--container-padding-tablet); /* 32px */
+    }
+  }
+
+  @media (min-width: 1280px) {
+    .footer {
+      padding-inline: var(--container-padding-desktop); /* 64px */
+    }
+  }
+
+  /* ====== White card ====== */
+  .footer__card {
+    background-color: var(--color-bg-white);
+    border-radius: var(--radius-2xl);
+    padding: var(--space-inline-3xl); /* 32px all sides */
+  }
+
+  /* Desktop: fix card height to 178px, content top-aligned */
+  @media (min-width: 768px) {
+    .footer__card {
+      height: 178px;
+    }
+  }
+
+  /* ====== Inner flex row ====== */
+  .footer__row {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-inline-2xl); /* 24px */
+  }
+
+  /* Stack vertically on mobile */
+  @media (max-width: 767px) {
+    .footer__row {
+      flex-direction: column;
+      gap: var(--space-stack-3xl); /* 32px */
+    }
+  }
+
+  /* ====== CTA title ====== */
+  .footer__cta-title {
+    display: flex;
+    align-items: center;
+    padding-top: var(--space-inset-sm); /* 8px — aligns baseline with illustration */
+    flex-shrink: 0;
+  }
+
+  .footer__cta-title p {
+    color: var(--color-text-black);
+    white-space: nowrap;
+    /* font-size uses --font-size-h4 via .text-h4-medium:
+       desktop 24px → mobile 20px handled globally in tokens.css */
+  }
+
+  /* ====== Dotted-line + bird illustration ====== */
+  .footer__illustration {
+    position: relative;
+    width: 309px;
+    height: 40px;
+    flex-shrink: 0;
+  }
+
+  /* Hidden on mobile — decorative only */
+  @media (max-width: 767px) {
+    .footer__illustration {
+      display: none;
+    }
+  }
+
+  .footer__illustration-line {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 273px;
+    height: 2px;
+    display: block;
+  }
+
+  .footer__illustration-bird {
+    position: absolute;
+    left: 278px;
+    top: 3px;
+    width: 27px;
+    height: 34px;
+    display: block;
+  }
+
+  /* ====== Links group (right column) ====== */
+  .footer__links-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-stack-lg); /* 16px */
+    padding-top: var(--space-inset-sm); /* 8px */
+    flex: 1;
+    min-width: 0;
+  }
+
+  .footer__links-heading {
+    color: var(--color-text-grey-muted);
+  }
+
+  /* Mobile: 20px → 16px (explicit design decision).
+     Uses --font-size-body-large which is 16px on mobile. */
+  @media (max-width: 767px) {
+    .footer__links-heading {
+      font-size: var(--font-size-body-large); /* mobile value: 16px */
+    }
+  }
+
+  .footer__links {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--space-inline-lg); /* 16px between links */
+    list-style: none;
+  }
+
+  /* ====== Individual link ====== */
+  .footer__link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-inset-sm); /* 8px between text and icon */
+    height: 32px;
+    padding: var(--space-inset-xs) 2px var(--space-inset-xs) var(--space-inset-xs);
+    border-radius: var(--radius-l);
+    color: var(--color-text-dark-grey);
+  }
+
+  .footer__link-arrow {
+    display: block;
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+  }
+
+  /* Minimum 44×44 tap target on touch devices */
+  @media (pointer: coarse) {
+    .footer__link {
+      min-height: 44px;
+    }
+  }
+</style>
