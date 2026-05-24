@@ -1,3 +1,10 @@
+# Astro
+dist/
+.astro/
+
+# Local design source folder (100MB) — curated copies go into src/assets/
+/Assets/
+
 # Logs
 logs
 *.log

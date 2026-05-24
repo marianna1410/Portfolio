@@ -1,0 +1,87 @@
+/* Global base styles. All values via tokens — no magic numbers, no inline hex. */
+
+@import './reset.css';
+@import './tokens.css';
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-family-body);
+  font-weight: var(--font-weight-regular);
+  font-size: var(--font-size-body-medium);
+  color: var(--color-text-primary);
+  background-color: var(--color-bg-primary);
+}
+
+/* Screen-reader only utility (a11y.md 1.5) */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Skip link (a11y.md 2.3) */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: var(--space-stack-sm);
+  z-index: var(--z-skip-link);
+  padding: var(--space-inset-sm) var(--space-inset-md);
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  border-radius: var(--radius-m);
+}
+
+.skip-link:focus {
+  left: var(--space-inline-sm);
+}
+
+/* Focus management (a11y.md 3.1) */
+:focus {
+  outline: none;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* Container (tokens.md 3.4) */
+.container {
+  width: 100%;
+  max-width: var(--container-max-width);
+  margin-inline: auto;
+  padding-inline: var(--container-padding-mobile);
+}
+
+@media (min-width: 768px) {
+  .container {
+    padding-inline: var(--container-padding-tablet);
+  }
+}
+
+@media (min-width: 1280px) {
+  .container {
+    padding-inline: var(--container-padding-desktop);
+  }
+}
+
+/* Reduced motion baseline (a11y.md 6.12) */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
