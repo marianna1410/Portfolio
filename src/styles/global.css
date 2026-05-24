@@ -1,5 +1,11 @@
 /* Global base styles. All values via tokens — no magic numbers, no inline hex. */
 
+/* Fonts (Fontsource — self-hosted, in bundle) */
+@import '@fontsource/inter-tight/400.css';
+@import '@fontsource/inter-tight/500.css';
+@import '@fontsource/inter-tight/600.css';
+@import '@fontsource/fira-code/400.css';
+
 @import './reset.css';
 @import './tokens.css';
 
