@@ -1,34 +1,32 @@
 ---
-import '../styles/global.css';
+import BaseLayout from '../layouts/BaseLayout.astro';
 ---
 
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="icon" href="/favicon.ico" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="generator" content={Astro.generator} />
-    <title>Marianna Delihioz — Portfolio</title>
-  </head>
-  <body>
-    <a href="#main" class="skip-link">Skip to main content</a>
-    <main id="main" class="container" style="padding-block: var(--space-stack-5xl);">
-      <h1 class="text-h1" style="color: var(--color-text-primary);">
-        Tokens preview
-      </h1>
+<BaseLayout title="Marianna Delihioz — Portfolio">
+  <section id="hero" style="min-height: 90vh; display: grid; place-items: center; padding-block: var(--space-stack-5xl);">
+    <div class="container" style="text-align: center;">
+      <h1 class="text-h1" style="color: var(--color-text-primary);">Hero placeholder</h1>
       <p class="text-body-medium-regular" style="color: var(--color-text-grey-muted); margin-top: var(--space-stack-md);">
-        This is a temporary preview to verify <code>tokens.css</code> loads correctly.
-        It will be replaced by the real Hero section in the next step.
+        Scroll to test sticky header. The real Hero comes in the next step.
       </p>
+    </div>
+  </section>
 
-      <div style="display: flex; gap: var(--space-inline-md); margin-top: var(--space-stack-2xl); flex-wrap: wrap;">
-        <span style="background: var(--color-accent-yellow); color: var(--color-text-black); padding: var(--space-inset-sm) var(--space-inset-md); border-radius: var(--radius-pill);" class="text-label">accent yellow</span>
-        <span style="background: var(--color-bg-light-grey); color: var(--color-text-dark-grey); padding: var(--space-inset-sm) var(--space-inset-md); border-radius: var(--radius-pill);" class="text-label">light grey bg</span>
-        <span style="background: var(--color-bg-black); color: var(--color-text-white); padding: var(--space-inset-sm) var(--space-inset-md); border-radius: var(--radius-pill);" class="text-label">black bg</span>
-        <span style="background: var(--color-bg-white); color: var(--color-text-primary); padding: var(--space-inset-sm) var(--space-inset-md); border-radius: var(--radius-pill); box-shadow: var(--shadow-card); border: 1px solid var(--color-stroke-light);" class="text-label">card shadow</span>
-      </div>
-    </main>
-  </body>
-</html>
+  <section id="works" style="min-height: 80vh; padding-block: var(--space-stack-5xl); background: var(--color-bg-light-grey);">
+    <div class="container">
+      <h2 class="text-h2">Works placeholder</h2>
+    </div>
+  </section>
+
+  <section id="experience" style="min-height: 80vh; padding-block: var(--space-stack-5xl);">
+    <div class="container">
+      <h2 class="text-h2">Experience placeholder</h2>
+    </div>
+  </section>
+
+  <section id="about" style="min-height: 80vh; padding-block: var(--space-stack-5xl); background: var(--color-bg-grey-muted);">
+    <div class="container">
+      <h2 class="text-h2">Behind the Screen placeholder</h2>
+    </div>
+  </section>
+</BaseLayout>

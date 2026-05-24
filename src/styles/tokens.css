@@ -84,10 +84,12 @@
   --line-height-loose:  1.4;
   --line-height-base:   1.48;
 
-  /* Letter spacing */
+  /* Letter spacing — Figma values are percent of font-size, so we use em.
+     Figma "letterSpacing: 1" = 1% = 0.01em (e.g. on 16px text → 0.16px).
+     Figma "letterSpacing: 2" = 2% = 0.02em (e.g. on 16px text → 0.32px). */
   --letter-spacing-tight:   0;
-  --letter-spacing-normal:  1px;
-  --letter-spacing-wide:    2px;
+  --letter-spacing-normal:  0.01em;
+  --letter-spacing-wide:    0.02em;
 
   /* --------------------------------------------------------
      3. Spacing (Figma Variables — semantic.dimension)
