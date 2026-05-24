@@ -1,7 +1,8 @@
 import { defineCollection, z } from 'astro:content';
+import { glob } from 'astro/loaders';
 
 const cases = defineCollection({
-  type: 'content',
+  loader: glob({ pattern: '**/*.mdx', base: './src/content/cases' }),
   schema: z.object({
     title: z.string(),
     summary: z.string(),

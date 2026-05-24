@@ -1,0 +1,335 @@
+/* ============================================================
+   Design Tokens — Marianna Delihioz Portfolio
+   Source: Figma file Md80hD9zZmtUsYs9ZLg8hM (UI Kit + page frames).
+   Per design-tokens.md — single-layer semantic system.
+   Always use tokens. No magic numbers. No inline hex values.
+   ============================================================ */
+
+:root {
+  /* --------------------------------------------------------
+     1. Colors (Figma Color Styles)
+     -------------------------------------------------------- */
+
+  /* Backgrounds */
+  --color-bg-white:       #FFFFFF;
+  --color-bg-light-grey:  #F4F4F3;
+  --color-bg-grey-muted:  #E5E5E5;
+  --color-bg-black:       #252525;
+
+  /* Texts */
+  --color-text-black:       #252525;
+  --color-text-dark-grey:   #4A4A4A;
+  --color-text-grey-muted:  #737373;
+  --color-text-white:       #FFFFFF;
+  --color-text-disabled:    #BBBBBB;
+
+  /* Strokes */
+  --color-stroke-light:        #E9E9E9;
+  --color-stroke-medium-grey:  #BBBBBB;
+  --color-stroke-dark-grey:    #4A4A4A;
+
+  /* Neutrals */
+  --color-neutral-grey-100:  #BBBBBB;
+  --color-neutral-grey-200:  #9B9B9B;
+  --color-neutral-grey-900:  #101010;
+  --color-black-deep:        #051014;
+
+  /* Labels */
+  --color-label-dark-grey:  #4A4A4A;
+  --color-label-blue:       #0778D5;
+
+  /* Accents */
+  --color-accent-yellow:  #E39B23;
+  --color-accent-red:     #E85949;
+
+  /* System */
+  --color-system-success:  #248434;
+  --color-system-error:    #D9321C;
+
+  /* Decorative */
+  --color-overlay-black-20:  rgba(0, 0, 0, 0.2);
+  --color-grey-blue-100:     #DEE1E7;
+
+  /* Semantic aliases (used across the site) */
+  --color-bg-primary:    var(--color-bg-white);
+  --color-text-primary:  var(--color-text-black);
+  --color-accent:        var(--color-accent-yellow);
+
+  /* --------------------------------------------------------
+     2. Typography (Figma Text Styles)
+     -------------------------------------------------------- */
+
+  /* Families */
+  --font-family-body:  'Inter Tight', system-ui, -apple-system, sans-serif;
+  --font-family-mono:  'Fira Code', ui-monospace, 'Cascadia Code', monospace;
+
+  /* Weights */
+  --font-weight-regular:   400;
+  --font-weight-medium:    500;
+  --font-weight-semibold:  600;
+
+  /* Sizes (desktop reference — clamp() applied later for mobile fluidity) */
+  --font-size-h1:           48px;
+  --font-size-h2:           40px;
+  --font-size-h3:           32px;
+  --font-size-h4:           24px;
+  --font-size-headline:     20px;
+  --font-size-body-large:   18px;
+  --font-size-body-medium:  16px;
+  --font-size-caption:      14px;
+
+  /* Line heights */
+  --line-height-tight:  1.1;
+  --line-height-snug:   1.2;
+  --line-height-loose:  1.4;
+  --line-height-base:   1.48;
+
+  /* Letter spacing */
+  --letter-spacing-tight:   0;
+  --letter-spacing-normal:  1px;
+  --letter-spacing-wide:    2px;
+
+  /* --------------------------------------------------------
+     3. Spacing (Figma Variables — semantic.dimension)
+     Three roles: inset (padding), stack (vertical), inline (horizontal).
+     -------------------------------------------------------- */
+
+  /* Inset — internal padding */
+  --space-inset-xs:   4px;
+  --space-inset-sm:   8px;
+  --space-inset-md:   12px;
+  --space-inset-lg:   16px;
+  --space-inset-xl:   20px;
+  --space-inset-2xl:  24px;
+
+  /* Stack — vertical spacing between elements */
+  --space-stack-xs:   4px;
+  --space-stack-sm:   8px;
+  --space-stack-md:   12px;
+  --space-stack-lg:   16px;
+  --space-stack-xl:   20px;
+  --space-stack-2xl:  24px;
+  --space-stack-3xl:  32px;
+  --space-stack-5xl:  48px;
+
+  /* Inline — horizontal spacing between elements */
+  --space-inline-sm:   8px;
+  --space-inline-md:   12px;
+  --space-inline-lg:   16px;
+  --space-inline-xl:   20px;
+  --space-inline-2xl:  24px;
+  --space-inline-3xl:  32px;
+  --space-inline-4xl:  40px;
+  --space-inline-5xl:  48px;
+  --space-inline-6xl:  64px;
+
+  /* --------------------------------------------------------
+     4. Radii (Figma Variables — primitives.radius)
+     -------------------------------------------------------- */
+
+  --radius-s:     4px;
+  --radius-m:     8px;
+  --radius-l:     12px;
+  --radius-xl:    16px;
+  --radius-2xl:   20px;
+  --radius-pill:  999px;
+
+  /* --------------------------------------------------------
+     5. Shadows (Figma Effect Styles)
+     -------------------------------------------------------- */
+
+  /* Cards (Lucida/Vaia case cards, Behind the Screen) */
+  --shadow-card:
+    -2px 2px 2px 0 rgba(0, 0, 0, 0.05),
+    -4px 3px 2px 0 rgba(0, 0, 0, 0.012),
+    -6px 4px 2px 0 rgba(0, 0, 0, 0);
+
+  /* Dropdown + header in Scrolling state */
+  --shadow-elevated:
+    0 1px 1px 0 rgba(186, 186, 186, 0.10),
+    0 3px 3px 0 rgba(186, 186, 186, 0.09),
+    0 6px 4px 0 rgba(186, 186, 186, 0.05),
+    0 11px 4px 0 rgba(186, 186, 186, 0.01),
+    0 17px 5px 0 rgba(186, 186, 186, 0);
+
+  /* Focus ring (paired with focus border via :focus-visible) */
+  --shadow-focus:
+    0 0 0 4px var(--color-text-primary),
+    0 0 0 2px var(--color-bg-white);
+
+  /* --------------------------------------------------------
+     6. Breakpoints (non-Figma — defined per design-tokens.md 3.1)
+     CSS uses values directly in @media; JS uses these via constants.
+     -------------------------------------------------------- */
+
+  --breakpoint-tablet:   768px;
+  --breakpoint-desktop:  1280px;
+
+  /* --------------------------------------------------------
+     7. Animation tokens (mirrors animations.md 0.3 & 0.4)
+     -------------------------------------------------------- */
+
+  /* Easing */
+  --ease-out:     cubic-bezier(0.0, 0.0, 0.2, 1);
+  --ease-in:      cubic-bezier(0.4, 0.0, 1, 1);
+  --ease-in-out:  cubic-bezier(0.4, 0.0, 0.2, 1);
+  --ease-linear:  linear;
+
+  /* Durations */
+  --duration-instant:     100ms;
+  --duration-fast:        150ms;
+  --duration-medium:      250ms;
+  --duration-slow:        400ms;
+  --duration-stack-swap:  500ms;
+  --duration-fan-out:     800ms;
+  --duration-orbit:       18s;
+
+  /* --------------------------------------------------------
+     8. Z-index scale (non-Figma)
+     -------------------------------------------------------- */
+
+  --z-base:       1;
+  --z-elevated:   10;
+  --z-sticky:     50;
+  --z-header:     100;
+  --z-dropdown:   200;
+  --z-overlay:    500;
+  --z-skip-link:  9999;
+
+  /* --------------------------------------------------------
+     9. Container widths (non-Figma)
+     -------------------------------------------------------- */
+
+  --container-max-width:        1280px;
+  --container-padding-mobile:   20px;
+  --container-padding-tablet:   32px;
+  --container-padding-desktop:  64px;
+
+  /* Optimal reading width for prose */
+  --max-content-width:  65ch;
+}
+
+/* ============================================================
+   Typography utility classes — direct map from Figma Text Styles.
+   Use as <h1 class="text-h1"> etc. instead of duplicating font props.
+   ============================================================ */
+
+.text-h1 {
+  font-family: var(--font-family-body);
+  font-weight: var(--font-weight-medium);
+  font-size: var(--font-size-h1);
+  line-height: var(--line-height-tight);
+  letter-spacing: var(--letter-spacing-tight);
+}
+
+.text-h2 {
+  font-family: var(--font-family-body);
+  font-weight: var(--font-weight-medium);
+  font-size: var(--font-size-h2);
+  line-height: var(--line-height-tight);
+  letter-spacing: var(--letter-spacing-normal);
+}
+
+.text-h3 {
+  font-family: var(--font-family-body);
+  font-weight: var(--font-weight-medium);
+  font-size: var(--font-size-h3);
+  line-height: var(--line-height-tight);
+  letter-spacing: var(--letter-spacing-normal);
+}
+
+.text-h4-medium {
+  font-family: var(--font-family-body);
+  font-weight: var(--font-weight-medium);
+  font-size: var(--font-size-h4);
+  line-height: var(--line-height-tight);
+  letter-spacing: var(--letter-spacing-wide);
+}
+
+.text-h4-semibold {
+  font-family: var(--font-family-body);
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-h4);
+  line-height: var(--line-height-tight);
+  letter-spacing: var(--letter-spacing-normal);
+}
+
+.text-headline-medium {
+  font-family: var(--font-family-body);
+  font-weight: var(--font-weight-medium);
+  font-size: var(--font-size-headline);
+  line-height: var(--line-height-tight);
+  letter-spacing: var(--letter-spacing-wide);
+}
+
+.text-headline-semibold {
+  font-family: var(--font-family-body);
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-headline);
+  line-height: var(--line-height-tight);
+  letter-spacing: var(--letter-spacing-wide);
+}
+
+.text-body-large-regular {
+  font-family: var(--font-family-body);
+  font-weight: var(--font-weight-regular);
+  font-size: var(--font-size-body-large);
+  line-height: var(--line-height-base);
+  letter-spacing: var(--letter-spacing-wide);
+}
+
+.text-body-large-semibold {
+  font-family: var(--font-family-body);
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-body-large);
+  line-height: var(--line-height-loose);
+  letter-spacing: var(--letter-spacing-wide);
+}
+
+.text-body-medium-regular {
+  font-family: var(--font-family-body);
+  font-weight: var(--font-weight-regular);
+  font-size: var(--font-size-body-medium);
+  line-height: var(--line-height-base);
+  letter-spacing: var(--letter-spacing-wide);
+}
+
+.text-body-medium-semibold {
+  font-family: var(--font-family-body);
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-body-medium);
+  line-height: var(--line-height-base);
+  letter-spacing: var(--letter-spacing-wide);
+}
+
+.text-label {
+  font-family: var(--font-family-body);
+  font-weight: var(--font-weight-medium);
+  font-size: var(--font-size-body-medium);
+  line-height: var(--line-height-tight);
+  letter-spacing: var(--letter-spacing-normal);
+}
+
+.text-caption-regular {
+  font-family: var(--font-family-body);
+  font-weight: var(--font-weight-regular);
+  font-size: var(--font-size-caption);
+  line-height: var(--line-height-snug);
+  letter-spacing: var(--letter-spacing-wide);
+}
+
+.text-caption-semibold {
+  font-family: var(--font-family-body);
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-caption);
+  line-height: var(--line-height-snug);
+  letter-spacing: var(--letter-spacing-wide);
+}
+
+.text-caption-mono {
+  font-family: var(--font-family-mono);
+  font-weight: var(--font-weight-regular);
+  font-size: var(--font-size-caption);
+  line-height: var(--line-height-loose);
+  letter-spacing: var(--letter-spacing-normal);
+}
