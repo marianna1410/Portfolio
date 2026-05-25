@@ -217,6 +217,10 @@
 
   /* Optimal reading width for prose */
   --max-content-width:  65ch;
+
+  /* Section vertical padding — applies to ALL main sections except Hero.
+     Hero has its own bespoke top padding (sticky header compensation). */
+  --space-section-block:  64px;
 }
 
 /* ============================================================
@@ -278,6 +282,9 @@
 
     /* ── Layout ──────────────────────────────────────────────*/
     --page-margin: 16px;
+
+    /* Section vertical padding (mobile) — applies to ALL sections except Hero. */
+    --space-section-block: 44px;
   }
 }
 

@@ -77,7 +77,7 @@ const works = [
   /* ====== Section shell ====== */
   .works {
     background-color: var(--color-bg-light-grey);
-    padding-block: var(--space-inline-6xl); /* 64px desktop */
+    padding-block: var(--space-section-block); /* 64px desktop / 44px mobile */
     padding-inline: var(--container-padding-desktop);
   }
 
@@ -89,7 +89,6 @@ const works = [
 
   @media (max-width: 767px) {
     .works {
-      padding-block: var(--space-stack-5xl); /* 32px mobile */
       padding-inline: var(--container-padding-mobile);
     }
   }
@@ -105,10 +104,10 @@ const works = [
     width: 100%;
   }
 
-  /* Mobile: tighter gap between heading and cards (24px per Marianna's brief) */
+  /* Mobile: gap between heading and cards = 32px (new section standard). */
   @media (max-width: 767px) {
     .works__inner {
-      gap: var(--space-stack-3xl); /* 24px mobile */
+      gap: var(--space-stack-5xl); /* 32px mobile */
     }
   }
 

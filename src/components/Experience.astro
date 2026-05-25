@@ -1,0 +1,435 @@
+---
+import { Image } from 'astro:assets';
+import craftPattern from '../assets/icons/experience-craft-pattern.svg';
+import bazaPattern  from '../assets/icons/experience-baza-pattern.svg';
+import arrowBullet  from '../assets/icons/arrow-right-bullet.svg';
+import paperSlice   from '../assets/icons/paper-slice.png';
+import paperTexture from '../assets/icons/paper-texture.png';
+import borderCraft  from '../assets/icons/experience-card-border-craft.svg';
+import borderBaza   from '../assets/icons/experience-card-border-baza.svg';
+
+/**
+ * Experience section — Figma node 472:16053.
+ * Two experience cards (Craft, Baza) + Skills grid of paper-textured pills.
+ *
+ * Card borders: SVG with stroke-dasharray="0.1 8" + non-scaling-stroke +
+ * preserveAspectRatio="none" — native CSS `border-style: dashed` can't render
+ * the tiny-dot + 8px-gap pattern from Figma.
+ *
+ * Skill pills: paper-slice end-caps (notches face OUTWARD per Figma) +
+ * fixed-position paper-texture background — all pills share same crop region
+ * so long pills don't stretch the texture (matches Figma frame-2316 trick).
+ */
+const jobs = [
+  {
+    pattern: craftPattern,
+    border: borderCraft,
+    role: 'UX/UI Designer',
+    company: 'Craft Innovations',
+    dates: 'Dec 2023 - Nov 2025',
+    bullets: [
+      'Contributed to 8 projects within a design team over two years, including web platforms and e-commerce solutions.',
+      'Conducted a comprehensive UX audit to identify and resolve usability issues, significantly enhancing the overall experience of an online banking platform.',
+      'Key contributor to a full-scale e-commerce store redesign and the development of a large-scale UI kit from scratch, partnering with the team on all stages from user flows to developer handoffs.',
+      "Developed an internal design accessibility guide based on WCAG standards, streamlining the team's workflow and ensuring compliance across the website redesign project.",
+    ],
+  },
+  {
+    pattern: bazaPattern,
+    border: borderBaza,
+    role: 'Junior UX/UI Designer',
+    company: 'Baza Trainee Ukraine',
+    dates: 'Jul 2023 - Dec 2023',
+    bullets: [
+      "Helped design a children's e-reading web platform, focusing on creating engaging experiences for young audiences.",
+      'Designed user flows for quiz interactions using the established design system.',
+      'Collaborated closely with a cross-functional team of designers and developers, gaining hands-on experience with the product development process.',
+    ],
+  },
+];
+
+const skillRows = [
+  ['Problem-solving', 'UX Research', 'Wireframing', 'AI Prototyping', 'Brainstorming'],
+  ['UX Audit', 'UX Writing', 'Accessibility', 'UI Kits', 'Design Systems'],
+  ['Visual Design', 'Micro-animation', 'Mobile App Design', 'AI Tools'],
+  ['Responsive & Web Design', 'Developer Handoff'],
+];
+---
+
+<section class="experience" id="experience" aria-labelledby="experience-heading">
+  <div class="experience__inner">
+    <!-- Title block -->
+    <header class="experience__title-block">
+      <p class="experience__caption text-caption-mono">{` {EXPERIENCE}`}</p>
+      <h2 id="experience-heading" class="experience__heading text-h2">
+        2+ years of UX-led design from corporate websites to scalable product platforms
+      </h2>
+    </header>
+
+    <!-- Experience cards -->
+    <div class="experience__cards">
+      {jobs.map((job) => (
+        <article class="experience__card">
+          <Image
+            src={job.border}
+            alt=""
+            class="experience__card-border"
+            aria-hidden="true"
+          />
+          <div class="experience__card-head">
+            <div class="experience__role">
+              <div class="experience__pattern" aria-hidden="true">
+                <Image src={job.pattern} alt="" width={52} height={52} />
+              </div>
+              <div class="experience__role-info">
+                <p class="experience__role-title text-headline-medium">{job.role}</p>
+                <p class="experience__role-company text-body-medium-regular">{job.company}</p>
+              </div>
+            </div>
+            <span class="experience__dates text-caption-mono">{job.dates}</span>
+          </div>
+
+          <ul class="experience__bullets">
+            {job.bullets.map((bullet) => (
+              <li class="experience__bullet">
+                <Image
+                  src={arrowBullet}
+                  alt=""
+                  width={20}
+                  height={20}
+                  class="experience__bullet-icon"
+                  aria-hidden="true"
+                />
+                <p class="experience__bullet-text text-body-large-regular">{bullet}</p>
+              </li>
+            ))}
+          </ul>
+        </article>
+      ))}
+    </div>
+
+    <!-- Skills -->
+    <div class="experience__skills">
+      <h3 class="experience__skills-title text-h4-medium">Skills acquired over time</h3>
+      <ul class="experience__skills-rows">
+        {skillRows.map((row) => (
+          <li class="experience__skills-row">
+            <ul class="experience__skills-pills">
+              {row.map((skill, i) => (
+                <li class={`skill-pill${i < row.length - 1 ? ' skill-pill--overlap' : ''}`}>
+                  <Image
+                    src={paperSlice}
+                    alt=""
+                    width={20}
+                    height={44}
+                    quality={95}
+                    class="skill-pill__cap skill-pill__cap--left"
+                    aria-hidden="true"
+                  />
+                  <span class="skill-pill__body">
+                    <span class="skill-pill__text text-caption-regular">{skill}</span>
+                  </span>
+                  <Image
+                    src={paperSlice}
+                    alt=""
+                    width={20}
+                    height={44}
+                    quality={95}
+                    class="skill-pill__cap skill-pill__cap--right"
+                    aria-hidden="true"
+                  />
+                </li>
+              ))}
+            </ul>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </div>
+</section>
+
+<style define:vars={{ paperTextureUrl: `url(${paperTexture.src})` }}>
+  /* ====== Section shell ====== */
+  .experience {
+    background-color: var(--color-bg-white);
+    padding-block: var(--space-section-block); /* 64px desktop / 44px mobile */
+    padding-inline: var(--container-padding-desktop);
+  }
+
+  @media (min-width: 768px) and (max-width: 1279px) {
+    .experience {
+      padding-inline: var(--container-padding-tablet);
+    }
+  }
+
+  @media (max-width: 767px) {
+    .experience {
+      padding-inline: var(--container-padding-mobile);
+    }
+  }
+
+  /* ====== Inner column ====== */
+  .experience__inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-stack-5xl); /* 48px desktop / 32px mobile */
+    max-width: 800px;
+    margin-inline: auto;
+    width: 100%;
+  }
+
+  /* ====== Title block ====== */
+  .experience__title-block {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-stack-xl); /* 20px desktop / 16px mobile */
+    align-items: center;
+    text-align: center;
+    width: 100%;
+    max-width: 766px;
+  }
+
+  .experience__caption {
+    color: var(--color-text-grey-muted);
+    margin: 0;
+  }
+
+  .experience__heading {
+    color: var(--color-text-black);
+    margin: 0;
+    text-wrap: balance;
+  }
+
+  /* ====== Cards container ====== */
+  .experience__cards {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-stack-2xl); /* 24px desktop / 20px mobile */
+    width: 100%;
+  }
+
+  /* ====== Single experience card ====== */
+  .experience__card {
+    position: relative;
+    background-color: var(--color-bg-white);
+    border-radius: var(--radius-xl); /* 16px desktop / 12px mobile */
+    padding: var(--space-inset-2xl); /* 24px desktop / 20px mobile */
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-stack-xl); /* 20px desktop / 16px mobile */
+  }
+
+  /* Dashed border SVG fills the card; preserveAspectRatio="none" stretches
+     the path to any card height while non-scaling-stroke keeps dash uniform. */
+  .experience__card-border {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    display: block;
+  }
+
+  /* ====== Card head: role + dates ====== */
+  .experience__card-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-inline-sm); /* 8px minimum gap between role and badge */
+    width: 100%;
+    /* Allow badge to wrap to next line if it can't fit with the 8px gap. */
+    flex-wrap: wrap;
+  }
+
+  .experience__role {
+    display: flex;
+    align-items: center;
+    gap: var(--space-inline-md); /* 12px desktop / 8px mobile */
+    min-width: 0;
+  }
+
+  .experience__pattern {
+    width: 52px;
+    height: 52px;
+    flex-shrink: 0;
+    overflow: hidden;
+  }
+
+  .experience__pattern :global(img) {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  .experience__role-info {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-stack-xs); /* 4px */
+    min-width: 0;
+  }
+
+  .experience__role-title {
+    color: var(--color-text-black);
+    margin: 0;
+  }
+
+  .experience__role-company {
+    color: var(--color-text-grey-muted);
+    margin: 0;
+  }
+
+  /* Dates Tag — Figma node 676:15746 */
+  .experience__dates {
+    color: var(--color-text-grey-muted);
+    background-color: var(--color-bg-light-grey);
+    padding: var(--space-inset-sm) var(--space-inset-lg); /* 8px 16px */
+    border-radius: var(--radius-l); /* 12px */
+    white-space: nowrap;
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    /* Vertical optical alignment with role title baseline */
+    margin-top: 4px;
+  }
+
+  /* ====== Bullets ====== */
+  .experience__bullets {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-stack-sm); /* 8px */
+    width: 100%;
+    position: relative; /* sit above border SVG */
+  }
+
+  .experience__bullet {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-inline-sm); /* 8px */
+    width: 100%;
+  }
+
+  .experience__bullet-icon {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    display: block;
+    /* Optical alignment with first line of text */
+    margin-top: 2px;
+  }
+
+  .experience__bullet-text {
+    color: var(--color-text-grey-muted);
+    margin: 0;
+    flex: 1 1 0;
+    min-width: 0;
+  }
+
+  /* ====== Skills section ====== */
+  .experience__skills {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-stack-2xl); /* 24px desktop / 20px mobile */
+  }
+
+  .experience__skills-title {
+    color: var(--color-text-black);
+    margin: 0;
+  }
+
+  .experience__skills-rows {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-stack-sm); /* 8px */
+    width: 100%;
+  }
+
+  .experience__skills-row {
+    width: 100%;
+  }
+
+  .experience__skills-pills {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    width: 100%;
+  }
+
+  /* ====== Skill pill — paper-textured Label (Figma component 314:12925+) ====== */
+  .skill-pill {
+    flex: 1 1 0;
+    min-width: 0;
+    height: 44px;
+    display: flex;
+    align-items: stretch;
+    position: relative;
+  }
+
+  /* Adjacent pills overlap by 4px to mimic Figma `mr-[-4px]` */
+  .skill-pill--overlap {
+    margin-right: -4px;
+  }
+
+  .skill-pill__cap {
+    width: 20px;
+    height: 44px;
+    flex-shrink: 0;
+    display: block;
+    object-fit: fill;
+  }
+
+  /* FLIP both caps so notches face OUTWARD (outer pill edges) per Figma.
+     Source slice asset has rounded LEFT edge + notches on RIGHT, so:
+     - Left cap: flip → notches go to LEFT (outer pill edge)
+     - Right cap: no flip → notches stay on RIGHT (outer pill edge) */
+  .skill-pill__cap--left {
+    transform: scaleX(-1);
+  }
+
+  .skill-pill__body {
+    flex: 1 1 0;
+    min-width: 0;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    /* Fixed-size paper texture: every pill shows the SAME crop region —
+       long pills don't stretch the fibers. Matches Figma frame-2316 trick. */
+    background-image: var(--paperTextureUrl);
+    background-size: 548px 44px; /* source width × pill height */
+    background-position: center;
+    background-repeat: no-repeat;
+  }
+
+  .skill-pill__text {
+    position: relative;
+    z-index: 1;
+    color: var(--color-text-dark-grey);
+    padding-inline: var(--space-inset-sm); /* 8px */
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  /* Mobile: pills wrap, sized to content; keep 44px height + paper assets intact */
+  @media (max-width: 767px) {
+    .experience__skills-pills {
+      flex-wrap: wrap;
+      row-gap: var(--space-stack-sm); /* 8px */
+    }
+
+    .skill-pill {
+      flex: 0 0 auto;
+    }
+  }
+</style>
