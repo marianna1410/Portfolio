@@ -10,6 +10,10 @@ interface Props {
 }
 
 const { variant = 'home' } = Astro.props;
+
+// Nav links: on home page use anchor links (#works), on case pages use /#works
+// so a click navigates to home and scrolls to the section.
+const navPrefix = variant === 'home' ? '#' : '/#';
 ---
 
 <header class="header" data-variant={variant}>
@@ -25,16 +29,18 @@ const { variant = 'home' } = Astro.props;
       </a>
     )}
 
+    {/* Desktop nav — visible on home only, hidden on mobile via CSS */}
     {variant === 'home' && (
       <nav class="header__nav" aria-label="Main">
         <ul class="header__nav-list">
-          <li><a href="#works" class="header__nav-link text-label" data-scroll-target="works">Works</a></li>
-          <li><a href="#experience" class="header__nav-link text-label" data-scroll-target="experience">Experience</a></li>
-          <li><a href="#about" class="header__nav-link text-label" data-scroll-target="about">About</a></li>
+          <li><a href={`${navPrefix}works`}      class="header__nav-link text-label" data-scroll-target="works">Works</a></li>
+          <li><a href={`${navPrefix}experience`} class="header__nav-link text-label" data-scroll-target="experience">Experience</a></li>
+          <li><a href={`${navPrefix}about`}      class="header__nav-link text-label" data-scroll-target="about">About</a></li>
         </ul>
       </nav>
     )}
 
+    {/* Desktop Contact button + dropdown (hidden on mobile) */}
     <div class="header__contact-wrapper">
       <button
         type="button"
@@ -96,7 +102,84 @@ const { variant = 'home' } = Astro.props;
       </ul>
     </div>
 
+    {/*
+      Mobile Menu button (hidden on desktop). Trigger only — the dropdown
+      is rendered as a sibling of the pill (outside this wrapper) so it can
+      span the full pill width without inheriting trigger's narrow width.
+    */}
+    <div class="header__menu-wrapper">
+      <button
+        type="button"
+        class="header__menu-button text-label"
+        aria-haspopup="menu"
+        aria-expanded="false"
+        aria-controls="mobile-menu"
+        data-menu-trigger
+      >
+        <span>Menu</span>
+        <Image src={chevronDownWhite} alt="" width={20} height={20} class="header__menu-chevron" />
+      </button>
+    </div>
+
   </div>
+
+  {/*
+    Mobile menu dropdown — sibling of pill so positioning is relative to .header
+    (which is the sticky positioning context). This avoids the 100vw scrollbar
+    discrepancy and lets dropdown align exactly with pill edges.
+    Contains nav (Works/Experience/About) + contacts (Email/LinkedIn/Telegram).
+  */}
+  <ul
+    id="mobile-menu"
+    class="header__menu-dropdown"
+    role="menu"
+    aria-label="Site menu — navigation and contacts"
+    hidden
+    data-menu-menu
+  >
+    {/* Nav tabs — full-width buttons with SVG dotted border, stacked vertically */}
+    <li role="none"><a href={`${navPrefix}works`}      role="menuitem" class="header__menu-tab text-label" data-scroll-target="works">Works</a></li>
+    <li role="none"><a href={`${navPrefix}experience`} role="menuitem" class="header__menu-tab text-label" data-scroll-target="experience">Experience</a></li>
+    <li role="none"><a href={`${navPrefix}about`}      role="menuitem" class="header__menu-tab text-label" data-scroll-target="about">About</a></li>
+
+    {/* Section label "CONTACT" (decorative — not a focusable menu item) */}
+    <li role="separator" class="header__menu-section-label text-caption-mono">CONTACT</li>
+
+    {/* Contacts group — horizontal row of 3 inline links with diagonal arrows */}
+    <li role="none" class="header__menu-contacts">
+      <a
+        href={`mailto:${CONTACT.email}`}
+        role="menuitem"
+        class="header__menu-contact-link text-label"
+        aria-label={`Email Marianna at ${CONTACT.email} (opens mail client)`}
+      >
+        <span>Email</span>
+        <Image src={diagonalArrow} alt="" width={20} height={20} class="header__menu-contact-arrow" />
+      </a>
+      <a
+        href={CONTACT.linkedin}
+        role="menuitem"
+        class="header__menu-contact-link text-label"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <span>LinkedIn</span>
+        <Image src={diagonalArrow} alt="" width={20} height={20} class="header__menu-contact-arrow" />
+        <span class="sr-only">(opens in new tab)</span>
+      </a>
+      <a
+        href={CONTACT.telegram}
+        role="menuitem"
+        class="header__menu-contact-link text-label"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <span>Telegram</span>
+        <Image src={diagonalArrow} alt="" width={20} height={20} class="header__menu-contact-arrow" />
+        <span class="sr-only">(opens in new tab)</span>
+      </a>
+    </li>
+  </ul>
 </header>
 
 <style>
@@ -132,10 +215,9 @@ const { variant = 'home' } = Astro.props;
     padding: var(--space-inset-sm);
     background-color: var(--color-bg-light-grey);
     border-radius: var(--radius-2xl);
-    /* Default state — no border, no shadow. Scrolling state added in Phase 2. */
   }
 
-  /* Mobile: pill stretches to full wrapper width, Logo↔Contact pushed to edges. */
+  /* Mobile: pill stretches full-width, Logo↔Menu pushed to edges. */
   @media (max-width: 767px) {
     .header__pill {
       width: 100%;
@@ -157,7 +239,7 @@ const { variant = 'home' } = Astro.props;
     border-radius: var(--radius-l);
   }
 
-  /* ====== Nav (Home variant) ====== */
+  /* ====== Nav (Home variant, desktop only) ====== */
   .header__nav-list {
     display: flex;
     align-items: center;
@@ -176,7 +258,7 @@ const { variant = 'home' } = Astro.props;
     white-space: nowrap;
   }
 
-  /* Hide nav on mobile per interactions.md 6.1 */
+  /* Hide nav on mobile — Menu dropdown carries nav links there */
   @media (max-width: 767px) {
     .header__nav {
       display: none;
@@ -193,9 +275,16 @@ const { variant = 'home' } = Astro.props;
     color: var(--color-text-dark-grey);
   }
 
-  /* ====== Contact button ====== */
+  /* ====== Desktop Contact button ====== */
   .header__contact-wrapper {
     position: relative; /* anchor for the dropdown */
+  }
+
+  /* Hide desktop Contact on mobile — replaced by Menu */
+  @media (max-width: 767px) {
+    .header__contact-wrapper {
+      display: none;
+    }
   }
 
   .header__contact-button {
@@ -217,18 +306,15 @@ const { variant = 'home' } = Astro.props;
     height: 20px;
   }
 
-  /* ====== Dropdown menu ====== */
+  /* ====== Desktop Contact dropdown ====== */
   .header__contact-menu {
     position: absolute;
-    /* 16px = 8px compensation for pill's bottom padding + 8px visible gap
-       between pill bottom and dropdown top (interactions.md 2.3). */
     top: calc(100% + var(--space-stack-sm) + var(--space-stack-sm));
-    /* Centered horizontally under the Contact button */
     left: 50%;
     transform: translateX(-50%);
     z-index: var(--z-dropdown);
     width: 125px;
-    padding: var(--space-inset-md); /* 12px per Figma 337:18726 */
+    padding: var(--space-inset-md);
     background-color: var(--color-bg-white);
     border: 1px solid var(--color-stroke-light);
     border-radius: var(--radius-l);
@@ -239,17 +325,11 @@ const { variant = 'home' } = Astro.props;
     display: none;
   }
 
-  .header__contact-menu-list-inner {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-stack-sm); /* 8px between items per Figma */
-  }
-
   .header__contact-menu-link {
     display: flex;
     align-items: center;
-    justify-content: flex-start; /* text + icon hug the left edge of the item */
-    gap: var(--space-inset-sm); /* 8px between text and icon per Figma */
+    justify-content: flex-start;
+    gap: var(--space-inset-sm);
     height: 32px;
     padding: var(--space-inset-xs) 2px var(--space-inset-xs) var(--space-inset-xs);
     border-radius: var(--radius-l);
@@ -263,34 +343,205 @@ const { variant = 'home' } = Astro.props;
     flex-shrink: 0;
   }
 
-  /* Minimum 44×44 tap target per a11y.md 8.1 — links here are 40h, so add inset padding */
+  /* ====== Mobile Menu button (hidden on desktop) ====== */
+  .header__menu-wrapper {
+    position: relative;
+    display: none; /* hidden on desktop */
+  }
+
+  @media (max-width: 767px) {
+    .header__menu-wrapper {
+      display: block;
+    }
+  }
+
+  .header__menu-button {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-inset-sm);
+    height: 40px;
+    padding: var(--space-inset-sm) var(--space-inset-md) var(--space-inset-sm) var(--space-inset-lg);
+    background-color: var(--color-bg-black);
+    color: var(--color-text-white);
+    border-radius: var(--radius-l);
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  .header__menu-chevron {
+    display: block;
+    width: 20px;
+    height: 20px;
+    transition: transform var(--duration-fast) var(--ease-out);
+  }
+
+  /* Rotate chevron when menu is open (a11y hint) */
+  .header__menu-button[aria-expanded="true"] .header__menu-chevron {
+    transform: rotate(180deg);
+  }
+
+  /* ====== Mobile Menu dropdown ======
+     Sibling of pill inside .header (sticky positioning context).
+     Position absolute relative to .header padding-box so left/right
+     anchors match the header's padding-inline — guaranteed to align
+     with the pill (no scrollbar 100vw discrepancy). Needs pointer-events:auto
+     because .header has pointer-events:none.
+     Per Figma node 647:22434 — 16px padding, 12px radius, elevated shadow. */
+  .header__menu-dropdown {
+    position: absolute;
+    top: calc(100% + var(--space-stack-sm) + var(--space-stack-sm)); /* 16px below pill */
+    /* Anchor to header's padding-box edges + offset by padding-inline to land
+       exactly on the pill's outer edges (pill is inside header content area) */
+    left: var(--container-padding-mobile);
+    right: var(--container-padding-mobile);
+    z-index: var(--z-dropdown);
+    pointer-events: auto;
+    padding: var(--space-inset-lg); /* 16px per Figma */
+    background-color: var(--color-bg-white);
+    border: 1px solid var(--color-stroke-light);
+    border-radius: var(--radius-xl); /* 12px mobile */
+    box-shadow: var(--shadow-elevated);
+    display: grid;
+    grid-template-columns: 1fr;
+    row-gap: var(--space-stack-sm); /* 8px between tabs */
+    list-style: none;
+    margin: 0;
+  }
+
+  .header__menu-dropdown[hidden] {
+    display: none;
+  }
+
+  /* ====== Nav tab — inline SVG dotted border, full-width, centered text ======
+     Per Figma node 647:22441 (asset Mobile_Tab_border.svg): rounded-rect 12px,
+     stroke dasharray="0.1 4" round-cap. SVG inlined as data URI with
+     preserveAspectRatio="none" + vector-effect="non-scaling-stroke" so it
+     stretches to any tab width while keeping the dot pattern uniform.
+     Inline (vs external import) avoids any path-resolution / cache issues. */
+  .header__menu-tab {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 40px;
+    padding-inline: var(--space-inset-md);
+    border: none;
+    border-radius: var(--radius-xl); /* 12px mobile */
+    background-color: var(--color-bg-white);
+    background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 312 41' preserveAspectRatio='none' fill='none'%3E%3Cpath d='M0.5 12.5C0.5 5.87258 5.87258 0.5 12.5 0.5H299.5C306.127 0.5 311.5 5.87258 311.5 12.5V28.5C311.5 35.1274 306.127 40.5 299.5 40.5H12.5C5.87258 40.5 0.5 35.1274 0.5 28.5V12.5Z' stroke='%23252525' stroke-linecap='round' stroke-dasharray='0.1 4' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E");
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    color: var(--color-text-dark-grey);
+    /* Override .text-label mobile size (14/15px) to match Figma tab spec (16px) */
+    font-size: var(--font-size-body-large);
+    white-space: nowrap;
+  }
+
+  /* ====== Section label "CONTACT" (decorative separator) ====== */
+  .header__menu-section-label {
+    /* Override role="separator" defaults */
+    list-style: none;
+    text-transform: uppercase;
+    color: var(--color-text-grey-muted);
+    /* Extra top margin to create breathing room after the last tab (Figma: 20px) */
+    margin-top: var(--space-stack-md); /* 8px mobile */
+  }
+
+  /* ====== Contacts row — horizontal flex inside its <li> wrapper ====== */
+  .header__menu-contacts {
+    display: flex;
+    align-items: center;
+    gap: var(--space-inline-sm); /* 8px between contact links */
+    list-style: none;
+    margin-top: var(--space-stack-xs); /* 4px below CONTACT label */
+  }
+
+  .header__menu-contact-link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-inset-sm); /* 8px between text and arrow */
+    height: 32px;
+    padding: var(--space-inset-xs) 2px var(--space-inset-xs) var(--space-inset-xs);
+    border-radius: var(--radius-l);
+    color: var(--color-text-dark-grey);
+    white-space: nowrap;
+  }
+
+  .header__menu-contact-arrow {
+    display: block;
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+  }
+
+  /* ====== Accessibility — focus + touch targets ====== */
+
+  /* Visible focus ring per a11y.md 8.1 (--shadow-focus: outer black + inner white) */
+  .header__nav-link:focus-visible,
+  .header__go-home:focus-visible,
+  .header__contact-button:focus-visible,
+  .header__menu-button:focus-visible,
+  .header__contact-menu-link:focus-visible,
+  .header__menu-tab:focus-visible,
+  .header__menu-contact-link:focus-visible {
+    outline: none;
+    box-shadow: var(--shadow-focus);
+  }
+
+  /* Minimum 44×44 tap target on touch devices */
   @media (pointer: coarse) {
     .header__contact-menu-link,
+    .header__menu-tab,
+    .header__menu-contact-link,
     .header__nav-link,
     .header__go-home,
-    .header__contact-button {
+    .header__contact-button,
+    .header__menu-button {
       min-height: 44px;
     }
   }
 </style>
 
 <script>
-  // Contact dropdown behavior — toggle, Esc, outside-click, focus management.
-  // No animations here (Phase 2 will layer those on).
-  const initContactDropdown = () => {
-    const trigger = document.querySelector<HTMLButtonElement>('[data-contact-trigger]');
-    const menu = document.querySelector<HTMLUListElement>('[data-contact-menu]');
+  /*
+   * Header dropdown behavior — handles BOTH:
+   *   1. Desktop Contact dropdown (data-contact-trigger / data-contact-menu)
+   *   2. Mobile Menu dropdown (data-menu-trigger / data-menu-menu)
+   *
+   * Features (a11y per accessibility.md):
+   *   - aria-expanded toggled on trigger
+   *   - hidden attribute toggled on menu
+   *   - First menu item focused on open
+   *   - Trigger refocused on close
+   *   - Esc closes + returns focus to trigger
+   *   - Outside click closes (no focus return)
+   *   - Arrow Up/Down navigates between menu items (wraps)
+   *   - Home/End jumps to first/last item
+   *
+   * Smooth scroll for any [data-scroll-target] link:
+   *   - If link's target section exists on current page → smooth scroll + close menu
+   *   - Otherwise let browser navigate (e.g. /#works from a case page)
+   */
+
+  type DropdownConfig = {
+    triggerSelector: string;
+    menuSelector: string;
+  };
+
+  const initDropdown = ({ triggerSelector, menuSelector }: DropdownConfig) => {
+    const trigger = document.querySelector<HTMLButtonElement>(triggerSelector);
+    const menu = document.querySelector<HTMLUListElement>(menuSelector);
     if (!trigger || !menu) return;
 
     const menuItems = () =>
       Array.from(menu.querySelectorAll<HTMLAnchorElement>('a[role="menuitem"]'));
 
+    const isOpen = () => trigger.getAttribute('aria-expanded') === 'true';
+
     const open = () => {
       trigger.setAttribute('aria-expanded', 'true');
       menu.removeAttribute('hidden');
       // Focus first menu item per a11y.md 2.5
-      const first = menuItems()[0];
-      if (first) first.focus();
+      menuItems()[0]?.focus();
     };
 
     const close = (returnFocus = true) => {
@@ -299,15 +550,12 @@ const { variant = 'home' } = Astro.props;
       if (returnFocus) trigger.focus();
     };
 
-    const isOpen = () => trigger.getAttribute('aria-expanded') === 'true';
-
     trigger.addEventListener('click', (e) => {
       e.stopPropagation();
-      if (isOpen()) close();
-      else open();
+      isOpen() ? close() : open();
     });
 
-    // Outside click closes
+    // Outside click closes (no focus return — user clicked elsewhere intentionally)
     document.addEventListener('click', (e) => {
       if (!isOpen()) return;
       const target = e.target as Node;
@@ -316,38 +564,80 @@ const { variant = 'home' } = Astro.props;
       }
     });
 
-    // Esc closes + returns focus
+    // Keyboard navigation
     document.addEventListener('keydown', (e) => {
       if (!isOpen()) return;
-      if (e.key === 'Escape') {
-        e.preventDefault();
-        close();
-        return;
-      }
-      // Arrow key navigation between items per a11y.md 2.5
       const items = menuItems();
       const currentIdx = items.indexOf(document.activeElement as HTMLAnchorElement);
-      if (e.key === 'ArrowDown') {
-        e.preventDefault();
-        const next = items[(currentIdx + 1) % items.length];
-        next?.focus();
-      } else if (e.key === 'ArrowUp') {
-        e.preventDefault();
-        const prev = items[(currentIdx - 1 + items.length) % items.length];
-        prev?.focus();
+
+      switch (e.key) {
+        case 'Escape':
+          e.preventDefault();
+          close();
+          break;
+        case 'ArrowDown':
+          e.preventDefault();
+          items[(currentIdx + 1) % items.length]?.focus();
+          break;
+        case 'ArrowUp':
+          e.preventDefault();
+          items[(currentIdx - 1 + items.length) % items.length]?.focus();
+          break;
+        case 'Home':
+          e.preventDefault();
+          items[0]?.focus();
+          break;
+        case 'End':
+          e.preventDefault();
+          items[items.length - 1]?.focus();
+          break;
       }
     });
 
-    // Clicking a menu item closes (link still navigates)
+    // Clicking any menu item closes the menu (link still navigates afterwards)
     menu.addEventListener('click', (e) => {
       const target = e.target as HTMLElement;
       if (target.closest('a[role="menuitem"]')) close(false);
     });
   };
 
+  /*
+   * Smooth scroll for [data-scroll-target] links on the SAME page.
+   * On case pages, these links point to /#section so the browser navigates
+   * to home naturally; smooth scroll only kicks in once on the home page.
+   * Respects prefers-reduced-motion via 'scroll-behavior' CSS being inherited.
+   */
+  const initSmoothScroll = () => {
+    const links = document.querySelectorAll<HTMLAnchorElement>('[data-scroll-target]');
+    links.forEach((link) => {
+      link.addEventListener('click', (e) => {
+        const targetId = link.dataset.scrollTarget;
+        if (!targetId) return;
+        // Only intercept if the target exists on the current page
+        const target = document.getElementById(targetId);
+        if (!target) return; // let browser navigate (e.g. /#works from case page)
+        e.preventDefault();
+        const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        target.scrollIntoView({
+          behavior: prefersReduced ? 'auto' : 'smooth',
+          block: 'start',
+        });
+        // Move focus to the section for screen readers
+        target.setAttribute('tabindex', '-1');
+        target.focus({ preventScroll: true });
+      });
+    });
+  };
+
+  const initHeader = () => {
+    initDropdown({ triggerSelector: '[data-contact-trigger]', menuSelector: '[data-contact-menu]' });
+    initDropdown({ triggerSelector: '[data-menu-trigger]',    menuSelector: '[data-menu-menu]'    });
+    initSmoothScroll();
+  };
+
   // Astro View Transitions fires astro:page-load on every page swap; bind there.
-  document.addEventListener('astro:page-load', initContactDropdown);
-  // Fallback for first paint without view transitions enabled yet
-  if (document.readyState !== 'loading') initContactDropdown();
-  else document.addEventListener('DOMContentLoaded', initContactDropdown);
+  document.addEventListener('astro:page-load', initHeader);
+  // Fallback for first paint without view transitions
+  if (document.readyState !== 'loading') initHeader();
+  else document.addEventListener('DOMContentLoaded', initHeader);
 </script>

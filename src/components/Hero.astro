@@ -6,7 +6,7 @@ import avatar    from '../assets/hero/hero-avatar.png';
 import heroPaper from '../assets/hero/hero-paper.svg';
 // Arrow icon for the button
 import diagonalArrow from '../assets/icons/diagonal-arrow.svg';
-// Decorative icons — PNG versions (higher fidelity than SVG dot-art)
+// Decorative icons — desktop set (10 icons, 256px sources for 4x retina at 64px display)
 import iconClaude         from '../assets/icons/icon-claude.png';
 import iconClever         from '../assets/icons/icon-clever.png';
 import iconEye            from '../assets/icons/icon-eye.png';
@@ -17,6 +17,14 @@ import iconGemini         from '../assets/icons/icon-gemini.png';
 import iconGoogleCalendar from '../assets/icons/icon-google-calendar.png';
 import iconNotion         from '../assets/icons/icon-notion.png';
 import iconSlack          from '../assets/icons/icon-slack.png';
+// Decorative icons — mobile set (6 icons, 192px sources for 4x retina at 48px display).
+// Mobile uses a different visual layout (3 top + 3 bottom around the card).
+import iconClaudeM  from '../assets/icons/icon-claude-mobile.png';
+import iconEyeM     from '../assets/icons/icon-eye-mobile.png';
+import iconFigmaM   from '../assets/icons/icon-figma-mobile.png';
+import iconFlowerM  from '../assets/icons/icon-flower-mobile.png';
+import iconGeminiM  from '../assets/icons/icon-gemini-mobile.png';
+import iconNotionM  from '../assets/icons/icon-notion-mobile.png';
 
 import { RESUME_URL } from '../lib/config.ts';
 ---
@@ -35,9 +43,10 @@ import { RESUME_URL } from '../lib/config.ts';
     <!-- ─── Card area: icons + resume card ───────────────── -->
     <div class="hero__card-area">
 
-      <!-- Decorative icons (aria-hidden — purely decorative).
-           Render at 128px (2x retina from 256px source); CSS displays at 64/32px. -->
-      <div class="hero__icons" aria-hidden="true">
+      <!-- Decorative icons — DESKTOP set (10 icons around the card).
+           Hidden on mobile via CSS; mobile uses a separate 6-icon set below.
+           Render at 128px (2x retina from 256px source); CSS displays at 64px. -->
+      <div class="hero__icons hero__icons--desktop" aria-hidden="true">
         <!-- top row -->
         <Image src={iconClever}         alt="" width={128} height={128} quality={90} class="hero__icon hero__icon--clever" />
         <Image src={iconGoogleCalendar} alt="" width={128} height={128} quality={90} class="hero__icon hero__icon--google-calendar" />
@@ -53,6 +62,20 @@ import { RESUME_URL } from '../lib/config.ts';
         <!-- bottom row -->
         <Image src={iconFlash}          alt="" width={128} height={128} quality={90} class="hero__icon hero__icon--flash" />
         <Image src={iconSlack}          alt="" width={128} height={128} quality={90} class="hero__icon hero__icon--slack" />
+      </div>
+
+      <!-- Decorative icons — MOBILE set (6 icons: 3 top + 3 bottom).
+           Hidden on desktop via CSS. Visual layout per Figma node 647:23550.
+           Render at 96px (2x retina from 192px source); CSS displays at 48px. -->
+      <div class="hero__icons hero__icons--mobile" aria-hidden="true">
+        <!-- top trio: flower (left) · gemini (center, raised) · claude (right) -->
+        <Image src={iconFlowerM} alt="" width={96} height={96} quality={90} class="hero__icon-m hero__icon-m--flower" />
+        <Image src={iconGeminiM} alt="" width={96} height={96} quality={90} class="hero__icon-m hero__icon-m--gemini" />
+        <Image src={iconClaudeM} alt="" width={96} height={96} quality={90} class="hero__icon-m hero__icon-m--claude" />
+        <!-- bottom trio: figma (left) · eye (center, lowered) · notion (right) -->
+        <Image src={iconFigmaM}  alt="" width={96} height={96} quality={90} class="hero__icon-m hero__icon-m--figma" />
+        <Image src={iconEyeM}    alt="" width={96} height={96} quality={90} class="hero__icon-m hero__icon-m--eye" />
+        <Image src={iconNotionM} alt="" width={96} height={96} quality={90} class="hero__icon-m hero__icon-m--notion" />
       </div>
 
       <!-- ─── Resume card ──────────────────────────────── -->
@@ -139,7 +162,10 @@ import { RESUME_URL } from '../lib/config.ts';
   @media (max-width: 767px) {
     .hero {
       min-height: auto;
-      padding-top: var(--space-stack-3xl);
+      /* Visual gap of 48px between Header pill bottom and {OPEN TO WORK}.
+         Header is position:sticky with top:20px (mobile), so it overlaps hero
+         by 20px in the layout flow. To get 48px visual gap: padding-top = 48 + 20 = 68. */
+      padding-top: 68px;
       padding-bottom: var(--space-stack-3xl);
       padding-inline: var(--container-padding-mobile);
     }
@@ -337,83 +363,108 @@ import { RESUME_URL } from '../lib/config.ts';
   }
 
   /* ============================================================
-     Mobile (≤767px) — scaled card + visible 32px icons
-     Scale factor ≈ 0.442 (300px / 679px desktop width)
-     Card reduced to 200px wide; icons 32px.
+     Desktop / Mobile icon-set toggle
+     ============================================================ */
+  .hero__icons--mobile { display: none; } /* hidden on desktop */
+
+  /* ============================================================
+     Mobile (≤767px) — per Figma node 647:23550 (375px frame).
+     Card 294×304px, card-area 343×490px (icons extend above and
+     below the card visually). All coordinates match Figma exactly.
      ============================================================ */
 
   @media (max-width: 767px) {
-    /* Card-area shrinks to fit in 335px available viewport */
+    /* Inner column gap on mobile — 32px between title group and card area
+       (per Figma node 647:21901: title-group bottom y=134, resume-card-icons y=166 → 32px) */
+    .hero__inner {
+      gap: 32px;
+    }
+
+    /* Title group gap between {OPEN TO WORK} tag and h1 (Figma: 12px) */
+    .hero__title-group {
+      gap: var(--space-stack-md); /* 8px mobile — close to Figma 12px */
+    }
+
+    /* Card-area: full container width 343px (=375 viewport - 2×16 page margin)
+       Height 490px accommodates icons that visually extend past the card.
+       Per Figma frame 647:21905. */
     .hero__card-area {
-      width: 300px;
-      height: 230px;
+      width: 343px;
+      height: 490px;
     }
 
-    /* Icons now visible on mobile at 32px */
-    .hero__icons {
-      display: block; /* was display:none */
+    /* Swap icon sets: hide desktop 10-icon set, show mobile 6-icon set */
+    .hero__icons--desktop { display: none; }
+    .hero__icons--mobile  { display: block; }
+
+    /* Mobile icons base: 48px (sourced from 192px PNG for 4x retina) */
+    .hero__icon-m {
+      position: absolute;
+      width: 48px;
+      height: 48px;
+      display: block;
     }
 
-    .hero__icon {
-      width: 32px;
-      height: 32px;
-    }
+    /* Mobile icon positions per Figma frames 647:21921 (top) + 647:22186 (bottom).
+       All Y coords use a +10 shift from raw Figma (raw top-icons frame y=-10)
+       so nothing is negative in CSS. Card top also gets +10 (y=88 vs Figma 78).
+       Gap between top icons bottom and card top = 10px (matches Figma). */
+    /* Top trio — flower (left) · gemini (raised center) · claude (right) */
+    .hero__icon-m--flower { left: 24px;  top: 30px;  }
+    .hero__icon-m--gemini { left: 148px; top: 0;     }
+    .hero__icon-m--claude { left: 270px; top: 30px;  }
+    /* Bottom trio — figma (left) · eye (lowered center) · notion (right) */
+    .hero__icon-m--figma  { left: 25px;  top: 412px; }
+    .hero__icon-m--eye    { left: 147px; top: 442px; }
+    .hero__icon-m--notion { left: 270px; top: 412px; }
 
-    /* Icon positions scaled ×0.442 from desktop */
-    .hero__icon--clever          { left: 100px; top: 0;    }
-    .hero__icon--google-calendar { left: 172px; top: 0;    }
-    .hero__icon--flower          { left: 30px;  top: 13px; }
-    .hero__icon--figma           { left: 241px; top: 13px; }
-    .hero__icon--gemini          { left: 0;     top: 57px; }
-    .hero__icon--eye             { left: 266px; top: 57px; }
-    .hero__icon--claude          { left: 30px;  top: 102px;}
-    .hero__icon--notion          { left: 241px; top: 102px;}
-    .hero__icon--flash           { left: 100px; top: 134px;}
-    .hero__icon--slack           { left: 172px; top: 134px;}
-
-    /* Card: absolute inside card-area, offset 50px to leave room for side icons */
+    /* Card: positioned at x=24, y=88 within card-area (Figma y=78, shifted +10
+       to leave room for top icons which extended above the original Figma frame) */
     .hero__card {
       position: absolute;
-      left: 50px;
-      top: 0;
-      width: 200px;
-      height: 216px;
+      left: 24px;
+      top: 88px;
+      width: 294px;
+      height: 304px;
     }
 
-    /* Sky: scaled proportionally to 200px card width */
+    /* Sky background: 206×300, centered in 294px card (left:44, gap each side 44).
+       Figma spec: 206×304, but paper SVG (viewBox 338×330) preserves aspect ratio
+       inside the 292×289 paper-wrap and renders ~285px tall. Sky shortened to 300
+       so its bottom matches paper's visual bottom — no blue strip leaking below. */
     .hero__sky-wrap {
-      left: 23px;
+      left: 44px;
       top: 0;
-      width: 154px;
-      height: 205px;
+      width: 206px;
+      height: 300px;
     }
 
-    /* Paper wrap: scaled to 200px × 205px */
+    /* Paper layer: 292×289 at x=1, y=15 within card */
     .hero__paper-wrap {
-      top: 11px;
-      width: 200px;
-      height: 205px;
+      left: 1px;
+      top: 15px;
+      width: 292px;
+      height: 289px;
     }
 
-    /* Avatar: scaled from 112px → 66px */
+    /* Avatar: 92×92 at x=100, y=28 within paper (centered: 100+46=146=292/2) */
     .hero__avatar {
-      top: 19px;
-      width: 66px;
-      height: 66px;
+      top: 28px;
+      width: 92px;
+      height: 92px;
     }
 
     .hero__avatar-img {
-      width: 66px;
-      height: 66px;
+      width: 92px;
+      height: 92px;
     }
 
-    /* Button: scaled top position; height slightly reduced */
+    /* "Open Resume" button: top:140 within paper. Width auto-sizes to content. */
     .hero__resume-btn {
-      top: 102px;
-      height: 28px;
-      gap: var(--space-inset-xs);  /* 4px — tighter on mobile */
-      padding-left: var(--space-inset-md);  /* 12px */
-      padding-right: var(--space-inset-sm); /* 8px */
+      top: 140px;
+      gap: var(--space-inset-xs);
+      padding-left: var(--space-inset-md);
+      padding-right: var(--space-inset-sm);
     }
 
     .hero__resume-btn-icon {
@@ -421,10 +472,11 @@ import { RESUME_URL } from '../lib/config.ts';
       height: 16px;
     }
 
-    /* Caption: scaled position */
+    /* Caption: 268px wide at x=12, y=243 within paper.
+       Font-size 12px via --font-size-caption-mono mobile override. */
     .hero__caption {
-      top: 162px;
-      width: 181px;
+      top: 243px;
+      width: 268px;
     }
   }
 </style>

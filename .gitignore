@@ -5,6 +5,9 @@ dist/
 # Local design source folder (100MB) — curated copies go into src/assets/
 /Assets/
 
+# Local debug folder — playwright screenshots, scratch scripts
+/.tmp/
+
 # Logs
 logs
 *.log

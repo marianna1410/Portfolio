@@ -206,12 +206,12 @@
      -------------------------------------------------------- */
 
   --container-max-width:        1280px;
-  --container-padding-mobile:   20px;
+  --container-padding-mobile:   16px;  /* updated from 20px per mobile-adaptation.md */
   --container-padding-tablet:   32px;
   --container-padding-desktop:  64px;
 
   /* Page margin — horizontal padding of the main content wrapper.
-     Mobile: always 20px (= --container-padding-mobile).
+     Mobile: 16px (= --container-padding-mobile).
      Desktop: depends on layout (= --container-padding-desktop = 64px). */
   --page-margin: 64px;
 
@@ -239,8 +239,8 @@
     --font-size-body-medium:  15px;
     --font-size-label:        14px;
     --font-size-body-mono-lg: 16px;
-    /* --font-size-caption (14px) and --font-size-caption-mono (14px)
-       are identical on mobile — not included per rule #1.  */
+    --font-size-caption-mono: 12px; /* mono-only mobile reduction (Fira Code) */
+    /* --font-size-caption (14px) stays identical on mobile — not included. */
 
     /* ── Stack (vertical spacing) ────────────────────────────
        xs (4px) and sm (8px) are stable — not included.     */
@@ -270,13 +270,14 @@
     --space-inset-2xl: 20px;
 
     /* ── Radii ───────────────────────────────────────────────
-       --radius-m (8px) and --radius-pill (999px) are stable. */
-    --radius-l:   8px;
+       --radius-m (8px) and --radius-pill (999px) are stable.
+       --radius-l: 12px on mobile (per design decision — buttons stay 12px). */
+    --radius-l:   12px;
     --radius-xl:  12px;
     --radius-2xl: 16px;
 
     /* ── Layout ──────────────────────────────────────────────*/
-    --page-margin: 20px;
+    --page-margin: 16px;
   }
 }
 
@@ -400,7 +401,7 @@
 .text-caption-mono {
   font-family: var(--font-family-mono);
   font-weight: var(--font-weight-regular);
-  font-size: var(--font-size-caption);
+  font-size: var(--font-size-caption-mono); /* mono-specific token (12px mobile, 14px desktop) */
   line-height: var(--line-height-loose);
   letter-spacing: var(--letter-spacing-normal);
 }

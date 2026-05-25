@@ -40,7 +40,7 @@
 | `--font-body-md-regular`  | Inter Tight  | `16px`       | `15px`      | 400   | 1.48        | 0.02em         |
 | `--font-label`            | Inter Tight  | `16px`       | `14px`      | 500   | 1.1         | 0.01em         |
 | `--font-caption-regular`  | Inter Tight  | `14px`       | `14px`      | 400   | 1.2         | 0.02em         |
-| `--font-caption-mono`     | Fira Code    | `14px`       | `14px`      | 400   | 1.4         | 0.01em         |
+| `--font-caption-mono`     | Fira Code    | `14px`       | `12px`      | 400   | 1.4         | 0.01em         |
 | `--font-body-mono-lg`     | Fira Code    | `20px`       | `16px`      | 400   | 1.4         | 0.01em         |
 
 > **Правило:** Line-height та letter-spacing є відносними і **не змінюються** між desktop і mobile. Змінюється лише `font-size`.
@@ -75,7 +75,8 @@
     --font-size-body-md: 15px;
     --font-size-label: 14px;
     --font-size-body-mono-lg: 16px;
-    /* --font-size-caption та --font-size-caption-mono не змінюються (14px = 14px) */
+    --font-size-caption-mono: 12px; /* mono-only mobile reduction (Fira Code) */
+    /* --font-size-caption (14px) не змінюється на мобілці */
   }
 }
 ```
@@ -219,7 +220,7 @@ Inset — це внутрішній відступ елемента з усіх 
 | Токен               | Desktop  | Mobile   | Де застосовується                          |
 |---------------------|:--------:|:--------:|-------------------------------------------|
 | `--radius-m`        | `8px`    | `8px`    | Дрібні елементи: чіпи, input, badge       |
-| `--radius-l`        | `12px`   | `8px`    | Картки, тултіпи, дропдауни                |
+| `--radius-l`        | `12px`   | `12px`   | Картки, тултіпи, дропдауни, **кнопки** (per Figma — на мобілці кнопки залишаються 12px) |
 | `--radius-xl`       | `16px`   | `12px`   | Модальні вікна, великі картки             |
 | `--radius-2xl`      | `20px`   | `16px`   | Hero-блоки, featured-секції               |
 | `--radius-pill`     | `999px`  | `999px`  | Кнопки pill, теги — **не змінюється**     |
@@ -238,7 +239,7 @@ Inset — це внутрішній відступ елемента з усіх 
 @media (max-width: 767px) {
   :root {
     --radius-m: 8px;
-    --radius-l: 8px;
+    --radius-l: 12px;   /* Buttons stay 12px on mobile per Figma */
     --radius-xl: 12px;
     --radius-2xl: 16px;
     --radius-pill: 999px;
@@ -254,7 +255,7 @@ Inset — це внутрішній відступ елемента з усіх 
 
 | Токен             | Desktop             | Mobile  |
 |-------------------|:-------------------:|:-------:|
-| `--page-margin`   | визначається layout | `20px`  |
+| `--page-margin`   | визначається layout | `16px`  |
 
 > **Правило:** На мобілці **завжди** `padding-inline: var(--page-margin)` на головному контейнері сторінки. Ніколи не використовуй `padding-left`/`padding-right` окремо — тільки `padding-inline`.
 
@@ -268,7 +269,7 @@ Inset — це внутрішній відступ елемента з усіх 
 
 @media (max-width: 767px) {
   :root {
-    --page-margin: 20px;
+    --page-margin: 16px;
   }
 }
 
@@ -361,7 +362,7 @@ Inset — це внутрішній відступ елемента з усіх 
 @media (max-width: 767px) {
   :root {
     /* ─── Typography (mobile overrides) ─── */
-    /* caption (14px) не змінюється — не включаємо в @media */
+    /* caption (regular, 14px) не змінюється — не включаємо в @media */
     --font-size-h1: 32px;
     --font-size-h2: 28px;
     --font-size-h3: 24px;
@@ -371,6 +372,7 @@ Inset — це внутрішній відступ елемента з усіх 
     --font-size-body-md: 15px;
     --font-size-label: 14px;
     --font-size-body-mono-lg: 16px;
+    --font-size-caption-mono: 12px; /* mono-only mobile reduction */
 
     /* ─── Stack (mobile overrides) ─── */
     --space-stack-md: 8px;
@@ -397,12 +399,12 @@ Inset — це внутрішній відступ елемента з усіх 
     --space-inset-2xl: 20px;
 
     /* ─── Radius (mobile overrides) ─── */
-    --radius-l: 8px;
+    --radius-l: 12px;   /* Buttons stay 12px on mobile per Figma */
     --radius-xl: 12px;
     --radius-2xl: 16px;
 
     /* ─── Layout (mobile overrides) ─── */
-    --page-margin: 20px;
+    --page-margin: 16px;
   }
 }
 ```
