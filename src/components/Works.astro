@@ -1,0 +1,279 @@
+---
+import { Image } from 'astro:assets';
+import lucidaDefault from '../assets/projects/lucida-default.png';
+import lucidaHover   from '../assets/projects/lucida-hover.png';
+import vaiaDefault   from '../assets/projects/vaia-default.png';
+import vaiaHover     from '../assets/projects/vaia-hover.png';
+
+/**
+ * Selected Works data — kept inline here since there are only 2 cases.
+ * Tags + titles per Figma node 472:16047. Links route to case study pages.
+ */
+const works = [
+  {
+    slug: 'lucida',
+    number: '01',
+    tags: ['Language Learning', 'Redesign Concept'],
+    title: 'Bringing structure and confidence to speaking practice through proven learning patterns',
+    defaultImg: lucidaDefault,
+    hoverImg: lucidaHover,
+  },
+  {
+    slug: 'vaia',
+    number: '02',
+    tags: ['EdTech', 'Redesign Concept'],
+    title: "Restoring students' control and transparency over automated exam preparation",
+    defaultImg: vaiaDefault,
+    hoverImg: vaiaHover,
+  },
+];
+---
+
+<section class="works" id="works" aria-labelledby="works-heading">
+  <div class="works__inner">
+    <h2 id="works-heading" class="works__heading text-h2">Selected Works</h2>
+
+    <ul class="works__cards">
+      {works.map((work) => (
+        <li class="works__card-item">
+          <a href={`/cases/${work.slug}`} class="works__card" aria-label={`Open ${work.slug} case study`}>
+            <div class="works__card-inner">
+              <div class="works__tags-title">
+                <ul class="works__tags" aria-label="Project metadata">
+                  <li class="works__tag works__tag--number text-caption-mono">{work.number}</li>
+                  {work.tags.map((tag) => <li class="works__tag text-caption-mono">{tag}</li>)}
+                </ul>
+                <h3 class="works__card-title text-h4-medium">{work.title}</h3>
+              </div>
+
+              <div class="works__image">
+                <Image
+                  src={work.defaultImg}
+                  alt=""
+                  width={1212}
+                  height={784}
+                  quality={95}
+                  class="works__image-default"
+                />
+                <Image
+                  src={work.hoverImg}
+                  alt=""
+                  width={1212}
+                  height={784}
+                  quality={95}
+                  class="works__image-hover"
+                  aria-hidden="true"
+                />
+              </div>
+            </div>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>
+
+<style>
+  /* ====== Section shell ====== */
+  .works {
+    background-color: var(--color-bg-light-grey);
+    padding-block: var(--space-inline-6xl); /* 64px desktop */
+    padding-inline: var(--container-padding-desktop);
+  }
+
+  @media (min-width: 768px) and (max-width: 1279px) {
+    .works {
+      padding-inline: var(--container-padding-tablet);
+    }
+  }
+
+  @media (max-width: 767px) {
+    .works {
+      padding-block: var(--space-stack-5xl); /* 32px mobile */
+      padding-inline: var(--container-padding-mobile);
+    }
+  }
+
+  /* ====== Inner column ====== */
+  .works__inner {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-stack-5xl); /* 48px desktop */
+    max-width: var(--container-max-width);
+    margin-inline: auto;
+    width: 100%;
+  }
+
+  /* Mobile: tighter gap between heading and cards (24px per Marianna's brief) */
+  @media (max-width: 767px) {
+    .works__inner {
+      gap: var(--space-stack-3xl); /* 24px mobile */
+    }
+  }
+
+  .works__heading {
+    color: var(--color-text-black);
+  }
+
+  /* ====== Cards row ====== */
+  .works__cards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-inline-xl); /* 20px desktop / 16px mobile */
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .works__card-item {
+    flex: 1 1 calc((100% - var(--space-inline-xl)) / 2);
+    min-width: 0; /* allow card to shrink properly */
+  }
+
+  /* Mobile: stack cards vertically (per Marianna's brief) */
+  @media (max-width: 767px) {
+    .works__card-item {
+      flex: 1 1 100%;
+    }
+  }
+
+  /* ====== Card ====== */
+  .works__card {
+    display: block;
+    background-color: var(--color-bg-white);
+    border-radius: var(--radius-2xl); /* 20px desktop / 16px mobile */
+    padding: var(--space-inset-xl); /* 20px desktop / 16px mobile */
+    height: 580px;
+    text-decoration: none;
+    color: inherit;
+    overflow: hidden;
+  }
+
+  @media (max-width: 767px) {
+    .works__card {
+      height: auto; /* let mobile cards size to content */
+    }
+  }
+
+  .works__card-inner {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-stack-3xl); /* 32px desktop / 24px mobile */
+    height: 100%;
+  }
+
+  /* ====== Tags + title ====== */
+  .works__tags-title {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-stack-2xl); /* 24px desktop / 20px mobile */
+  }
+
+  .works__tags {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-inline-sm); /* 8px */
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .works__tag {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-inset-sm) var(--space-inset-lg); /* 8px 16px */
+    background-color: var(--color-bg-light-grey);
+    border-radius: var(--radius-l); /* 12px */
+    color: var(--color-text-grey-muted);
+    white-space: nowrap;
+  }
+
+  .works__tag--number {
+    /* Square-ish tag for the project number */
+    width: 40px;
+    padding-inline: 0;
+    justify-content: center;
+  }
+
+  .works__card-title {
+    color: var(--color-text-black);
+    /* Allow title to wrap naturally */
+    text-wrap: balance;
+  }
+
+  /* ====== Image area with hover swap ====== */
+  .works__image {
+    position: relative;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+    border-radius: var(--radius-l); /* 12px */
+    background-color: var(--color-bg-light-grey); /* fallback while images load */
+  }
+
+  /* Mobile: card height auto, so image needs explicit aspect-ratio
+     (~606:392 from Figma 472:16051 image area). */
+  @media (max-width: 767px) {
+    .works__image {
+      flex: 0 0 auto;
+      aspect-ratio: 606 / 392;
+    }
+  }
+
+  /* Both images fill the container; hover layered on top with opacity 0 by default */
+  .works__image-default,
+  .works__image-hover {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    display: block;
+    transition: opacity var(--duration-medium) var(--ease-out);
+  }
+
+  .works__image-hover {
+    opacity: 0;
+  }
+
+  /* Hover state: swap images. Also on keyboard focus for a11y. */
+  .works__card:hover .works__image-default,
+  .works__card:focus-visible .works__image-default {
+    opacity: 0;
+  }
+
+  .works__card:hover .works__image-hover,
+  .works__card:focus-visible .works__image-hover {
+    opacity: 1;
+  }
+
+  /* Touch devices — disable hover swap; default image always shown */
+  @media (pointer: coarse) {
+    .works__card:hover .works__image-default,
+    .works__card:focus-visible .works__image-default {
+      opacity: 1;
+    }
+    .works__card:hover .works__image-hover,
+    .works__card:focus-visible .works__image-hover {
+      opacity: 0;
+    }
+  }
+
+  /* Respect prefers-reduced-motion — skip the crossfade animation */
+  @media (prefers-reduced-motion: reduce) {
+    .works__image-default,
+    .works__image-hover {
+      transition: none;
+    }
+  }
+
+  /* ====== Focus ring ====== */
+  .works__card:focus-visible {
+    outline: none;
+    box-shadow: var(--shadow-focus);
+  }
+</style>
