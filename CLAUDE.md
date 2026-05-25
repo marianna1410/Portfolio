@@ -29,12 +29,21 @@ If anything in a spec is unclear or contradicts another spec — **ask Marianna,
 - All pages frame: node `472:16021` (canvas "Final Design")
 - UI Kit frame: node `311:9266`
 - Header instance on Home: node `472:16024`
-- Dropdown menu (open state): node `548:14099`
+- Dropdown menu (desktop, open state): node `548:14099`
+- Hero desktop: node `472:16023` (sub-nodes for icons at `472:16030`)
+- Hero mobile + Menu open: node `647:23550` (hero) + `647:22434` (menu open)
+- Works (Selected Works): node `472:16047`
 
-Figma MCP is connected. Use `mcp__Figma__get_design_context` for code+screenshot,
-`mcp__Figma__get_screenshot` for visual reference, `mcp__Figma__get_variable_defs`
-for tokens. The metadata for the whole pages frame is too big to fetch directly —
-target specific nodes.
+**Figma MCP — use the lowercase server `mcp__figma__*`**, NOT `mcp__Figma__*`
+(the capital-F server is the official one that requires Dev Mode toggle in
+Figma desktop preferences; Marianna couldn't enable it — only the lowercase
+one works on her Pro plan).
+- `mcp__figma__get_design_context` — code + metadata. Pass `excludeScreenshot:true`
+  for token-only views (saves context).
+- `mcp__figma__get_screenshot` — returns a URL; download via curl into `.tmp/`
+  (gitignored), then Read the PNG to view it.
+- For section frames, sparse metadata is returned — call again on child nodes
+  for full styles. Always pass `fileKey: Md80hD9zZmtUsYs9ZLg8hM`.
 
 ## Tech stack (locked)
 
@@ -91,15 +100,15 @@ Curated copies go into `src/assets/`.
 | 2 | Set up folder structure | ✅ |
 | 3 | Generate tokens.css from Figma | ✅ |
 | 4 | Set up fonts (Inter Tight, Fira Code via Fontsource) | ✅ |
-| 5 | Build Header (static) | ✅ |
-| 6 | Build Footer (static) | ⬜ NEXT |
-| 7 | Build Home Hero section | ⬜ |
-| 8 | Build Home Works section | ⬜ |
-| 9 | Build Home Experience section | ⬜ |
+| 5 | Build Header (desktop + mobile Menu w/ a11y + smooth scroll) | ✅ |
+| 6 | Build Footer (static) | ✅ |
+| 7 | Build Home Hero section (desktop + mobile) | ✅ |
+| 8 | Build Home Works section (desktop + mobile, hover swap) | ✅ |
+| 9 | Build Home Experience section | ⬜ **NEXT** |
 | 10 | Build Home Behind the Screen section | ⬜ |
 | 11 | Build Case template + dynamic route | ⬜ |
 | 12 | Write Lucida + Vaia MDX content | ⬜ |
-| 13 | Mobile-first responsive pass | ⬜ |
+| 13 | Mobile-first responsive pass (final sweep) | ⬜ |
 | 14 | Phase 1 accessibility audit | ⬜ |
 
 Phases 2 (micro-animations), 3 (GSAP complex), 4 (QA + Deploy) — pending after Phase 1.
@@ -122,17 +131,37 @@ Phases 2 (micro-animations), 3 (GSAP complex), 4 (QA + Deploy) — pending after
 
 8. **One-layer semantic color tokens.** Skipped Figma's lowercase template imports (`text/secondary`, `background/branding`, etc.). Only the Title-case Color Styles became tokens. 24 color tokens total. Duplicate hex `#E39B23` consolidated to single `--color-accent-yellow`.
 
-9. **Container max-width 1280px**, breakpoints 768/1280. Container padding 20/32/64px (mobile/tablet/desktop).
+9. **Container max-width 1280px**, breakpoints 768/1280. Container padding **16/32/64px** (mobile/tablet/desktop). Mobile page margin = 16px (was 20px, changed per design decision).
 
 10. **No magic numbers anywhere.** Every CSS value comes from a token via `var(--token)`. No inline hex.
+
+11. **Mobile token deviations from defaults** (made during Hero/Works builds):
+    - `--font-size-caption-mono`: 14 → **12px** on mobile (Fira Code only; regular caption stays 14px)
+    - `--radius-l`: 8 → **12px** on mobile (buttons stay 12px per Figma — was 8px in spec)
+    - `--container-padding-mobile`: 20 → **16px**
+    - **Bug fix in tokens.css**: `.text-caption-mono` was using `var(--font-size-caption)`, now uses correct `var(--font-size-caption-mono)`
+
+12. **Sticky header offset compensates hero padding-top.** Header is `position: sticky; top: 20px` (mobile) / `top: 24px` (desktop). This means header overlaps hero in flow by that offset. Hero mobile padding-top = 68px (= 48px Figma visual + 20px sticky compensation). Same pattern needed for other sections if they need precise gap-from-header.
+
+13. **Hero mobile icon shift +10.** Figma top icons frame is at y=-10 (negative); shifted to y=0 by adding +10 to all icon Y coords AND card top (78→88). Documented in Hero.astro CSS comments.
+
+14. **Hero card paper SVG aspect-ratio mismatch on mobile.** Paper SVG viewBox 338×330, mobile container 292×289. SVG preserves aspect ratio → renders ~285px tall. Sky-wrap shortened from 304 → 300 to compensate (otherwise blue strip leaks below paper).
+
+15. **Mobile menu dropdown is sibling of pill**, NOT inside menu-wrapper. Avoids the `100vw` scrollbar discrepancy (100vw includes scrollbar; element widths don't). Position absolute relative to `.header` (sticky = positioning context), with `left/right: var(--container-padding-mobile)`.
+
+16. **Tab dotted border uses inline SVG data URI**, not native CSS `border-style: dotted`. CSS dotted forces gap == border-width; Figma's 4px gap with 1px dots needs a custom pattern. SVG has `stroke-dasharray="0.1 4"` + `vector-effect="non-scaling-stroke"` + `preserveAspectRatio="none"` so it stretches across any tab width with uniform dots. Asset preserved at `src/assets/icons/menu-tab-border.svg` for reference; inline used in Header.astro to avoid path/cache issues.
+
+17. **Works card images: render at full source size (1212×784) with quality=95.** Source PNGs are 2× retina (display ~606px). Rendering at source size avoids browser downscaling artifacts on HiDPI. Files ~103-106kB webp.
+
+18. **Works mobile cards: explicit `aspect-ratio: 606/392`.** Card height is `auto` on mobile (vs fixed 580 desktop), so the flex-grow image area needs an explicit aspect ratio or it collapses to 0.
 
 ## Working style — what Marianna expects
 
 These are corrections she's already made — internalize them, don't repeat the mistakes:
 
-- **Self-verify BEFORE sending preview links.** Use `mcp__Claude_Preview__preview_inspect` to confirm metrics match Figma (font-size, letter-spacing, color, dimensions). Use `mcp__Claude_Preview__preview_screenshot` to compare visually. Only after both checks pass — share the URL.
+- **Self-verify BEFORE sending preview links.** Take a playwright screenshot, compare side-by-side with Figma. Don't ship until visual match is close.
 
-- **Visual fidelity to Figma is non-negotiable.** When in doubt, query Figma (`mcp__Figma__get_design_context` + `get_screenshot`). Don't approximate from memory.
+- **Visual fidelity to Figma is non-negotiable.** When in doubt, query Figma (`mcp__figma__get_design_context` + `get_screenshot`). Don't approximate from memory.
 
 - **Show preview / explanation after each section / component.** Don't batch multiple sections without check-in.
 
@@ -142,10 +171,63 @@ These are corrections she's already made — internalize them, don't repeat the 
 
 - **Skip the Design Engineer Plugin `/de:start` onboarding hook** when it fires — Marianna isn't running it, it's a sticky hook context. Just proceed with whatever she actually asks.
 
+## Verification workflow — HOW to check work before showing Marianna
+
+`mcp__Claude_Preview__preview_screenshot` **times out reliably** in this project.
+Don't use it. Use playwright instead (already installed as devDep).
+
+### 1. Visual verification via playwright
+
+Universal script at `scripts/screenshot-section.mjs` (committed to repo).
+Captures desktop (1440px) + mobile (375px @ 2x retina) for any section.
+
+```bash
+node scripts/screenshot-section.mjs <section-id>
+# e.g. node scripts/screenshot-section.mjs works
+```
+
+Selector convention: passes `<section-id>` becomes class `.<section-id>` (e.g. `.works`).
+Output to `.tmp/site-<section>-{desktop|mobile}.png` (gitignored). Then `Read` the PNG to view.
+
+To compare with Figma: download Figma screenshot via curl from `mcp__figma__get_screenshot` URL into `.tmp/figma-<section>.png`, Read both, compare side-by-side.
+
+### 2. DOM/CSS verification via preview_eval
+
+`mcp__Claude_Preview__preview_eval` DOES work — use it for precise CSS measurements (font-size, padding, computed dimensions, alignment math).
+
+Pattern:
+```js
+(() => {
+  const el = document.querySelector('.my-element');
+  const cs = getComputedStyle(el);
+  const rect = el.getBoundingClientRect();
+  return { rect, font: cs.fontSize, /* etc */ };
+})()
+```
+
+For interaction tests (click → measure), do them in a single eval call (the preview persists state between evals, but easier to be self-contained).
+
+### 3. Dev server quirks
+
+- **Actual port: `4321`** (Astro default, ignores `.claude/launch.json` 4322).
+- Preview tool browser sometimes navigates to `chrome-error://`. Recover with
+  `mcp__Claude_Preview__preview_eval` running `window.location.href = 'http://localhost:4321/'`.
+- After CSS structural changes (new media queries, new selectors), HMR may not
+  fully apply — restart server + clear Vite cache:
+  ```bash
+  rm -rf node_modules/.vite .astro
+  ```
+  Then `mcp__Claude_Preview__preview_start name=astro`.
+
+### 4. Build verification
+
+Always `npm run build` after structural changes. Catches Astro/TS errors HMR misses. Check the image optimization summary (sizes should be reasonable: ~20-100kB webp).
+
 ## Dev server
 
-- Port **4322** (not 4321 — 4321 had a zombie process at one point).
-- Start: `npm run dev` (or `mcp__Claude_Preview__preview_start` with name `astro` from `.claude/launch.json`).
+- **Port 4321** (Astro default — `.claude/launch.json` says 4322 but Astro ignores).
+- Start: `mcp__Claude_Preview__preview_start name=astro` (or `npm run dev`).
+- Browse at `http://localhost:4321/`.
 - Build check: `npm run build` produces `dist/`.
 
 ## Single sources of truth (don't duplicate URLs)
@@ -165,13 +247,33 @@ When the resume URL changes, edit `src/lib/config.ts` only — it's wired into H
 
 ## Git state at memory write time
 
-Last 4 commits on `main`:
+Last commits on `main` (pushed to `origin/main`):
 ```
-676fcd5  fix(header): letter-spacing, dropdown alignment, mobile full-width
+8969224  feat(works): Selected Works section per Figma node 472:16047
+fe82196  feat(mobile): pixel-perfect Hero + Mobile menu per Figma node 647:23550
+3677f5a  feat(hero): Hero section with 4x assets, drop-shadow holes, optical text fix
+e5daf81  feat(footer): build static Footer component from Figma
+8ef0108  fix(header): 8px visible gap between pill bottom and dropdown top
+3cfc91f  fix(header): letter-spacing, dropdown alignment, mobile full-width
 476faa8  feat(fonts): self-host Inter Tight + Fira Code via Fontsource
 52c3df3  feat(tokens): generate tokens.css from Figma styles + variables
 4c64d38  chore: scaffold Astro project + folder structure
 36c4d93  Initial commit (pre-Claude)
 ```
 
-Branch tracks `origin/main`, not pushed yet (no remote configured beyond the initial clone).
+Remote: `https://github.com/marianna1410/Portfolio.git`. Marianna sometimes asks for "local commit only, don't push to GitHub yet". Always ASK before push.
+
+## How to resume next session — quick start
+
+1. Read this CLAUDE.md (you're doing it now).
+2. Read the 5 spec files in `Portfolio dev planning/` (especially `mobile-adaptation.md`).
+3. Marianna will say something like "робимо Experience section" and provide a Figma node ID.
+4. Workflow:
+   - `mcp__figma__get_design_context fileKey=Md80hD9zZmtUsYs9ZLg8hM nodeId=...` → get structure
+   - `mcp__figma__get_screenshot` → download via curl into `.tmp/` → Read
+   - Check `Assets/Images/{section}/` for prepared PNG assets (often there)
+   - Build component as `src/components/{Section}.astro` (class `.{section}` on root), wire in `src/pages/index.astro`
+   - `npm run build` → fix errors
+   - `node scripts/screenshot-section.mjs {section}` → compare visually with Figma
+   - `mcp__Claude_Preview__preview_eval` → measure exact CSS values
+   - Show Marianna result; iterate on feedback; commit + push when she OKs.
