@@ -1,0 +1,430 @@
+---
+import { Image } from 'astro:assets';
+// Hero assets
+import skyBg     from '../assets/hero/hero-sky-bg.png';
+import avatar    from '../assets/hero/hero-avatar.png';
+import heroPaper from '../assets/hero/hero-paper.svg';
+// Arrow icon for the button
+import diagonalArrow from '../assets/icons/diagonal-arrow.svg';
+// Decorative icons — PNG versions (higher fidelity than SVG dot-art)
+import iconClaude         from '../assets/icons/icon-claude.png';
+import iconClever         from '../assets/icons/icon-clever.png';
+import iconEye            from '../assets/icons/icon-eye.png';
+import iconFigma          from '../assets/icons/icon-figma.png';
+import iconFlash          from '../assets/icons/icon-flash.png';
+import iconFlower         from '../assets/icons/icon-flower.png';
+import iconGemini         from '../assets/icons/icon-gemini.png';
+import iconGoogleCalendar from '../assets/icons/icon-google-calendar.png';
+import iconNotion         from '../assets/icons/icon-notion.png';
+import iconSlack          from '../assets/icons/icon-slack.png';
+
+import { RESUME_URL } from '../lib/config.ts';
+---
+
+<section class="hero" id="hero" aria-labelledby="hero-heading">
+  <div class="hero__inner">
+
+    <!-- ─── Title + tag ──────────────────────────────────── -->
+    <div class="hero__title-group">
+      <p class="hero__tag text-caption-mono">{`{OPEN TO WORK}`}</p>
+      <h1 id="hero-heading" class="hero__heading text-h1">
+        Designer Who Creates Digital Experiences for Humans
+      </h1>
+    </div>
+
+    <!-- ─── Card area: icons + resume card ───────────────── -->
+    <div class="hero__card-area">
+
+      <!-- Decorative icons (aria-hidden — purely decorative).
+           Render at 128px (2x retina from 256px source); CSS displays at 64/32px. -->
+      <div class="hero__icons" aria-hidden="true">
+        <!-- top row -->
+        <Image src={iconClever}         alt="" width={128} height={128} quality={90} class="hero__icon hero__icon--clever" />
+        <Image src={iconGoogleCalendar} alt="" width={128} height={128} quality={90} class="hero__icon hero__icon--google-calendar" />
+        <!-- upper sides -->
+        <Image src={iconFlower}         alt="" width={128} height={128} quality={90} class="hero__icon hero__icon--flower" />
+        <Image src={iconFigma}          alt="" width={128} height={128} quality={90} class="hero__icon hero__icon--figma" />
+        <!-- middle sides -->
+        <Image src={iconGemini}         alt="" width={128} height={128} quality={90} class="hero__icon hero__icon--gemini" />
+        <Image src={iconEye}            alt="" width={128} height={128} quality={90} class="hero__icon hero__icon--eye" />
+        <!-- lower sides -->
+        <Image src={iconClaude}         alt="" width={128} height={128} quality={90} class="hero__icon hero__icon--claude" />
+        <Image src={iconNotion}         alt="" width={128} height={128} quality={90} class="hero__icon hero__icon--notion" />
+        <!-- bottom row -->
+        <Image src={iconFlash}          alt="" width={128} height={128} quality={90} class="hero__icon hero__icon--flash" />
+        <Image src={iconSlack}          alt="" width={128} height={128} quality={90} class="hero__icon hero__icon--slack" />
+      </div>
+
+      <!-- ─── Resume card ──────────────────────────────── -->
+      <div class="hero__card">
+
+        <!-- Sky background layer (decorative).
+             Render at 522×662 (2x retina from 1044×1324 source); CSS displays at 261×331. -->
+        <div class="hero__sky-wrap" aria-hidden="true">
+          <Image src={skyBg} alt="" width={522} height={662} quality={90} class="hero__sky-img" />
+        </div>
+
+        <!-- Paper layer (card face with shadow).
+             box-shadow is on the IMG (filter: drop-shadow) so the shadow follows
+             the SVG silhouette including the punched circle holes — per Figma. -->
+        <div class="hero__paper-wrap">
+          <Image
+            src={heroPaper}
+            alt=""
+            width={338}
+            height={330}
+            class="hero__paper-img"
+            aria-hidden="true"
+          />
+
+          <!-- Avatar — 224×224 source rendered for 2x retina at 112px display -->
+          <div class="hero__avatar" aria-hidden="true">
+            <Image
+              src={avatar}
+              alt=""
+              width={224}
+              height={224}
+              quality={90}
+              class="hero__avatar-img"
+            />
+          </div>
+
+          <!-- Open Resume button -->
+          <a
+            href={RESUME_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="hero__resume-btn text-label"
+            aria-label="Open Resume (opens in new tab)"
+          >
+            <span>Open Resume</span>
+            <Image
+              src={diagonalArrow}
+              alt=""
+              width={20}
+              height={20}
+              class="hero__resume-btn-icon"
+            />
+          </a>
+
+          <!-- Caption -->
+          <p class="hero__caption text-caption-mono">
+            UX/UI Designer · 2+ years crafting<br />user&#8209;friendly interfaces
+          </p>
+        </div>
+      </div>
+      <!-- end .hero__card -->
+
+    </div>
+    <!-- end .hero__card-area -->
+
+  </div>
+</section>
+
+<style>
+  /* ====== Section shell ====== */
+  .hero {
+    min-height: 800px;
+    padding-top: 145px;      /* content starts at y=145 per Figma */
+    padding-bottom: 64px;
+    padding-inline: var(--container-padding-desktop);
+  }
+
+  @media (min-width: 768px) and (max-width: 1279px) {
+    .hero {
+      padding-inline: var(--container-padding-tablet);
+    }
+  }
+
+  @media (max-width: 767px) {
+    .hero {
+      min-height: auto;
+      padding-top: var(--space-stack-3xl);
+      padding-bottom: var(--space-stack-3xl);
+      padding-inline: var(--container-padding-mobile);
+    }
+  }
+
+  /* ====== Inner flex column ====== */
+  .hero__inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 48px;
+  }
+
+  /* ====== Title + tag ====== */
+  .hero__title-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-stack-xl);
+    text-align: center;
+    max-width: 766px;
+    width: 100%;
+  }
+
+  .hero__tag {
+    color: var(--color-text-grey-muted);
+  }
+
+  .hero__heading {
+    color: var(--color-text-black);
+  }
+
+  /* ====== Card area (icons + card container) ====== */
+  .hero__card-area {
+    position: relative;
+    width: 679px;
+    height: 348px;
+    flex-shrink: 0;
+  }
+
+  /* ====== Decorative icons — desktop (64px) ====== */
+  .hero__icons {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  .hero__icon {
+    position: absolute;
+    width: 64px;
+    height: 64px;
+    display: block;
+  }
+
+  /* Absolute positions per Figma node 472:16030 */
+  .hero__icon--clever          { left: 226px; top: 0;     }
+  .hero__icon--google-calendar { left: 388px; top: 0;     }
+  .hero__icon--flower          { left: 68px;  top: 30px;  }
+  .hero__icon--figma           { left: 546px; top: 30px;  }
+  .hero__icon--gemini          { left: 0;     top: 130px; }
+  .hero__icon--eye             { left: 615px; top: 130px; }
+  .hero__icon--claude          { left: 68px;  top: 230px; }
+  .hero__icon--notion          { left: 546px; top: 230px; }
+  .hero__icon--flash           { left: 226px; top: 284px; }
+  .hero__icon--slack           { left: 388px; top: 284px; }
+
+  /* ====== Resume card ====== */
+  .hero__card {
+    position: absolute;
+    left: 170px;  /* centers the 338px card within 679px container */
+    top: 0;
+    width: 338px;
+    height: 349px;
+  }
+
+  /* Sky background (behind the paper card) */
+  .hero__sky-wrap {
+    position: absolute;
+    left: 39px;
+    top: 0;
+    width: 261px;
+    height: 331px;
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+  }
+
+  .hero__sky-img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: var(--radius-xl);
+  }
+
+  /* Paper layer — white card face with shadow.
+     border-radius removed from wrapper (paper SVG has its own rounded shape).
+     Shadow is on the IMG via filter: drop-shadow — this follows the SVG
+     silhouette so the shadow also appears INSIDE the two punched holes
+     (matches Figma "paper" effect). */
+  .hero__paper-wrap {
+    position: absolute;
+    left: 0;
+    top: 19px;
+    width: 338px;
+    height: 330px;
+  }
+
+  .hero__paper-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    /* Chained drop-shadows mirror --shadow-card from tokens.css.
+       Third layer (rgba 0) skipped — would be invisible. */
+    filter:
+      drop-shadow(-2px 2px 2px rgba(0, 0, 0, 0.05))
+      drop-shadow(-4px 3px 2px rgba(0, 0, 0, 0.012));
+  }
+
+  /* Avatar circle */
+  .hero__avatar {
+    position: absolute;
+    left: 50%;
+    top: 32px;
+    transform: translateX(-50%);
+    width: 112px;
+    height: 112px;
+    border-radius: var(--radius-pill);
+    overflow: hidden;
+    background-color: var(--color-bg-grey-muted);
+    flex-shrink: 0;
+  }
+
+  .hero__avatar-img {
+    display: block;
+    width: 112px;
+    height: 112px;
+    object-fit: cover;
+    object-position: top center;
+  }
+
+  /* Open Resume button */
+  .hero__resume-btn {
+    position: absolute;
+    left: 50%;
+    top: 172px;
+    transform: translateX(-50%);
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-inset-sm);  /* 8px */
+    height: 32px;
+    padding-top: var(--space-inset-xs);
+    padding-bottom: var(--space-inset-xs);
+    padding-left: var(--space-inset-lg);
+    padding-right: var(--space-inset-md);
+    background-color: var(--color-bg-white);
+    border: 1px solid var(--color-stroke-medium-grey);
+    border-radius: var(--radius-l);
+    color: var(--color-text-dark-grey);
+    white-space: nowrap;
+  }
+
+  .hero__resume-btn-icon {
+    display: block;
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+  }
+
+  /* Optical text alignment — Inter Tight has tall ascenders, so flex-centered
+     text reads ~1-2px higher than the mathematical center of the line-box.
+     translateY pulls the text down so its visual center (between cap-line and
+     baseline) aligns with the icon's visual center (matches Figma). */
+  .hero__resume-btn span {
+    transform: translateY(1px);
+  }
+
+  /* Touch devices — 44px minimum tap target */
+  @media (pointer: coarse) {
+    .hero__resume-btn {
+      min-height: 44px;
+    }
+  }
+
+  /* Caption */
+  .hero__caption {
+    position: absolute;
+    left: 50%;
+    top: 274px;
+    transform: translateX(-50%);
+    width: 306px;
+    text-align: center;
+    color: var(--color-text-grey-muted);
+  }
+
+  /* ============================================================
+     Mobile (≤767px) — scaled card + visible 32px icons
+     Scale factor ≈ 0.442 (300px / 679px desktop width)
+     Card reduced to 200px wide; icons 32px.
+     ============================================================ */
+
+  @media (max-width: 767px) {
+    /* Card-area shrinks to fit in 335px available viewport */
+    .hero__card-area {
+      width: 300px;
+      height: 230px;
+    }
+
+    /* Icons now visible on mobile at 32px */
+    .hero__icons {
+      display: block; /* was display:none */
+    }
+
+    .hero__icon {
+      width: 32px;
+      height: 32px;
+    }
+
+    /* Icon positions scaled ×0.442 from desktop */
+    .hero__icon--clever          { left: 100px; top: 0;    }
+    .hero__icon--google-calendar { left: 172px; top: 0;    }
+    .hero__icon--flower          { left: 30px;  top: 13px; }
+    .hero__icon--figma           { left: 241px; top: 13px; }
+    .hero__icon--gemini          { left: 0;     top: 57px; }
+    .hero__icon--eye             { left: 266px; top: 57px; }
+    .hero__icon--claude          { left: 30px;  top: 102px;}
+    .hero__icon--notion          { left: 241px; top: 102px;}
+    .hero__icon--flash           { left: 100px; top: 134px;}
+    .hero__icon--slack           { left: 172px; top: 134px;}
+
+    /* Card: absolute inside card-area, offset 50px to leave room for side icons */
+    .hero__card {
+      position: absolute;
+      left: 50px;
+      top: 0;
+      width: 200px;
+      height: 216px;
+    }
+
+    /* Sky: scaled proportionally to 200px card width */
+    .hero__sky-wrap {
+      left: 23px;
+      top: 0;
+      width: 154px;
+      height: 205px;
+    }
+
+    /* Paper wrap: scaled to 200px × 205px */
+    .hero__paper-wrap {
+      top: 11px;
+      width: 200px;
+      height: 205px;
+    }
+
+    /* Avatar: scaled from 112px → 66px */
+    .hero__avatar {
+      top: 19px;
+      width: 66px;
+      height: 66px;
+    }
+
+    .hero__avatar-img {
+      width: 66px;
+      height: 66px;
+    }
+
+    /* Button: scaled top position; height slightly reduced */
+    .hero__resume-btn {
+      top: 102px;
+      height: 28px;
+      gap: var(--space-inset-xs);  /* 4px — tighter on mobile */
+      padding-left: var(--space-inset-md);  /* 12px */
+      padding-right: var(--space-inset-sm); /* 8px */
+    }
+
+    .hero__resume-btn-icon {
+      width: 16px;
+      height: 16px;
+    }
+
+    /* Caption: scaled position */
+    .hero__caption {
+      top: 162px;
+      width: 181px;
+    }
+  }
+</style>

@@ -1,16 +1,10 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import Hero from '../components/Hero.astro';
 ---
 
 <BaseLayout title="Marianna Delihioz — Portfolio">
-  <section id="hero" style="min-height: 90vh; display: grid; place-items: center; padding-block: var(--space-stack-5xl);">
-    <div class="container" style="text-align: center;">
-      <h1 class="text-h1" style="color: var(--color-text-primary);">Hero placeholder</h1>
-      <p class="text-body-medium-regular" style="color: var(--color-text-grey-muted); margin-top: var(--space-stack-md);">
-        Scroll to test sticky header. The real Hero comes in the next step.
-      </p>
-    </div>
-  </section>
+  <Hero />
 
   <section id="works" style="min-height: 80vh; padding-block: var(--space-stack-5xl); background: var(--color-bg-light-grey);">
     <div class="container">
