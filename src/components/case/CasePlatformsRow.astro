@@ -1,0 +1,96 @@
+---
+/**
+ * CasePlatformsRow.astro — two label+icons groups, side by side.
+ * Used inside the "Review Analysis" callout.
+ *
+ *   App reviews analyzed:        Platforms used:
+ *   [□][□][□][□][□]              [□][□][□][□][□]
+ *
+ * Each icon: 44×44, rounded 12px. Group: 12px gap between label and icons,
+ * 12px gap between icons. 40px between the two groups.
+ */
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+
+interface IconItem {
+  src: ImageMetadata;
+  alt: string;
+  /** Optional solid background under the icon (some Figma icons sit on a tint). */
+  bg?: string;
+}
+
+interface Props {
+  groups: Array<{
+    label: string;
+    icons: IconItem[];
+  }>;
+}
+
+const { groups } = Astro.props;
+---
+
+<div class="platforms-row">
+  {groups.map((group) => (
+    <div class="platforms-row__group">
+      <p class="platforms-row__label">{group.label}</p>
+      <ul class="platforms-row__icons">
+        {group.icons.map((icon) => (
+          <li
+            class="platforms-row__icon"
+            style={icon.bg ? `background-color: ${icon.bg};` : undefined}
+          >
+            <Image src={icon.src} alt={icon.alt} width={88} height={88} />
+          </li>
+        ))}
+      </ul>
+    </div>
+  ))}
+</div>
+
+<style>
+  .platforms-row {
+    display: flex;
+    gap: var(--space-inline-4xl); /* 40px */
+    align-items: flex-start;
+  }
+
+  .platforms-row__group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-inline-md); /* 12px */
+  }
+
+  .platforms-row__label {
+    margin: 0;
+    font-family: var(--font-family-body);
+    font-weight: var(--font-weight-regular);
+    font-size: var(--font-size-body-medium); /* 16px */
+    line-height: var(--line-height-base);
+    letter-spacing: var(--letter-spacing-wide);
+    color: var(--color-text-grey-muted);
+  }
+
+  .platforms-row__icons {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    gap: var(--space-inline-md); /* 12px */
+    align-items: center;
+  }
+
+  .platforms-row__icon {
+    width: 44px;
+    height: 44px;
+    border-radius: var(--radius-l); /* 12px */
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+
+  .platforms-row__icon :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+</style>

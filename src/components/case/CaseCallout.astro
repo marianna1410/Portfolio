@@ -1,0 +1,116 @@
+---
+/**
+ * CaseCallout.astro — dashed-border block used in Research methodology.
+ * Figma 472:17140 / 472:17141 / 472:17163.
+ * Border asset: Assets/Images/Case Lucida/Border_Callout.svg
+ *   (rounded 16px rect, stroke #4A4A4A, dasharray "0.1 8" → round dots
+ *    spaced 8px apart, NOT the native CSS `dashed` pattern).
+ *
+ * Implementation:
+ *   - Outer <aside> provides padding + border-radius for content layout
+ *   - Inline <svg><rect/></svg> behind the content draws the dotted border.
+ *     The rect uses CSS geometry properties (x, y, width, height, rx, ry)
+ *     so it stretches to any callout size while keeping corners 16px round.
+ *   - vector-effect=non-scaling-stroke is unnecessary because there's no
+ *     viewBox; SVG coordinates equal CSS pixels.
+ */
+interface Props {
+  number: number;
+  title: string;
+  text: string;
+}
+
+const { number, title, text } = Astro.props;
+---
+
+<aside class="case-callout">
+  <svg class="case-callout__border" aria-hidden="true" focusable="false">
+    <rect class="case-callout__border-rect" />
+  </svg>
+
+  <div class="case-callout__inner">
+    <div class="case-callout__text">
+      <p class="case-callout__heading">
+        <span class="case-callout__number">{number}.</span>
+        <span class="case-callout__title">{title}</span>
+      </p>
+      <p class="case-callout__body">{text}</p>
+    </div>
+    <slot />
+  </div>
+</aside>
+
+<style>
+  .case-callout {
+    position: relative;
+    padding: var(--space-inset-xl); /* 20px */
+    border-radius: var(--radius-xl); /* 16px — for content clipping; visible border is the SVG */
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  /* ── Dotted SVG border (positioned behind content) ───────────────────── */
+  .case-callout__border {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    overflow: visible; /* avoid clipping round dots on the edge */
+  }
+
+  .case-callout__border-rect {
+    /* SVG geometry properties via CSS — modern browsers (Chrome 79+, FF 70+, Safari 14+).
+       Inset 0.5px so the 1px stroke centers on the visual edge instead of being clipped. */
+    x: 0.5px;
+    y: 0.5px;
+    width: calc(100% - 1px);
+    height: calc(100% - 1px);
+    rx: 16px;
+    ry: 16px;
+    fill: none;
+    stroke: var(--color-stroke-dark-grey); /* #4A4A4A */
+    stroke-width: 1;
+    stroke-dasharray: 0.1 8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  /* ── Inner content (sits above the SVG border) ───────────────────────── */
+  .case-callout__inner {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-stack-lg); /* 16px — between text block and any slot content */
+  }
+
+  .case-callout__text {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-stack-sm); /* 8px */
+  }
+
+  .case-callout__heading {
+    margin: 0;
+    font-family: var(--font-family-body);
+    font-weight: var(--font-weight-semibold);
+    font-size: var(--font-size-body-large);
+    line-height: var(--line-height-loose);
+    letter-spacing: var(--letter-spacing-wide);
+    color: var(--color-text-grey-muted);
+  }
+
+  .case-callout__number {
+    margin-right: 0.5ch;
+  }
+
+  .case-callout__body {
+    margin: 0;
+    font-family: var(--font-family-body);
+    font-weight: var(--font-weight-regular);
+    font-size: var(--font-size-body-large);
+    line-height: var(--line-height-base);
+    letter-spacing: var(--letter-spacing-wide);
+    color: var(--color-text-grey-muted);
+  }
+</style>

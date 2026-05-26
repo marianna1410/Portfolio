@@ -1,0 +1,112 @@
+---
+/**
+ * CaseLayout.astro — chrome for case study pages.
+ * Wraps BaseLayout with case=variant header, builds the 2-column grid:
+ * [193px TOC sticky] [123px gap] [868px content].
+ *
+ * Footer is rendered by BaseLayout (full-page width, outside this grid).
+ */
+import BaseLayout from './BaseLayout.astro';
+import CaseTOC from '../components/CaseTOC.astro';
+
+interface TocItem {
+  id: string;
+  label: string;
+}
+
+interface Props {
+  title: string;
+  description?: string;
+  tocItems?: TocItem[];
+  activeTocId?: string;
+}
+
+const {
+  title,
+  description,
+  tocItems,
+  activeTocId,
+} = Astro.props;
+---
+
+<BaseLayout title={title} description={description} headerVariant="case">
+  <article class="case">
+    <div class="case__wrap">
+      <div class="case__grid">
+        <aside class="case__sidebar">
+          <CaseTOC items={tocItems} active={activeTocId} />
+        </aside>
+        <div class="case__content">
+          <slot />
+        </div>
+      </div>
+    </div>
+  </article>
+</BaseLayout>
+
+<style>
+  .case {
+    /* Top spacing: 48px visible gap from header pill bottom to first content.
+       Header is sticky top:24px (desktop) / top:20px (mobile) but in normal
+       flow occupies only its 56px height. To produce a 48px visible gap below
+       the pill we add (sticky offset + visible gap) of padding-top here.
+       Desktop: 24 sticky + 48 visible = 72px. */
+    padding-block: 72px 64px;
+  }
+
+  .case__wrap {
+    /* Wrapper from Figma: 1312 wide, centered, with 64px internal gutter.
+       Total content area = 64 (pad) + 193 (TOC) + 123 (gap) + 868 (col) + 64 (pad) = 1312.
+       Equivalent: max-width 1184 + padding-inline 64. */
+    max-width: 1184px;
+    margin-inline: auto;
+    padding-inline: var(--container-padding-desktop);
+    box-sizing: content-box;
+  }
+
+  .case__grid {
+    display: grid;
+    grid-template-columns: 193px 868px;
+    column-gap: 123px;
+    align-items: start;
+  }
+
+  .case__sidebar {
+    /* Stretch sidebar to full grid-row height. Without this, the cell
+       shrink-wraps to the TOC's natural ~243px and `position:sticky`
+       has no room to stick within. */
+    align-self: stretch;
+  }
+
+  .case__content {
+    width: 868px;
+    /* Vertical rhythm: 48px between each section AND on each side of a divider.
+       A <CaseDivider /> is 1px tall + 0 own margin, so this single gap value
+       reproduces the Figma pattern section → 48 → divider → 48 → next. */
+    display: flex;
+    flex-direction: column;
+    gap: 48px;
+  }
+
+  /* Mobile: collapse to single column (no design yet — minimal fallback) */
+  @media (max-width: 767px) {
+    .case {
+      /* Mobile: 20 sticky + 32 visible = 52px padding-top. */
+      padding-block: 52px 32px;
+    }
+
+    .case__wrap {
+      padding-inline: var(--page-margin);
+    }
+
+    .case__grid {
+      grid-template-columns: 1fr;
+    }
+
+    .case__content {
+      width: 100%;
+      max-width: 100%;
+      gap: var(--space-stack-3xl); /* tighter on mobile until proper design exists */
+    }
+  }
+</style>

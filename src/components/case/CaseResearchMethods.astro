@@ -1,0 +1,86 @@
+---
+/**
+ * CaseResearchMethods.astro — first sub-block of the Research section.
+ * Figma 491:11961 (Lucida) / 491:11962 (Vaia).
+ *
+ *   {RESEARCH}
+ *   Section headline (h3 32)
+ *   ↕ 24px stack
+ *   Intro line (Headline 20 SemiBold #252525)
+ *   ↕ 16px stack
+ *   [3× CaseCallout, with 16px stack between]
+ */
+import CaseSectionHeader from './CaseSectionHeader.astro';
+import CaseCallout from './CaseCallout.astro';
+import CasePlatformsRow from './CasePlatformsRow.astro';
+import type { ImageMetadata } from 'astro';
+
+interface IconItem {
+  src: ImageMetadata;
+  alt: string;
+  bg?: string;
+}
+
+interface PlatformGroup {
+  label: string;
+  icons: IconItem[];
+}
+
+interface CalloutWithPlatforms {
+  title: string;
+  text: string;
+  /** If present, renders a CasePlatformsRow inside the callout. */
+  platforms?: PlatformGroup[];
+}
+
+interface Props {
+  caption: string;
+  headline: string;
+  intro: string;
+  callouts: CalloutWithPlatforms[];
+}
+
+const { caption, headline, intro, callouts } = Astro.props;
+---
+
+<div class="research-methods">
+  <CaseSectionHeader caption={caption} headline={headline} />
+
+  <div class="research-methods__body">
+    <p class="research-methods__intro text-headline-semibold">{intro}</p>
+    <div class="research-methods__callouts">
+      {callouts.map((c, i) => (
+        <CaseCallout number={i + 1} title={c.title} text={c.text}>
+          {c.platforms && <CasePlatformsRow groups={c.platforms} />}
+        </CaseCallout>
+      ))}
+    </div>
+  </div>
+</div>
+
+<style>
+  .research-methods {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-stack-2xl); /* 24px between section header and body */
+    width: 100%;
+  }
+
+  .research-methods__body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-stack-lg); /* 16px between intro line and callouts */
+  }
+
+  .research-methods__intro {
+    /* .text-headline-semibold = 20px SemiBold Inter Tight, 1.1, 2% */
+    margin: 0;
+    color: var(--color-text-black);
+  }
+
+  .research-methods__callouts {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-stack-lg); /* 16px between callouts */
+  }
+</style>

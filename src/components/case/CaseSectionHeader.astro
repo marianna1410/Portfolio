@@ -1,0 +1,64 @@
+---
+/**
+ * CaseSectionHeader.astro — section heading pattern used across every
+ * major case-study section ({RESEARCH}, {PROBLEM N}, {SOLUTION N}, {SUMMARY}).
+ *
+ *   {CAPTION}                ← caption mono, #737373
+ *   ↕ 16px stack
+ *   Headline                 ← h3 32px Inter Tight Medium #252525 (default)
+ *
+ * `as` lets the caller change the headline element (h2/h3) without changing
+ * the visual style. `size` swaps the typography for sub-sections that use a
+ * smaller headline (Problems & Solutions use 24px/h4 instead of 32px/h3).
+ */
+interface Props {
+  caption: string;          // e.g. "{RESEARCH}", "{PROBLEM 1}"
+  headline: string;
+  as?: 'h2' | 'h3';
+  /**
+   * 'h3' (default, 32px Medium) — section-level (Research, Summary, ...)
+   * 'h4' (24px Medium) — sub-section level used inside Problems / Solutions
+   */
+  size?: 'h3' | 'h4';
+  /**
+   * Caption text color. Default 'muted' (#737373) is used by Research / Overview
+   * / Solutions / Summary. 'error' (#D9321C) is used by {PROBLEM N} headers.
+   */
+  captionTone?: 'muted' | 'error';
+  id?: string;
+}
+
+const { caption, headline, as: Tag = 'h2', size = 'h3', captionTone = 'muted', id } = Astro.props;
+const headlineClass = size === 'h4' ? 'text-h4-medium' : 'text-h3';
+---
+
+<header class="case-section-header" id={id}>
+  <p class:list={['case-section-header__caption', 'text-caption-mono', `case-section-header__caption--${captionTone}`]}>{caption}</p>
+  <Tag class:list={['case-section-header__headline', headlineClass]}>{headline}</Tag>
+</header>
+
+<style>
+  .case-section-header {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-stack-lg); /* 16px */
+    width: 100%;
+  }
+
+  .case-section-header__caption {
+    margin: 0;
+  }
+
+  .case-section-header__caption--muted {
+    color: var(--color-text-grey-muted);
+  }
+
+  .case-section-header__caption--error {
+    color: var(--color-system-error); /* #D9321C — used by {PROBLEM N} headers */
+  }
+
+  .case-section-header__headline {
+    margin: 0;
+    color: var(--color-text-black);
+  }
+</style>

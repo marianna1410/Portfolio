@@ -1,0 +1,161 @@
+---
+/**
+ * CaseResearchProblemSelection.astro — third sub-block of Research.
+ * Figma 472:17178 "Problem selection".
+ *
+ *   Title (h4 24 SemiBold #252525)
+ *   ↕ 16px stack
+ *   Description paragraph (18 Regular #737373)
+ *   ↕ 16px outer stack
+ *   "Impact is determined…" with 3 bullets (arrow-right-bullet + bold+plain text)
+ *   ↕ 16px outer stack
+ *   "Effort — ..." paragraph
+ */
+import { Image } from 'astro:assets';
+import arrowRightBullet from '../../assets/icons/arrow-right-bullet.svg';
+
+interface CriteriaBullet {
+  bold: string;   // bold-question prefix, e.g. 'Does this problem block the user\'s main "job"?'
+  plain: string;  // regular continuation
+}
+
+interface Props {
+  title: string;
+  description: string;
+  /** The lead-in line above the bullets, e.g. "Impact is determined based on three questions:" — `boldLead` is the bold word. */
+  impactLeadBold: string;
+  impactLeadPlain: string;
+  impactBullets: CriteriaBullet[];
+  /** The trailing paragraph; `boldLead` is the bold prefix, `plain` continues. */
+  effortBold: string;
+  effortPlain: string;
+}
+
+const {
+  title,
+  description,
+  impactLeadBold,
+  impactLeadPlain,
+  impactBullets,
+  effortBold,
+  effortPlain,
+} = Astro.props;
+---
+
+<div class="problem-selection">
+  <h3 class="problem-selection__title text-h4-semibold">{title}</h3>
+  <p class="problem-selection__description">{description}</p>
+
+  <div class="problem-selection__impact">
+    <p class="problem-selection__lead">
+      <strong>{impactLeadBold}</strong> {impactLeadPlain}
+    </p>
+    <ul class="problem-selection__bullets">
+      {impactBullets.map((b) => (
+        <li class="problem-selection__bullet">
+          <Image
+            src={arrowRightBullet}
+            alt=""
+            width={20}
+            height={20}
+            class="problem-selection__bullet-icon"
+          />
+          <span class="problem-selection__bullet-text">
+            <strong>{b.bold}</strong> {b.plain}
+          </span>
+        </li>
+      ))}
+    </ul>
+  </div>
+
+  <p class="problem-selection__effort">
+    <strong>{effortBold}</strong> {effortPlain}
+  </p>
+</div>
+
+<style>
+  .problem-selection {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-stack-lg); /* 16px between all major rows */
+    width: 100%;
+  }
+
+  /* ── Title ───────────────────────────────────────────────────────────── */
+  .problem-selection__title {
+    /* .text-h4-semibold = 24px SemiBold Inter Tight, 1.1, 1% */
+    margin: 0;
+    color: var(--color-text-black);
+  }
+
+  /* ── Description & effort paragraphs ─────────────────────────────────── */
+  .problem-selection__description,
+  .problem-selection__effort {
+    margin: 0;
+    font-family: var(--font-family-body);
+    font-weight: var(--font-weight-regular);
+    font-size: var(--font-size-body-large); /* 18 */
+    line-height: var(--line-height-base);
+    letter-spacing: var(--letter-spacing-wide);
+    color: var(--color-text-grey-muted);
+  }
+
+  /* Bold runs inside rich-text paragraphs inherit color from parent (#737373);
+     weight bumps to bold. */
+  .problem-selection__description strong,
+  .problem-selection__effort strong,
+  .problem-selection__lead strong,
+  .problem-selection__bullet-text strong {
+    font-weight: var(--font-weight-semibold);
+    /* Per Figma the bold weight is actually 700/Bold inside paragraphs.
+       Our token caps at SemiBold (600). Bumping to Bold for emphasis. */
+    font-weight: 700;
+  }
+
+  /* ── Impact block (lead + bullets) ───────────────────────────────────── */
+  .problem-selection__impact {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-stack-md); /* 12px */
+  }
+
+  .problem-selection__lead {
+    margin: 0;
+    font-family: var(--font-family-body);
+    font-weight: var(--font-weight-regular);
+    font-size: var(--font-size-body-large);
+    line-height: var(--line-height-base);
+    letter-spacing: var(--letter-spacing-wide);
+    color: var(--color-text-grey-muted);
+  }
+
+  .problem-selection__bullets {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-stack-sm); /* 8px */
+  }
+
+  .problem-selection__bullet {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-inline-sm); /* 8px */
+  }
+
+  .problem-selection__bullet-icon {
+    display: block;
+    flex-shrink: 0;
+  }
+
+  .problem-selection__bullet-text {
+    flex: 1;
+    font-family: var(--font-family-body);
+    font-weight: var(--font-weight-regular);
+    font-size: var(--font-size-body-large);
+    line-height: var(--line-height-base);
+    letter-spacing: var(--letter-spacing-wide);
+    color: var(--color-text-grey-muted);
+  }
+</style>

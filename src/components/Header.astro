@@ -3,6 +3,7 @@ import { Image } from 'astro:assets';
 import logoSvg from '../assets/icons/logo.svg';
 import chevronDownWhite from '../assets/icons/chevron-down-white.svg';
 import diagonalArrow from '../assets/icons/diagonal-arrow-dark-grey.svg';
+import arrowLeftBullet from '../assets/icons/arrow-left-dark-grey.svg';
 import { CONTACT } from '../lib/config.ts';
 
 interface Props {
@@ -25,7 +26,8 @@ const navPrefix = variant === 'home' ? '#' : '/#';
       </a>
     ) : (
       <a href="/" class="header__go-home text-label">
-        Go Home
+        <Image src={arrowLeftBullet} alt="" width={20} height={20} class="header__go-home-icon" />
+        <span>Go Home</span>
       </a>
     )}
 
@@ -217,6 +219,16 @@ const navPrefix = variant === 'home' ? '#' : '/#';
     border-radius: var(--radius-2xl);
   }
 
+  /* Case variant: fixed pill width 492 (Figma 472:17103) with content
+     justified to opposite edges. */
+  @media (min-width: 768px) {
+    .header[data-variant="case"] .header__pill {
+      width: 492px;
+      justify-content: space-between;
+      gap: 0;
+    }
+  }
+
   /* Mobile: pill stretches full-width, Logo↔Menu pushed to edges. */
   @media (max-width: 767px) {
     .header__pill {
@@ -265,14 +277,22 @@ const navPrefix = variant === 'home' ? '#' : '/#';
     }
   }
 
-  /* ====== Go Home (Case variant) ====== */
+  /* ====== Go Home (Case variant) ======
+     Figma 472:17103 → "Link/Footer": h=32, rounded 12, gap 8.
+     Asymmetric padding (pl=4 pr=2 py=4) per Figma spec. */
   .header__go-home {
     display: flex;
     align-items: center;
-    height: 40px;
-    padding: var(--space-inset-sm) var(--space-inset-md);
+    gap: var(--space-inline-sm);
+    height: 32px;
+    padding: var(--space-inset-xs) 2px var(--space-inset-xs) var(--space-inset-xs);
     border-radius: var(--radius-l);
     color: var(--color-text-dark-grey);
+  }
+
+  .header__go-home-icon {
+    display: block;
+    flex-shrink: 0;
   }
 
   /* ====== Desktop Contact button ====== */

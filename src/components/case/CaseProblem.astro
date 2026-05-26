@@ -1,0 +1,130 @@
+---
+/**
+ * CaseProblem.astro — one Problem block (×3 used in Problems section).
+ * Figma 472:17185 (Problem 1) / 472:17209 (Problem 2) / 472:17233 (Problem 3).
+ *
+ *   {PROBLEM N}                              ← caption mono, RED #D9321C
+ *   ↕ 16px stack
+ *   Headline (h3 32 Medium #252525)
+ *   ↕ 16px outer stack
+ *   Problem statement: (Bold 18 #737373)
+ *   ↕ 4px stack
+ *   Mixed bold/regular paragraph (18 #737373)
+ *   ↕ 32px outer stack
+ *   Composite phone-screen image (868×520, bg #F4F4F3, rounded 12)
+ */
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+import CaseSectionHeader from './CaseSectionHeader.astro';
+
+interface ParagraphPart {
+  text: string;
+  bold?: boolean;
+}
+
+interface Props {
+  number: number;            // 1, 2, 3
+  headline: string;
+  /** Rich-text paragraph after "Problem statement:" — array of {text, bold?} */
+  paragraph: ParagraphPart[];
+  image: ImageMetadata;
+  imageAlt: string;
+}
+
+const { number, headline, paragraph, image, imageAlt } = Astro.props;
+---
+
+<article class="case-problem">
+  <div class="case-problem__text">
+    <CaseSectionHeader
+      caption={`{PROBLEM ${number}}`}
+      headline={headline}
+      as="h2"
+      size="h3"
+      captionTone="error"
+    />
+    <div class="case-problem__statement">
+      <p class="case-problem__statement-label">Problem statement:</p>
+      <p class="case-problem__statement-text">
+        {paragraph.map((part) => (
+          part.bold
+            ? <strong>{part.text}</strong>
+            : <span>{part.text}</span>
+        ))}
+      </p>
+    </div>
+  </div>
+
+  <div class="case-problem__image-wrap">
+    <Image
+      src={image}
+      alt={imageAlt}
+      width={1736}
+      height={1040}
+      quality={90}
+      class="case-problem__image"
+    />
+  </div>
+</article>
+
+<style>
+  .case-problem {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-stack-3xl); /* 32px between text block and image */
+    width: 100%;
+  }
+
+  /* ── Text block ──────────────────────────────────────────────────────── */
+  .case-problem__text {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-stack-lg); /* 16px between header and statement */
+  }
+
+  .case-problem__statement {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-stack-xs); /* 4px between label and paragraph */
+  }
+
+  .case-problem__statement-label {
+    margin: 0;
+    font-family: var(--font-family-body);
+    font-weight: 700; /* Inter Tight Bold per Figma */
+    font-size: var(--font-size-body-large);
+    line-height: var(--line-height-base);
+    letter-spacing: var(--letter-spacing-wide);
+    color: var(--color-text-grey-muted);
+  }
+
+  .case-problem__statement-text {
+    margin: 0;
+    font-family: var(--font-family-body);
+    font-weight: var(--font-weight-regular);
+    font-size: var(--font-size-body-large);
+    line-height: var(--line-height-base);
+    letter-spacing: var(--letter-spacing-wide);
+    color: var(--color-text-grey-muted);
+  }
+
+  .case-problem__statement-text strong {
+    font-weight: 700; /* Inter Tight Bold inside mixed-rich paragraph */
+  }
+
+  /* ── Image ───────────────────────────────────────────────────────────── */
+  .case-problem__image-wrap {
+    width: 100%;
+    aspect-ratio: 868 / 520;
+    background-color: var(--color-bg-light-grey);
+    border-radius: var(--radius-l); /* 12px */
+    overflow: hidden;
+  }
+
+  .case-problem__image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+</style>

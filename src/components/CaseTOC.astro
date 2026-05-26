@@ -1,0 +1,259 @@
+---
+/**
+ * CaseTOC.astro — sticky table-of-contents sidebar for case study pages.
+ * Figma 472:17105 (Lucida) and 472:20848 (Vaia) — identical structure.
+ *
+ * 5 quick-links. Active item shows dotted arrow-right + black text;
+ * inactive items show grey text, no icon. (Active state will be wired
+ * up via scroll-spy in step 7 — for now first item is statically active.)
+ */
+import { Image } from 'astro:assets';
+import triangleRight from '../assets/icons/triangle-right.svg';
+import triangleRightGrey from '../assets/icons/triangle-right-grey.svg';
+
+interface Item {
+  id: string;
+  label: string;
+}
+
+interface Props {
+  items?: Item[];
+  /** id of the currently-active section (matches an item.id) */
+  active?: string;
+}
+
+const {
+  items = [
+    { id: 'overview',  label: 'Project Overview' },
+    { id: 'research',  label: 'Research' },
+    { id: 'problems',  label: 'Problems' },
+    { id: 'solutions', label: 'Solutions' },
+    { id: 'summary',   label: 'Summary' },
+  ],
+  active = 'overview',
+} = Astro.props;
+---
+
+<nav class="case-toc" aria-label="Case study sections">
+  <ul class="case-toc__list">
+    {items.map((item) => {
+      const isActive = item.id === active;
+      return (
+        <li class="case-toc__item">
+          <a
+            href={`#${item.id}`}
+            class:list={['case-toc__link', { 'case-toc__link--active': isActive }]}
+            aria-current={isActive ? 'true' : undefined}
+            data-toc-link
+            data-target={item.id}
+          >
+            <span class="case-toc__icon" aria-hidden="true">
+              {/* Two pre-rendered triangle variants stacked in the 20×20 slot.
+                  CSS shows the black one for the current link, the grey one on hover. */}
+              <Image src={triangleRight}      alt="" width={20} height={20} class="case-toc__icon-img case-toc__icon-img--active" />
+              <Image src={triangleRightGrey}  alt="" width={20} height={20} class="case-toc__icon-img case-toc__icon-img--hover" />
+            </span>
+            <span class="case-toc__label">{item.label}</span>
+          </a>
+        </li>
+      );
+    })}
+  </ul>
+</nav>
+
+<style>
+  .case-toc {
+    /* Outer frame from Figma: 193×243, inset 12px */
+    width: 193px;
+    padding: var(--space-inset-md);
+    /* Sticky: total 16px visual gap from header pill bottom to the first
+       link's TEXT baseline, with that 16 absorbed by the TOC's own paddings
+       (12px outer + 4px on the link). So sticky outer top = pill bottom = 80. */
+    position: sticky;
+    top: 80px;
+    align-self: start;
+  }
+
+  .case-toc__list {
+    display: flex;
+    flex-direction: column;
+    gap: 11px; /* exact value from Figma */
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    width: 169px; /* inner "Con" frame width */
+  }
+
+  .case-toc__item {
+    margin: 0;
+  }
+
+  .case-toc__link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-inset-xs);
+    padding: var(--space-inset-xs);
+    border-radius: var(--radius-l);
+    color: var(--color-text-grey-muted);
+    text-decoration: none;
+    font-family: var(--font-family-body);
+    font-weight: var(--font-weight-regular);
+    font-size: var(--font-size-body-large);
+    line-height: var(--line-height-base);
+    letter-spacing: var(--letter-spacing-wide);
+    white-space: nowrap;
+    transition: color var(--duration-fast) var(--ease-out);
+  }
+
+  /* Hover state per Figma (394:10336) keeps text color at default grey.
+     Only the icon appears — and it's the GREY variant, not the black one. */
+
+  .case-toc__link--active {
+    color: var(--color-text-black);
+  }
+
+  .case-toc__icon {
+    /* Per Figma: the 20×20 icon slot is ALWAYS reserved.
+       The two stacked triangle variants inside toggle independently so
+       the text x-position stays identical across Default/Hover/Current/Focus. */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    position: relative;
+  }
+
+  .case-toc__icon-img {
+    position: absolute;
+    inset: 0;
+    display: none;
+  }
+
+  /* Current (active) link → show black triangle, grey stays hidden. */
+  .case-toc__link--active .case-toc__icon-img--active {
+    display: block;
+  }
+
+  /* Hover on a non-current link → show grey triangle (text colour unchanged). */
+  .case-toc__link:hover:not(.case-toc__link--active) .case-toc__icon-img--hover {
+    display: block;
+  }
+
+  .case-toc__link:focus-visible {
+    /* Figma Focus state: white background + 2px white inner ring + 4px dark outer ring */
+    outline: none;
+    background-color: var(--color-bg-white);
+    box-shadow: var(--shadow-focus);
+  }
+
+  /* Mobile: hide for now (per design decision — no mobile case design yet) */
+  @media (max-width: 767px) {
+    .case-toc {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  /**
+   * TOC scroll-spy: highlight the link whose section currently dominates
+   * the viewport. Uses IntersectionObserver with a top offset matched to
+   * the sticky header (24 top + 56 height = 80) plus a small breathing room
+   * so a section becomes "active" right as it crosses the header.
+   */
+  function initTocScrollSpy() {
+    const tocLinks = Array.from(document.querySelectorAll<HTMLAnchorElement>('[data-toc-link]'));
+    if (tocLinks.length === 0) return;
+
+    const linkByTarget = new Map<string, HTMLAnchorElement>();
+    const targetIds: string[] = [];
+    tocLinks.forEach((link) => {
+      const target = link.dataset.target;
+      if (target) {
+        linkByTarget.set(target, link);
+        targetIds.push(target);
+      }
+    });
+
+    const sections = targetIds
+      .map((id) => document.getElementById(id))
+      .filter((el): el is HTMLElement => el !== null);
+    if (sections.length === 0) return;
+
+    const setActive = (id: string) => {
+      tocLinks.forEach((link) => {
+        const isActive = link.dataset.target === id;
+        link.classList.toggle('case-toc__link--active', isActive);
+        if (isActive) link.setAttribute('aria-current', 'true');
+        else link.removeAttribute('aria-current');
+      });
+    };
+
+    // Track section visibility via IntersectionObserver, then pick the
+    // section closest to the top of the "active zone" (just below header).
+    const visible = new Map<string, number>(); // id → intersection ratio
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            visible.set(entry.target.id, entry.intersectionRatio);
+          } else {
+            visible.delete(entry.target.id);
+          }
+        });
+
+        // If nothing is intersecting (e.g. between sections), find the
+        // last section whose top is above the active line (header offset + 100).
+        if (visible.size === 0) {
+          const activeLine = 180;
+          let lastAbove: HTMLElement | null = null;
+          sections.forEach((s) => {
+            if (s.getBoundingClientRect().top <= activeLine) lastAbove = s;
+          });
+          if (lastAbove) setActive(lastAbove.id);
+          return;
+        }
+
+        // Otherwise pick the section whose top is closest to (but at or above)
+        // the active line.
+        let chosen: HTMLElement | null = null;
+        let chosenTop = -Infinity;
+        sections.forEach((s) => {
+          if (visible.has(s.id)) {
+            const top = s.getBoundingClientRect().top;
+            // Prefer the section just below the active line (closest top to it from below),
+            // OR the last one we scrolled past.
+            if (top <= 180 && top > chosenTop) {
+              chosen = s;
+              chosenTop = top;
+            }
+          }
+        });
+        // Fallback: first visible section if none crossed the active line yet.
+        if (!chosen) {
+          for (const s of sections) {
+            if (visible.has(s.id)) { chosen = s; break; }
+          }
+        }
+        if (chosen) setActive(chosen.id);
+      },
+      {
+        // top margin matches sticky header height + breathing room so a section
+        // counts as "visible" once it scrolls past the header.
+        rootMargin: '-120px 0px -40% 0px',
+        threshold: [0, 0.1, 0.5, 1],
+      }
+    );
+
+    sections.forEach((s) => observer.observe(s));
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initTocScrollSpy);
+  } else {
+    initTocScrollSpy();
+  }
+</script>

@@ -1,0 +1,49 @@
+---
+/**
+ * CaseDivider.astro — dotted horizontal divider between case sections.
+ * Figma asset: Assets/Images/Case Lucida/divider.svg
+ *
+ * Pattern (same as the Header menu-tab-border, see CLAUDE.md decision #16):
+ *   - Inline SVG with stroke-dasharray="0.1 8" → renders as round dots 8px apart
+ *   - vector-effect="non-scaling-stroke" → stroke-width stays 2px under any scale
+ *   - preserveAspectRatio="none" → SVG stretches horizontally to container width
+ *
+ * Reference copy preserved at src/assets/icons/case-divider.svg.
+ *
+ * The parent flex container (`.case__content` with `gap: 48px`) provides the
+ * 48px breathing room above and below the divider.
+ */
+---
+
+<svg
+  class="case-divider"
+  preserveAspectRatio="none"
+  viewBox="0 0 870 2"
+  height="2"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+  aria-hidden="true"
+  focusable="false"
+>
+  <path
+    d="M1 1H869"
+    stroke="#BBBBBB"
+    stroke-width="2"
+    stroke-linecap="round"
+    stroke-dasharray="0.1 8"
+    vector-effect="non-scaling-stroke"
+  />
+</svg>
+
+<style>
+  .case-divider {
+    display: block;
+    width: 100%;
+    height: 2px;
+    /* overflow:visible so round-cap dots (2px diameter) aren't clipped by the
+       2px-tall SVG box. Otherwise dots render as flat ticks instead of circles. */
+    overflow: visible;
+    /* The dots' visual gap stays 8px regardless of stretch thanks to
+       vector-effect=non-scaling-stroke + preserveAspectRatio=none above. */
+  }
+</style>

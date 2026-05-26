@@ -1,0 +1,161 @@
+---
+/**
+ * CaseProjectOverview.astro — "Project Overview" section.
+ * Figma 472:17121 (Lucida) / 472:20864 (Vaia) — identical structure.
+ *
+ * Layout:
+ *   {PROJECT OVERVIEW} caption  ← 16px stack
+ *   Descriptive paragraph (h4/medium, 24px Inter Tight Medium, black)
+ *   ← 32px stack
+ *   [Role 180w] ← 73px gap → [Methods 551w]
+ */
+import { Image } from 'astro:assets';
+import arrowRightBullet from '../../assets/icons/arrow-right-bullet.svg';
+
+interface Props {
+  /** The descriptive paragraph (rendered as h4-medium style). */
+  paragraph: string;
+  /** Role bullets — each becomes a row with arrow-right-bullet icon. */
+  role: string[];
+  /** Methods text — plain string with `·` separators per Figma. */
+  methods: string;
+}
+
+const { paragraph, role, methods } = Astro.props;
+---
+
+<section class="case-overview" id="overview" aria-labelledby="overview-label">
+  <header class="case-overview__title-block">
+    <p class="case-overview__caption text-caption-mono" id="overview-label">{`{PROJECT OVERVIEW}`}</p>
+    <p class="case-overview__paragraph text-h4-medium">{paragraph}</p>
+  </header>
+
+  <div class="case-overview__details">
+    <div class="case-overview__details-col case-overview__details-col--role">
+      <h2 class="case-overview__details-label text-body-large-semibold">Role</h2>
+      <ul class="case-overview__bullets">
+        {role.map((item) => (
+          <li class="case-overview__bullet">
+            <Image
+              src={arrowRightBullet}
+              alt=""
+              width={20}
+              height={20}
+              class="case-overview__bullet-icon"
+            />
+            <span class="case-overview__bullet-text text-body-large-regular">{item}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+
+    <div class="case-overview__details-col case-overview__details-col--methods">
+      <h2 class="case-overview__details-label text-body-large-semibold">Methods</h2>
+      <p class="case-overview__methods-text text-body-large-regular">{methods}</p>
+    </div>
+  </div>
+</section>
+
+<style>
+  .case-overview {
+    /* Outer: column flex, gap 32 (--space-stack-3xl) between title block and details */
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-stack-3xl);
+    width: 100%;
+  }
+
+  /* ── Title block ─────────────────────────────────────────────────────── */
+  .case-overview__title-block {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-stack-lg); /* 16px */
+  }
+
+  .case-overview__caption {
+    margin: 0;
+    color: var(--color-text-grey-muted);
+  }
+
+  .case-overview__paragraph {
+    /* .text-h4-medium = 24px Inter Tight Medium, line-height 1.1, tracking 2% */
+    margin: 0;
+    color: var(--color-text-black);
+  }
+
+  /* ── Details row ─────────────────────────────────────────────────────── */
+  .case-overview__details {
+    display: flex;
+    gap: 73px; /* exact Figma value — not a token */
+    align-items: flex-start;
+    width: 100%;
+  }
+
+  .case-overview__details-col {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-stack-sm); /* 8px */
+  }
+
+  .case-overview__details-col--role {
+    width: 180px;
+    flex-shrink: 0;
+  }
+
+  .case-overview__details-col--methods {
+    width: 551px;
+    flex-shrink: 0;
+  }
+
+  .case-overview__details-label {
+    /* .text-body-large-semibold = 18px SemiBold Inter Tight #252525 */
+    margin: 0;
+    color: var(--color-text-black);
+  }
+
+  /* ── Role bullets ────────────────────────────────────────────────────── */
+  .case-overview__bullets {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-stack-xs); /* 4px */
+  }
+
+  .case-overview__bullet {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-inline-sm); /* 8px */
+  }
+
+  .case-overview__bullet-icon {
+    display: block;
+    flex-shrink: 0;
+  }
+
+  .case-overview__bullet-text {
+    margin: 0;
+    color: var(--color-text-grey-muted);
+  }
+
+  /* ── Methods text ────────────────────────────────────────────────────── */
+  .case-overview__methods-text {
+    margin: 0;
+    color: var(--color-text-grey-muted);
+    white-space: pre-wrap; /* preserve double-spaces and the · separators verbatim */
+  }
+
+  /* Mobile fallback (no Figma design yet — stack columns) */
+  @media (max-width: 767px) {
+    .case-overview__details {
+      flex-direction: column;
+      gap: var(--space-stack-2xl);
+    }
+
+    .case-overview__details-col--role,
+    .case-overview__details-col--methods {
+      width: 100%;
+    }
+  }
+</style>

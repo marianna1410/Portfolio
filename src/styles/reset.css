@@ -12,7 +12,11 @@
 
 html,
 body {
-  height: 100%;
+  /* `min-height` (not `height: 100%`) so the document grows with content.
+     `height: 100%` clamps body to viewport-height; long pages then scroll
+     ONLY the html element, and `position: sticky` elements (e.g. the Header)
+     drift out of view once content extends past body's box. */
+  min-height: 100%;
 }
 
 body {

@@ -1,0 +1,228 @@
+---
+/**
+ * /cases/lucida — Lucida AI case study page.
+ * Built static-first per Figma 472:17100. Will refactor to content collection
+ * after visual sign-off (see task #4).
+ */
+import CaseLayout from '../../layouts/CaseLayout.astro';
+import CaseHero from '../../components/case/CaseHero.astro';
+import CaseProjectOverview from '../../components/case/CaseProjectOverview.astro';
+import CaseDivider from '../../components/case/CaseDivider.astro';
+import CaseResearchMethods from '../../components/case/CaseResearchMethods.astro';
+import CaseResearchFindings from '../../components/case/CaseResearchFindings.astro';
+import CaseResearchProblemSelection from '../../components/case/CaseResearchProblemSelection.astro';
+import CaseProblem from '../../components/case/CaseProblem.astro';
+import heroImage from '../../assets/projects/cases/lucida/hero.png';
+import userFeedbackImage from '../../assets/projects/cases/lucida/user-feedback.png';
+import problem1Image from '../../assets/projects/cases/lucida/Problem 1.png';
+import problem2Image from '../../assets/projects/cases/lucida/Problem 2.png';
+import problem3Image from '../../assets/projects/cases/lucida/Problem 3.png';
+// Platform icons used inside the Research methodology callout
+import iconLucida   from '../../assets/projects/cases/lucida/platforms/lucida.png';
+import iconPraktika from '../../assets/projects/cases/lucida/platforms/praktika.png';
+import iconLangua   from '../../assets/projects/cases/lucida/platforms/langua.png';
+import iconSpeak    from '../../assets/projects/cases/lucida/platforms/speak.png';
+import iconLora     from '../../assets/projects/cases/lucida/platforms/lora.png';
+import iconAppStore from '../../assets/projects/cases/lucida/platforms/app store.png';
+import iconGooglePlay from '../../assets/projects/cases/lucida/platforms/google play.png';
+import iconTrustpilot from '../../assets/projects/cases/lucida/platforms/trustpilot.png';
+import iconReddit   from '../../assets/projects/cases/lucida/platforms/reddit.png';
+
+const title = 'Lucida AI — Bringing structure and confidence to speaking practice · Marianna Delihioz';
+const description = 'Case study: redesigning Lucida AI to turn one-time lesson content into practiced, retained vocabulary and corrections.';
+
+const heroTitle = 'Bringing structure and confidence to speaking practice through proven learning patterns';
+const heroTags = ['Language Learning', 'Redesign Concept'];
+
+const overviewParagraph = 'Lucida AI is a mobile app that lets users speak with an AI tutor, get real-time pronunciation and grammar corrections, and save unfamiliar words to a dictionary. This case study is about the moment the lesson ends and none of those corrections and new words actually stick, and the redesign that closes that gap.';
+const overviewRole = ['UX Designer', 'Product Designer'];
+const overviewMethods = 'UX Audit  · Competitive analysis · Desk research · Journey mapping · Problem framing · User flows · Wireframing · Prototyping';
+
+const researchCallouts = [
+  {
+    title: 'UX Audit',
+    text: `Walked through the core flows (taking a lesson with the AI tutor, reviewing mistakes during and after the lesson, learning new vocabulary via the dictionary and word practice) and mapped breakdowns against Nielsen's heuristics.`,
+  },
+  {
+    title: 'Review Analysis',
+    text: 'Collected feedback from 5 platforms (App Store, Play Market, Trustpilot, Reddit, Langua Forum) and used AI to identify recurring patterns across 100+ reviews of Lucida and 4 peer apps (Praktika, Langua, Speak, Loora AI).',
+    platforms: [
+      {
+        label: 'App reviews analyzed:',
+        icons: [
+          { src: iconLucida,   alt: 'Lucida' },
+          { src: iconPraktika, alt: 'Praktika' },
+          { src: iconLangua,   alt: 'Langua', bg: '#FFECEC' },
+          { src: iconSpeak,    alt: 'Speak',  bg: '#EDF0FD' },
+          { src: iconLora,     alt: 'Loora AI', bg: '#E4EAFD' },
+        ],
+      },
+      {
+        label: 'Platforms used:',
+        icons: [
+          { src: iconAppStore,   alt: 'App Store' },
+          { src: iconGooglePlay, alt: 'Google Play', bg: '#F4F4F3' },
+          { src: iconTrustpilot, alt: 'Trustpilot',  bg: '#F4F4F3' },
+          { src: iconLangua,     alt: 'Langua Forum', bg: '#FFECEC' },
+          { src: iconReddit,     alt: 'Reddit' },
+        ],
+      },
+    ],
+  },
+  {
+    title: 'Desk Research',
+    text: `Read research on how to actually learn languages effectively to identify which mechanics Lucida's flow was missing. Users had asked for specific features (flashcards, grammar exercises). Those requests don't always match what actually helps users reach their goal, which is why the redesign leans on proven methods from research.`,
+  },
+];
+
+const findingsItems = [
+  'No retention or practice mechanic for words saved to the dictionary.',
+  'Lesson mistakes corrected in the moment, with no reinforcement after.',
+  'No grammar instruction or targeted exercises.',
+  'No level test and no visible progress over time.',
+  'AI has limited context regarding user’s goals and the user in general.',
+];
+
+const problemSelectionBullets = [
+  {
+    bold: `Does this problem block the user's main "job"?`,
+    plain: 'The main task in Lucida is to help users become fluent, or at least more confident, speakers. If the problem hinders that directly → high impact.',
+  },
+  {
+    bold: 'How often does this come up in reviews?',
+    plain: 'If the issue shows up consistently across user feedback (multiple platforms, across different competitors) → high impact.',
+  },
+  {
+    bold: 'Does the problem cause users to abandon the app?',
+    plain: `If feedback includes signals like "has to rely on third-party apps for this" or "it's not actually teaching me" → high impact.`,
+  },
+];
+
+// Each problem statement follows the "When [subject] try to [action], they
+// encounter difficulties because [reason], which leads to [outcome]" template
+// where the connective phrases are bolded per Figma 472:17191 / 472:17215 / 472:17239.
+const problems = [
+  {
+    number: 1,
+    headline: 'Saved words collect in a list but never come back into use',
+    image: problem1Image,
+    imageAlt: 'Lucida dictionary screen: a static list of saved words with no practice or recall exercises available.',
+    paragraph: [
+      { text: 'When ', bold: true },
+      { text: 'users' },
+      { text: ' try to ', bold: true },
+      { text: 'learn the vocabulary they saved during lessons' },
+      { text: ', they encounter difficulties because ', bold: true },
+      { text: 'the dictionary is a static list with no practice or recall exercises' },
+      { text: ', which leads to ', bold: true },
+      { text: 'saved words never becoming part of active vocabulary.' },
+    ],
+  },
+  {
+    number: 2,
+    headline: `Today's new words don't stay in memory for long`,
+    image: problem2Image,
+    imageAlt: 'Lucida lesson screens showing newly saved words before and during a new lesson, with no scheduled review.',
+    paragraph: [
+      { text: 'When ', bold: true },
+      { text: 'users' },
+      { text: ' try to ', bold: true },
+      { text: 'retain new vocabulary across sessions' },
+      { text: ', they encounter difficulties because ', bold: true },
+      { text: 'the app has no spaced practice or scheduled review of past material' },
+      { text: ', which leads to ', bold: true },
+      { text: `words fading from memory before they're reinforced.` },
+    ],
+  },
+  {
+    number: 3,
+    headline: 'The same mistakes return lesson after lesson',
+    image: problem3Image,
+    imageAlt: 'Lucida tutor flagging a grammar mistake during a lesson; correction is shown once and never revisited.',
+    paragraph: [
+      { text: 'When ', bold: true },
+      { text: 'users' },
+      { text: ' try to ', bold: true },
+      { text: 'improve from the mistakes they make during a lesson' },
+      { text: ', they encounter difficulties because ', bold: true },
+      { text: `corrections only surface in the moment and aren't revisited afterward` },
+      { text: ', which leads to ', bold: true },
+      { text: 'the same mistakes returning in every following lesson.' },
+    ],
+  },
+];
+---
+
+<CaseLayout title={title} description={description}>
+  <CaseHero
+    number="01"
+    tags={heroTags}
+    title={heroTitle}
+    image={heroImage}
+    imageAlt="Lucida AI lesson summary screen showing achievements: Duration, Expressions saved, Tasks completed, Elements repeated, Errors corrected."
+  />
+
+  <CaseProjectOverview
+    paragraph={overviewParagraph}
+    role={overviewRole}
+    methods={overviewMethods}
+  />
+
+  <CaseDivider />
+
+  <section class="case-research" id="research">
+    <CaseResearchMethods
+      caption="{RESEARCH}"
+      headline="What practicing with an AI tutor actually leaves behind"
+      intro="To find out, I ran three parallel analyses, each from a different angle:"
+      callouts={researchCallouts}
+    />
+
+    <CaseResearchFindings
+      heading="The most frequently mentioned issues that surfaced"
+      items={findingsItems}
+      image={userFeedbackImage}
+      imageAlt="Grid of seven highlighted user quotes from App Store, Play Market, Trustpilot, Reddit and Langua Forum reviews."
+      caption="Key highlights from users' feedback."
+    />
+
+    <CaseResearchProblemSelection
+      title="Criteria for selecting problems to solve"
+      description="The selection of problems to solve was based on impact/effort, considering existing constraints and available data."
+      impactLeadBold="Impact"
+      impactLeadPlain="is determined based on three questions:"
+      impactBullets={problemSelectionBullets}
+      effortBold="Effort"
+      effortPlain="— how realistically the problems can be solved at the design solution level, based on the available information."
+    />
+  </section>
+
+  <CaseDivider />
+
+  <section class="case-problems" id="problems">
+    {problems.map((p) => (
+      <CaseProblem
+        number={p.number}
+        headline={p.headline}
+        paragraph={p.paragraph}
+        image={p.image}
+        imageAlt={p.imageAlt}
+      />
+    ))}
+  </section>
+
+  <CaseDivider />
+</CaseLayout>
+
+<style>
+  /* Research is composed of 3 sub-blocks separated by 48px; the wrapping
+     section makes them addressable as #research and lets them share that
+     internal vertical rhythm. */
+  .case-research,
+  .case-problems {
+    display: flex;
+    flex-direction: column;
+    gap: 48px;
+    width: 100%;
+  }
+</style>
