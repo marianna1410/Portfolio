@@ -117,26 +117,28 @@ const skillRows = [
             <ul class="experience__skills-pills">
               {row.map((skill, i) => (
                 <li class={`skill-pill${i < row.length - 1 ? ' skill-pill--overlap' : ''}`}>
-                  <Image
-                    src={paperSlice}
-                    alt=""
+                  {/* Raw <img> (not Astro Image) so the slice PNG is served
+                      as-is — Astro's webp conversion blurred the texture. */}
+                  <img
+                    src={paperSlice.src}
                     width={20}
                     height={44}
-                    quality={95}
                     class="skill-pill__cap skill-pill__cap--left"
+                    alt=""
                     aria-hidden="true"
+                    decoding="async"
                   />
                   <span class="skill-pill__body">
                     <span class="skill-pill__text text-caption-regular">{skill}</span>
                   </span>
-                  <Image
-                    src={paperSlice}
-                    alt=""
+                  <img
+                    src={paperSlice.src}
                     width={20}
                     height={44}
-                    quality={95}
                     class="skill-pill__cap skill-pill__cap--right"
+                    alt=""
                     aria-hidden="true"
+                    decoding="async"
                   />
                 </li>
               ))}
@@ -214,10 +216,18 @@ const skillRows = [
     position: relative;
     background-color: var(--color-bg-white);
     border-radius: var(--radius-xl); /* 16px desktop / 12px mobile */
-    padding: var(--space-inset-2xl); /* 24px desktop / 20px mobile */
+    padding: var(--space-inset-2xl); /* 24px desktop */
     display: flex;
     flex-direction: column;
     gap: var(--space-stack-xl); /* 20px desktop / 16px mobile */
+  }
+
+  /* Mobile: tighter card padding (16px) per Marianna's spec.
+     Uses --space-inset-xl which resolves to 16px on mobile. */
+  @media (max-width: 767px) {
+    .experience__card {
+      padding: var(--space-inset-xl); /* 16px on mobile */
+    }
   }
 
   /* Dashed border SVG fills the card; preserveAspectRatio="none" stretches
@@ -404,10 +414,17 @@ const skillRows = [
     align-items: center;
     justify-content: center;
     overflow: hidden;
-    /* Fixed-size paper texture: every pill shows the SAME crop region —
-       long pills don't stretch the fibers. Matches Figma frame-2316 trick. */
+    /* Paper texture rendered LARGER than the pill body so each pill
+       shows a small, sharp window of the texture (matches Figma
+       frame-2316 trick: width 309%, height 484% of body). This keeps
+       the paper grain fine instead of stretched-looking. Source PNG is
+       1200×1800 portrait crumpled paper from Figma (downscaled to 600×900
+       for delivery). */
     background-image: var(--paperTextureUrl);
-    background-size: 548px 44px; /* source width × pill height */
+    background-size: 309% 484%;
+    /* Source PNG was pre-cropped from the top-left quadrant of Figma's
+       crumpled-paper asset, so the whole image is fold-free — any
+       position works and centering keeps the crop balanced across pills. */
     background-position: center;
     background-repeat: no-repeat;
   }
@@ -421,15 +438,29 @@ const skillRows = [
     white-space: nowrap;
   }
 
-  /* Mobile: pills wrap, sized to content; keep 44px height + paper assets intact */
+  /* Mobile: collapse the row structure so all pills flow in a single
+     wrap-flow. Each pill keeps its natural content width — no growing
+     to fill the row, no banner-stretched lonely pills. Trailing space
+     on the right of each wrap-line is acceptable per Marianna's spec. */
   @media (max-width: 767px) {
-    .experience__skills-pills {
+    .experience__skills-rows {
+      flex-direction: row;
       flex-wrap: wrap;
-      row-gap: var(--space-stack-sm); /* 8px */
+      gap: 0; /* spacing handled via row-gap below + pill margin */
+      row-gap: var(--space-stack-sm); /* 8px between wrap-lines */
+    }
+
+    /* Display:contents lets all .skill-pill items become direct visual
+       siblings of .experience__skills-rows, merging the 4 data-rows into
+       one continuous wrap-flow. DOM list semantics preserved for a11y. */
+    .experience__skills-row,
+    .experience__skills-pills {
+      display: contents;
     }
 
     .skill-pill {
-      flex: 0 0 auto;
+      flex: 0 0 auto; /* natural content width, no grow/shrink */
+      margin-right: -4px; /* overlap into next pill (incl. wrap boundaries) */
     }
   }
 </style>
