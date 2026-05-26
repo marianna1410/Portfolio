@@ -357,6 +357,14 @@
   letter-spacing: var(--letter-spacing-wide);
 }
 
+.text-body-large-medium {
+  font-family: var(--font-family-body);
+  font-weight: var(--font-weight-medium);
+  font-size: var(--font-size-body-large);
+  line-height: var(--line-height-base);
+  letter-spacing: var(--letter-spacing-wide);
+}
+
 .text-body-large-semibold {
   font-family: var(--font-family-body);
   font-weight: var(--font-weight-semibold);
@@ -409,6 +417,14 @@
   font-family: var(--font-family-mono);
   font-weight: var(--font-weight-regular);
   font-size: var(--font-size-caption-mono); /* mono-specific token (12px mobile, 14px desktop) */
+  line-height: var(--line-height-loose);
+  letter-spacing: var(--letter-spacing-normal);
+}
+
+.text-body-mono-lg {
+  font-family: var(--font-family-mono);
+  font-weight: var(--font-weight-regular);
+  font-size: var(--font-size-body-mono-lg); /* 20px desktop / 16px mobile */
   line-height: var(--line-height-loose);
   letter-spacing: var(--letter-spacing-normal);
 }

@@ -3,16 +3,12 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Hero from '../components/Hero.astro';
 import Works from '../components/Works.astro';
 import Experience from '../components/Experience.astro';
+import BehindTheScreen from '../components/BehindTheScreen.astro';
 ---
 
 <BaseLayout title="Marianna Delihioz — Portfolio">
   <Hero />
   <Works />
   <Experience />
-
-  <section id="about" style="min-height: 80vh; padding-block: var(--space-stack-5xl); background: var(--color-bg-grey-muted);">
-    <div class="container">
-      <h2 class="text-h2">Behind the Screen placeholder</h2>
-    </div>
-  </section>
+  <BehindTheScreen />
 </BaseLayout>

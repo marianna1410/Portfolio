@@ -1,0 +1,565 @@
+---
+import { Image } from 'astro:assets';
+// Raw import so we can inline the border SVG (vector-effect="non-scaling-stroke"
+// renders inconsistently through <img>; inline SVG works reliably everywhere).
+import endBorderSvg from '../assets/icons/behind-end-border.svg?raw';
+import heartIcon    from '../assets/icons/heart.png';
+import checkboxIcon from '../assets/icons/checkbox-check.svg';
+import buildingImg  from '../assets/behind-the-screen/building.png';
+import fontanImg    from '../assets/behind-the-screen/fontan.png';
+import riverImg     from '../assets/behind-the-screen/river.png';
+
+/**
+ * Behind the Screen section — Figma node 472:16885.
+ * Four-card grid:
+ *  - About me (col 1, both rows)   — torn-paper-cut card with mono bio text
+ *  - Traveling 2025 (cols 2-3, r1) — white card with 3 rotated photos
+ *  - Latest books (col 2, r2)      — white card with checklist (line-through)
+ *  - That's it (col 3, r2)         — dashed-border closing card
+ *
+ * Card grid 3×2, each cell ~424×280, gap 20px, total 1312×580.
+ *
+ * About-me card uses behind-paper.svg as a backdrop (scalloped top edge).
+ * Mobile: cards stack vertically; "That's it" shrinks with heart + text
+ * sitting on the same horizontal line.
+ */
+
+const books = ['Predictably Irrational', 'Made to Stick', 'The Art of Systems Thinking'];
+
+const bioParagraphs = [
+  "Hello! I'm Marianna. Besides being a designer, I consider myself an explorer because curiosity is one of the traits that have paved the way to who I am today.",
+  "When I'm not working, you can find me:",
+  '→ reading an interesting book about psychology',
+  '→ watching long podcasts and interviews',
+  '→ taking new courses',
+  '→ scrolling on Pinterest',
+  '→ on the road',
+];
+---
+
+<section class="behind" id="about" aria-labelledby="behind-heading">
+  <div class="behind__inner">
+    <h2 id="behind-heading" class="behind__heading text-h2">Behind the Screen</h2>
+
+    <div class="behind__grid">
+      <!-- About me — paper card spanning both rows. The scalloped top
+           edge is a CSS mask on the inner .behind__paper element. The
+           outer <article> holds the filter:drop-shadow only (no mask) —
+           splitting mask and filter onto separate elements is required
+           because Chrome/Opera clip drop-shadow to the mask's bounding
+           box when both are on the same element. -->
+      <article class="behind__card behind__card--about">
+        <div class="behind__paper">
+          <div class="behind__about-text text-body-mono-lg">
+            {bioParagraphs.map((p) => <p>{p}</p>)}
+          </div>
+        </div>
+      </article>
+
+      <!-- Traveling 2025 -->
+      <article class="behind__card behind__card--travel">
+        <div class="behind__travel-head">
+          <div class="behind__travel-info">
+            <p class="text-caption-regular behind__travel-label">Traveling</p>
+            <p class="text-h2 behind__travel-year">2025</p>
+          </div>
+          <span class="behind__travel-tag text-caption-mono">44° 25′ 55″ N</span>
+        </div>
+        <div class="behind__travel-photos" aria-hidden="true">
+          <div class="behind__photo behind__photo--river">
+            <Image src={riverImg} alt="" width={296} height={368} quality={90} />
+          </div>
+          <div class="behind__photo behind__photo--fontan">
+            <Image src={fontanImg} alt="" width={296} height={368} quality={90} />
+          </div>
+          <div class="behind__photo behind__photo--building">
+            <Image src={buildingImg} alt="" width={404} height={466} quality={90} />
+          </div>
+        </div>
+      </article>
+
+      <!-- Latest books -->
+      <article class="behind__card behind__card--books">
+        <h3 class="behind__books-title text-h4-medium">The latest books I've read</h3>
+        <ul class="behind__books-list">
+          {books.map((book) => (
+            <li class="behind__book">
+              <Image
+                src={checkboxIcon}
+                alt=""
+                width={20}
+                height={20}
+                class="behind__book-check"
+                aria-hidden="true"
+              />
+              <span class="behind__book-title text-body-large-regular">{book}</span>
+            </li>
+          ))}
+        </ul>
+      </article>
+
+      <!-- That's it -->
+      <article class="behind__card behind__card--end">
+        {/* Inline SVG + inline style (Astro's scoped CSS doesn't apply
+            to nodes injected via set:html, so we bypass it explicitly). */}
+        <Fragment set:html={endBorderSvg.replace(
+          '<svg',
+          '<svg aria-hidden="true" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;display:block;z-index:1;"'
+        )} />
+        {/* Raw <img> (not Astro Image) so the dotted-heart PNG stays
+            sharp — Astro's webp conversion softened the dots. */}
+        <img
+          src={heartIcon.src}
+          width={52}
+          height={52}
+          class="behind__end-heart"
+          alt=""
+          aria-hidden="true"
+          decoding="async"
+        />
+        <p class="behind__end-text text-body-mono-lg">
+          That&rsquo;s it <strong>˘ᵕ˘</strong>
+        </p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<style>
+  /* ====== Section shell ====== */
+  .behind {
+    background-color: var(--color-bg-light-grey);
+    padding-block: var(--space-section-block); /* 64px desktop / 44px mobile */
+    padding-inline: var(--container-padding-desktop);
+  }
+
+  @media (min-width: 768px) and (max-width: 1279px) {
+    .behind {
+      padding-inline: var(--container-padding-tablet);
+    }
+  }
+
+  @media (max-width: 767px) {
+    .behind {
+      padding-inline: var(--container-padding-mobile);
+    }
+  }
+
+  /* ====== Inner column ====== */
+  .behind__inner {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-stack-5xl); /* 48px desktop / 32px mobile */
+    max-width: 1312px;
+    margin-inline: auto;
+    width: 100%;
+  }
+
+  .behind__heading {
+    color: var(--color-text-black);
+    margin: 0;
+  }
+
+  /* ====== 3×2 grid ====== */
+  .behind__grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-rows: 280px 280px;
+    gap: var(--space-stack-xl); /* 20px */
+    width: 100%;
+  }
+
+  /* ====== Card base ====== */
+  .behind__card {
+    position: relative;
+    overflow: hidden;
+    border-radius: var(--radius-2xl); /* 20px desktop / 16px mobile */
+    background-color: var(--color-bg-white);
+    padding: var(--space-inset-2xl); /* 24px desktop / 20px mobile */
+  }
+
+  /* ====== About me — paper card (col 1, rows 1-2) ======
+
+     Built as a normal padded container with a CSS mask that cuts circular
+     "teeth" out of the top edge. Mask is a repeated radial-gradient tile:
+     each 37px tile holds one 27px-diameter circle centered on the top
+     edge, leaving 10px of solid paper between circles (per Marianna's
+     spec). Mobile variant: 20px circles → 30px tile.
+
+     Why mask not SVG: the previous SVG overlay didn't adapt cleanly to
+     varying card widths (aspect-ratio mismatch + janky absolute text
+     positioning). A masked container adapts naturally to any width while
+     keeping the same 24px inner padding and consistent scallop density. */
+  .behind__card--about {
+    --scallop-diameter: 27px;
+    --scallop-gap: 10px;
+    --scallop-tile: calc(var(--scallop-diameter) + var(--scallop-gap));
+
+    grid-column: 1;
+    grid-row: 1 / span 2;
+    /* Article itself is transparent — its only visible content is
+       .behind__paper. filter:drop-shadow then casts based on the
+       child's silhouette without being clipped by the child's mask. */
+    background-color: transparent;
+    padding: 0;
+    overflow: visible;
+    /* Exact Figma drop-shadow (node 472:16885). */
+    filter:
+      drop-shadow(-2px 2px 2px rgba(0, 0, 0, 0.05))
+      drop-shadow(-4px 3px 2px rgba(0, 0, 0, 0.01))
+      drop-shadow(-6px 4px 2px rgba(0, 0, 0, 0));
+  }
+
+  /* Inner paper: holds the white background, scalloped mask, and the
+     padding/content. Filter on the parent casts its shadow off this
+     element's silhouette. */
+  .behind__paper {
+    width: 100%;
+    height: 100%;
+    background-color: var(--color-bg-white);
+    border-radius: var(--radius-2xl); /* 20px desktop / 16px mobile */
+    /* Per Marianna: 40px sides / 44px bottom on desktop. Top padding
+       includes scallop diameter (cutouts eat into the visible area). */
+    padding-inline: 40px;
+    padding-block-end: 44px;
+    padding-block-start: calc(var(--scallop-diameter) + 20px);
+    box-sizing: border-box;
+
+    mask-image: radial-gradient(
+      circle calc(var(--scallop-diameter) / 2) at 50% 0,
+      transparent calc(100% - 1px),
+      #000 100%
+    );
+    mask-size: var(--scallop-tile) 100%;
+    mask-repeat: repeat-x;
+    mask-position: center top;
+    -webkit-mask-image: radial-gradient(
+      circle calc(var(--scallop-diameter) / 2) at 50% 0,
+      transparent calc(100% - 1px),
+      #000 100%
+    );
+    -webkit-mask-size: var(--scallop-tile) 100%;
+    -webkit-mask-repeat: repeat-x;
+    -webkit-mask-position: center top;
+  }
+
+  .behind__about-text {
+    color: var(--color-text-grey-muted);
+  }
+
+  .behind__about-text p {
+    margin: 0;
+  }
+
+  .behind__about-text p + p {
+    margin-top: var(--space-stack-md); /* 12px */
+  }
+
+  /* ====== Traveling 2025 (cols 2-3, row 1) ====== */
+  .behind__card--travel {
+    grid-column: 2 / span 2;
+    grid-row: 1;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-inline-2xl); /* 24px */
+  }
+
+  .behind__travel-head {
+    display: flex;
+    flex-direction: column;
+    gap: 120px;
+    flex-shrink: 0;
+    width: 135px;
+  }
+
+  .behind__travel-info {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-stack-md); /* 12px */
+  }
+
+  .behind__travel-label {
+    color: var(--color-text-grey-muted);
+    margin: 0;
+  }
+
+  .behind__travel-year {
+    color: var(--color-text-black);
+    margin: 0;
+  }
+
+  .behind__travel-tag {
+    color: var(--color-text-grey-muted);
+    background-color: var(--color-bg-light-grey);
+    padding: var(--space-inset-sm) var(--space-inset-lg);
+    border-radius: var(--radius-l); /* 12px */
+    align-self: flex-start;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
+  }
+
+  .behind__travel-photos {
+    position: relative;
+    width: 432px;
+    height: 232px;
+    flex-shrink: 0;
+  }
+
+  /* Shared photo box. Specific transforms applied below.
+     White 4px border + rounded corners + drop shadow (Figma effect). */
+  .behind__photo {
+    position: absolute;
+    border: 4px solid var(--color-bg-white);
+    border-radius: var(--radius-l); /* 12px */
+    overflow: hidden;
+  }
+
+  .behind__photo :global(img) {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .behind__photo--river {
+    width: 148px;
+    height: 184px;
+    /* Position matches Figma rotation-wrapper center (left=41, w=220 →
+       center x=151; photo width 148 → left = 151-74 = 77). */
+    left: 77px;
+    top: 19px;
+    transform: rotate(-30deg);
+    box-shadow:
+      -6.667px 110px 30.833px 0 rgba(102, 102, 102, 0),
+      -4.167px 70px 28.333px 0 rgba(102, 102, 102, 0.01),
+      -2.5px 39.167px 23.333px 0 rgba(102, 102, 102, 0.05);
+  }
+
+  .behind__photo--fontan {
+    width: 148px;
+    height: 184px;
+    /* Center x = 280 (wrapper left=170 + w=220/2); left = 280-74 = 206. */
+    left: 206px;
+    top: 19px;
+    transform: rotate(30deg);
+    box-shadow:
+      -8px 132px 37px 0 rgba(102, 102, 102, 0),
+      -5px 84px 34px 0 rgba(102, 102, 102, 0.01),
+      -3px 47px 28px 0 rgba(102, 102, 102, 0.05),
+      -1px 21px 21px 0 rgba(102, 102, 102, 0.09);
+  }
+
+  .behind__photo--building {
+    width: 202px;
+    height: 233px;
+    left: 115px;
+    top: -1px;
+    border-radius: 14px;
+    box-shadow:
+      -8px 132px 37px 0 rgba(102, 102, 102, 0),
+      -5px 84px 34px 0 rgba(102, 102, 102, 0.01),
+      -3px 47px 28px 0 rgba(102, 102, 102, 0.05);
+  }
+
+  /* ====== Latest books (col 2, row 2) ====== */
+  .behind__card--books {
+    grid-column: 2;
+    grid-row: 2;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-stack-lg); /* 16px */
+  }
+
+  .behind__books-title {
+    color: var(--color-text-black);
+    margin: 0;
+  }
+
+  .behind__books-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-stack-sm); /* 8px */
+  }
+
+  .behind__book {
+    display: flex;
+    align-items: center;
+    gap: var(--space-inline-sm); /* 8px */
+  }
+
+  .behind__book-check {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    display: block;
+    border-radius: 5.5px;
+  }
+
+  .behind__book-title {
+    color: var(--color-neutral-grey-200);
+    text-decoration: line-through;
+    margin: 0;
+  }
+
+  /* ====== That's it (col 3, row 2) ====== */
+  .behind__card--end {
+    grid-column: 3;
+    grid-row: 2;
+    background-color: #F0F0EF;
+    /* Native CSS dashed border can't reproduce the Figma 0.1×8 stroke
+       pattern — use Border.svg overlay instead (vector-effect non-scaling
+       so the dot density stays uniform at any card width). */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: stretch;
+  }
+
+  .behind__end-border {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    display: block;
+    z-index: var(--z-base);
+  }
+
+  .behind__end-border :global(img) {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  .behind__end-heart {
+    width: 52px;
+    height: 52px;
+    align-self: flex-start;
+    display: block;
+    position: relative;
+    z-index: var(--z-elevated);
+  }
+
+  .behind__end-text {
+    color: var(--color-text-grey-muted);
+    text-align: right;
+    margin: 0;
+    align-self: stretch;
+    position: relative;
+    z-index: var(--z-elevated);
+  }
+
+  .behind__end-text strong {
+    font-weight: var(--font-weight-semibold);
+  }
+
+  /* ====== Tablet + Mobile (≤1279px) — stacked layout ======
+     The 3-col grid only works when viewport ≥ container-max-width (1280)
+     — at narrower widths the About me column shrinks below the size
+     needed to fit Body/mono/large bio text in 580px height. Below 1280
+     we stack all four cards in a single column. */
+  @media (max-width: 1279px) {
+    .behind__grid {
+      grid-template-columns: 1fr;
+      grid-template-rows: none;
+      grid-auto-rows: auto;
+    }
+
+    /* All cards reset to single column, auto-row */
+    .behind__card--about,
+    .behind__card--travel,
+    .behind__card--books,
+    .behind__card--end {
+      grid-column: 1;
+      grid-row: auto;
+    }
+
+    .behind__card {
+      padding: var(--space-inset-xl); /* 16px on mobile */
+    }
+
+    /* About me — full width, auto height, smaller scallops (20px).
+       Padding 0 here (mobile .behind__card rule above sets 16px, but
+       About me uses inner .behind__paper for padding instead). */
+    .behind__card--about {
+      --scallop-diameter: 20px;
+      --scallop-gap: 10px;
+      --scallop-tile: calc(var(--scallop-diameter) + var(--scallop-gap));
+
+      width: 100%;
+      height: auto;
+      min-height: 0;
+      padding: 0;
+    }
+
+    /* Inner paper mobile padding per Marianna: 28 sides, 40 top, 32 bot. */
+    .behind__paper {
+      padding-inline: 28px;
+      padding-block-start: 40px;
+      padding-block-end: 32px;
+    }
+
+    /* Traveling card: stack header above photos */
+    .behind__card--travel {
+      flex-direction: column;
+      align-items: stretch;
+      gap: var(--space-stack-xl); /* 16px */
+    }
+
+    .behind__travel-head {
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-inline-md);
+      width: 100%;
+    }
+
+    .behind__travel-info {
+      gap: var(--space-stack-xs); /* 4px */
+    }
+
+    .behind__travel-photos {
+      /* Photos frame is fixed 432×232 (absolute children rely on those
+         coords). Mobile card content is narrower than 432, so scale the
+         whole frame down. Layout height collapsed to match visual height
+         so no extra whitespace below. */
+      align-self: center;
+      transform: scale(0.68);
+      transform-origin: top center;
+      height: calc(232px * 0.68); /* ~158px laid-out height */
+    }
+
+    /* Books — heading 18px on mobile per spec (overrides H4 token 20px) */
+    .behind__books-title {
+      font-size: 18px;
+    }
+
+    /* That's it — heart + text on same horizontal line, smaller card */
+    .behind__card--end {
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-inline-md);
+      padding: var(--space-inset-xl); /* 16px */
+    }
+
+    .behind__end-heart {
+      width: 32px;
+      height: 32px;
+      flex-shrink: 0;
+      align-self: center;
+    }
+
+    .behind__end-text {
+      text-align: right;
+      flex: 1 1 auto;
+      align-self: center;
+    }
+  }
+</style>
