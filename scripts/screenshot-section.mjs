@@ -1,47 +1,35 @@
-// Reusable section-screenshot helper.
-// Usage: node scripts/screenshot-section.mjs <section-id>
-//   e.g. node scripts/screenshot-section.mjs works
-// Output: .tmp/site-<section>-desktop.png + .tmp/site-<section>-mobile.png
-//
-// Requires the dev server running on http://localhost:4321
-// and a CSS class `.<section>` (e.g. `.works`, `.hero`, `.experience`) on the
-// section's root element so we can boundingBox-clip to just that section.
+// Screenshot a specific section by ID at desktop 1440.
+// Usage: node scripts/screenshot-section.mjs <slug> <section-id>
+//   e.g. node scripts/screenshot-section.mjs lucida problems
 import { chromium } from 'playwright';
-import { mkdirSync } from 'node:fs';
 
-const section = process.argv[2] || 'hero';
-const url = `http://localhost:4321/#${section}`;
-const selector = `.${section}`;
-
-mkdirSync('.tmp', { recursive: true });
+const slug = process.argv[2] || 'lucida';
+const id = process.argv[3] || 'problems';
 
 const browser = await chromium.launch();
+const ctx = await browser.newContext({ viewport: { width: 1440, height: 2000 }, deviceScaleFactor: 1 });
+const page = await ctx.newPage();
+await page.goto(`http://localhost:4321/cases/${slug}`, { waitUntil: 'networkidle' });
+await page.waitForTimeout(400);
 
-// === Desktop 1440 ===
-const desktop = await browser.newContext({
-  viewport: { width: 1440, height: 900 },
-  deviceScaleFactor: 1,
+const target = page.locator(`#${id}`);
+const box = await target.boundingBox();
+if (!box) { console.error(`No #${id}`); process.exit(1); }
+
+// Scroll into view
+await page.evaluate((y) => window.scrollTo(0, Math.max(0, y - 120)), box.y);
+await page.waitForTimeout(300);
+
+const newBox = await target.boundingBox();
+await page.screenshot({
+  path: `.tmp/site-${slug}-${id}.png`,
+  clip: {
+    x: 0,
+    y: Math.max(0, Math.floor(newBox.y - 20)),
+    width: 1440,
+    height: Math.min(2000, Math.ceil(newBox.height + 80)),
+  },
 });
-const dPage = await desktop.newPage();
-await dPage.goto(url, { waitUntil: 'networkidle' });
-await dPage.waitForTimeout(500);
-const dBox = await dPage.locator(selector).boundingBox();
-if (dBox) {
-  await dPage.screenshot({ path: `.tmp/site-${section}-desktop.png`, clip: dBox });
-}
 
-// === Mobile 375 @ 2x retina ===
-const mobile = await browser.newContext({
-  viewport: { width: 375, height: 1200 },
-  deviceScaleFactor: 2,
-});
-const mPage = await mobile.newPage();
-await mPage.goto(url, { waitUntil: 'networkidle' });
-await mPage.waitForTimeout(500);
-const mBox = await mPage.locator(selector).boundingBox();
-if (mBox) {
-  await mPage.screenshot({ path: `.tmp/site-${section}-mobile.png`, clip: mBox });
-}
-
+console.log(JSON.stringify({ id, height: newBox.height }));
 await browser.close();
-console.log(`Saved: .tmp/site-${section}-desktop.png + .tmp/site-${section}-mobile.png`);
