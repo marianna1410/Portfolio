@@ -82,7 +82,7 @@ const skillRows = [
                 <Image src={job.pattern} alt="" width={52} height={52} />
               </div>
               <div class="experience__role-info">
-                <p class="experience__role-title text-headline-medium">{job.role}</p>
+                <p class="experience__role-title text-body-large-medium">{job.role}</p>
                 <p class="experience__role-company text-body-medium-regular">{job.company}</p>
               </div>
             </div>
@@ -275,7 +275,7 @@ const skillRows = [
   .experience__role-info {
     display: flex;
     flex-direction: column;
-    gap: var(--space-stack-xs); /* 4px */
+    gap: 0; /* per Marianna: role title sits flush above company name */
     min-width: 0;
   }
 
