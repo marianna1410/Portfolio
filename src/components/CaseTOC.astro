@@ -1,15 +1,32 @@
 ---
 /**
- * CaseTOC.astro — sticky table-of-contents sidebar for case study pages.
- * Figma 472:17105 (Lucida) and 472:20848 (Vaia) — identical structure.
+ * CaseTOC.astro — table-of-contents sidebar for case study pages.
  *
- * 5 quick-links. Active item shows dotted arrow-right + black text;
- * inactive items show grey text, no icon. (Active state will be wired
- * up via scroll-spy in step 7 — for now first item is statically active.)
+ * Two visual modes, controlled purely by viewport width:
+ *
+ *   ≥1280px (desktop):  sticky inline TOC in the left sidebar grid column,
+ *                       no FAB — current original behaviour.
+ *
+ *   ≤1279px (tablet + mobile):  small FAB pinned to bottom-right of the
+ *                       viewport (24 px from edges on mobile, 40 px on
+ *                       tablet — Marianna's spec). Clicking the FAB opens
+ *                       a 200 px-wide popup TOC to the LEFT of the FAB,
+ *                       bottom-aligned with it, 16 px gap. Per Figma
+ *                       769:20694 (FAB component) + 768:18976 (Mobile_TOC
+ *                       layout).
+ *
+ * Trigger: click on FAB toggles the popup.
+ * Close:   click FAB again / click outside / Esc / click any link.
+ *
+ * Both modes share ONE DOM tree, so the scroll-spy script picks up the
+ * active section once and the highlighted state is reflected in either
+ * visible mode.
  */
 import { Image } from 'astro:assets';
 import triangleRight from '../assets/icons/triangle-right.svg';
 import triangleRightGrey from '../assets/icons/triangle-right-grey.svg';
+import iconTocContent from '../assets/icons/icon-toc-content.svg';
+import iconTocClose from '../assets/icons/icon-toc-close.svg';
 
 interface Item {
   id: string;
@@ -34,63 +51,108 @@ const {
 } = Astro.props;
 ---
 
-<nav class="case-toc" aria-label="Case study sections">
-  <ul class="case-toc__list">
-    {items.map((item) => {
-      const isActive = item.id === active;
-      return (
-        <li class="case-toc__item">
-          <a
-            href={`#${item.id}`}
-            class:list={['case-toc__link', { 'case-toc__link--active': isActive }]}
-            aria-current={isActive ? 'true' : undefined}
-            data-toc-link
-            data-target={item.id}
-          >
-            <span class="case-toc__icon" aria-hidden="true">
-              {/* Two pre-rendered triangle variants stacked in the 20×20 slot.
-                  CSS shows the black one for the current link, the grey one on hover. */}
-              <Image src={triangleRight}      alt="" width={20} height={20} class="case-toc__icon-img case-toc__icon-img--active" />
-              <Image src={triangleRightGrey}  alt="" width={20} height={20} class="case-toc__icon-img case-toc__icon-img--hover" />
-            </span>
-            <span class="case-toc__label">{item.label}</span>
-          </a>
-        </li>
-      );
-    })}
-  </ul>
-</nav>
+<div class="case-toc-wrapper" data-toc-wrapper>
+  {/* FAB — visible only at ≤1279px. */}
+  <button
+    type="button"
+    class="case-toc__fab"
+    aria-expanded="false"
+    aria-controls="case-toc-list"
+    aria-label="Open table of contents"
+    data-toc-fab
+  >
+    <span class="case-toc__fab-icons" aria-hidden="true">
+      <Image src={iconTocContent} alt="" width={20} height={20} class="case-toc__fab-icon case-toc__fab-icon--closed" />
+      <Image src={iconTocClose}   alt="" width={20} height={20} class="case-toc__fab-icon case-toc__fab-icon--open" />
+    </span>
+  </button>
+
+  <nav class="case-toc" id="case-toc-list" aria-label="Case study sections">
+    {/* Title + dotted divider — visible only in popup mode (≤1279px). */}
+    <p class="case-toc__title">Table of Contents</p>
+    <svg
+      class="case-toc__divider"
+      viewBox="0 0 178 2"
+      preserveAspectRatio="none"
+      aria-hidden="true"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path d="M1 1H177" stroke="#BBBBBB" stroke-width="2" stroke-linecap="round" stroke-dasharray="0.1 8" vector-effect="non-scaling-stroke" />
+    </svg>
+
+    <ul class="case-toc__list">
+      {items.map((item) => {
+        const isActive = item.id === active;
+        return (
+          <li class="case-toc__item">
+            <a
+              href={`#${item.id}`}
+              class:list={['case-toc__link', { 'case-toc__link--active': isActive }]}
+              aria-current={isActive ? 'true' : undefined}
+              data-toc-link
+              data-target={item.id}
+            >
+              <span class="case-toc__icon" aria-hidden="true">
+                {/* Two pre-rendered triangle variants stacked in the 20×20 slot.
+                    CSS shows the black one for the current link, the grey one on hover. */}
+                <Image src={triangleRight}      alt="" width={20} height={20} class="case-toc__icon-img case-toc__icon-img--active" />
+                <Image src={triangleRightGrey}  alt="" width={20} height={20} class="case-toc__icon-img case-toc__icon-img--hover" />
+              </span>
+              <span class="case-toc__label">{item.label}</span>
+            </a>
+          </li>
+        );
+      })}
+    </ul>
+  </nav>
+</div>
 
 <style>
-  .case-toc {
-    /* Outer frame from Figma: 193×243, inset 12px on sides+bottom only.
-       Padding-top = 0 (Marianna's call): the first link's top sits flush
-       with the TOC outer top, putting its baseline at the same vertical
-       level as the header pill text. */
+  /* ═══ Shared base (used by both modes; per-mode overrides further down) ═══ */
+  .case-toc-wrapper {
+    /* Default = desktop. The wrapper acts as the sticky sidebar column. */
     width: 193px;
-    padding: 0 var(--space-inset-md) var(--space-inset-md);
-    /* Sticky alignment with header pill: both use top:24. Header pill is
-       centered horizontally in the viewport; the TOC sits in the left
-       sidebar grid column, so they don't overlap horizontally. Mobile
-       breakpoint hides TOC entirely. */
     position: sticky;
     top: 24px;
     align-self: start;
+
+    /* Multi-layer drop shadow from Figma "Small elements" effect — used on
+       BOTH the FAB and the popup TOC in popup mode so they read as one
+       lifted-from-page system. Declared once here, consumed twice below. */
+    --shadow-fab:
+      0  1px 1px 0 rgba(186, 186, 186, 0.10),
+      0  3px 3px 0 rgba(186, 186, 186, 0.09),
+      0  6px 4px 0 rgba(186, 186, 186, 0.05),
+      0 11px 4px 0 rgba(186, 186, 186, 0.01),
+      0 17px 5px 0 rgba(186, 186, 186, 0.00);
+  }
+
+  .case-toc {
+    /* Desktop inline TOC layout — original spec. */
+    width: 193px;
+    padding: 0 var(--space-inset-md) var(--space-inset-md);
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Title + divider exist in DOM at all widths so the SAME node tree works in
+     both modes; they're only revealed in popup mode via media queries below. */
+  .case-toc__title,
+  .case-toc__divider {
+    display: none;
   }
 
   .case-toc__list {
     display: flex;
     flex-direction: column;
-    gap: 11px; /* exact value from Figma */
+    gap: 11px; /* exact desktop value from Figma */
     list-style: none;
     margin: 0;
     padding: 0;
-    width: 169px; /* inner "Con" frame width */
+    width: 169px; /* inner "Con" frame width on desktop */
   }
 
-  .case-toc__item {
-    margin: 0;
-  }
+  .case-toc__item { margin: 0; }
 
   .case-toc__link {
     display: inline-flex;
@@ -109,17 +171,9 @@ const {
     transition: color var(--duration-fast) var(--ease-out);
   }
 
-  /* Hover state per Figma (394:10336) keeps text color at default grey.
-     Only the icon appears — and it's the GREY variant, not the black one. */
-
-  .case-toc__link--active {
-    color: var(--color-text-black);
-  }
+  .case-toc__link--active { color: var(--color-text-black); }
 
   .case-toc__icon {
-    /* Per Figma: the 20×20 icon slot is ALWAYS reserved.
-       The two stacked triangle variants inside toggle independently so
-       the text x-position stays identical across Default/Hover/Current/Focus. */
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -128,44 +182,157 @@ const {
     flex-shrink: 0;
     position: relative;
   }
-
   .case-toc__icon-img {
     position: absolute;
     inset: 0;
     display: none;
   }
-
-  /* Current (active) link → show black triangle, grey stays hidden. */
-  .case-toc__link--active .case-toc__icon-img--active {
-    display: block;
-  }
-
-  /* Hover on a non-current link → show grey triangle (text colour unchanged). */
-  .case-toc__link:hover:not(.case-toc__link--active) .case-toc__icon-img--hover {
-    display: block;
-  }
+  .case-toc__link--active .case-toc__icon-img--active { display: block; }
+  .case-toc__link:hover:not(.case-toc__link--active) .case-toc__icon-img--hover { display: block; }
 
   .case-toc__link:focus-visible {
-    /* Figma Focus state: white background + 2px white inner ring + 4px dark outer ring */
     outline: none;
     background-color: var(--color-bg-white);
     box-shadow: var(--shadow-focus);
   }
 
-  /* Mobile: hide for now (per design decision — no mobile case design yet) */
-  @media (max-width: 767px) {
+  /* FAB — hidden on desktop. */
+  .case-toc__fab { display: none; }
+
+  /* ═══ Popup mode (≤1279px): FAB pinned to bottom-right, TOC popup
+         opens to its left, both bottom-aligned. ═══ */
+  @media (max-width: 1279px) {
+    /* Wrapper becomes a pass-through so its children stay free of grid flow.
+       Both .case-toc__fab and .case-toc are position:fixed below, so neither
+       takes up any space in normal flow. */
+    .case-toc-wrapper {
+      position: static;
+      width: auto;
+      top: auto;
+      align-self: auto;
+    }
+
+    .case-toc__fab {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 44px;
+      padding: var(--space-inset-md); /* 12px */
+      background-color: var(--color-bg-light-grey);
+      border: 1px solid transparent;
+      border-radius: var(--radius-pill);
+      cursor: pointer;
+      box-shadow: var(--shadow-fab);
+      /* Pinned to bottom-right of viewport. Mobile values; tablet override
+         below bumps these to 40px. */
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 50;
+    }
+
+    .case-toc__fab:focus-visible {
+      outline: none;
+      box-shadow: var(--shadow-focus);
+    }
+
+    .case-toc__fab-icons {
+      position: relative;
+      width: 20px;
+      height: 20px;
+      display: inline-block;
+    }
+    .case-toc__fab-icon {
+      position: absolute;
+      inset: 0;
+      display: block;
+    }
+    /* By default show the content (list) icon; hide the close icon. */
+    .case-toc__fab-icon--open { display: none; }
+    /* When open, swap the icons. */
+    .case-toc-wrapper.is-open .case-toc__fab-icon--closed { display: none; }
+    .case-toc-wrapper.is-open .case-toc__fab-icon--open   { display: block; }
+
+    /* TOC popup container — 200 px wide per Figma, anchored to FAB. */
     .case-toc {
-      display: none;
+      position: fixed;
+      bottom: 24px; /* same as FAB */
+      /* Sit 16 px to the LEFT of the FAB: FAB right (24) + FAB width (44) + gap (16) = 84 */
+      right: calc(24px + 44px + 16px);
+      width: 200px;
+      max-height: calc(100vh - 48px - 80px); /* keep inside viewport, leave room above header */
+      overflow-y: auto;
+      padding: var(--space-inset-sm) var(--space-inset-md); /* 8px 12px */
+      background-color: var(--color-bg-light-grey);
+      border-radius: var(--radius-l); /* 12px */
+      box-shadow: var(--shadow-fab);
+      gap: var(--space-stack-sm); /* 8px */
+      z-index: 50;
+      /* Hidden until .is-open is applied. */
+      visibility: hidden;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .case-toc-wrapper.is-open .case-toc {
+      visibility: visible;
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    /* Title row: "Table of Contents" — mono caption, py-1 (4px top/bottom). */
+    .case-toc__title {
+      display: block;
+      margin: 0;
+      padding: var(--space-inset-xs) 0; /* 4px 0 */
+      font-family: var(--font-family-mono);
+      font-weight: var(--font-weight-regular);
+      font-size: var(--font-size-caption-mono);
+      line-height: var(--line-height-base);
+      letter-spacing: var(--letter-spacing-wide);
+      color: var(--color-text-grey-muted);
+    }
+
+    .case-toc__divider {
+      display: block;
+      width: 100%;
+      height: 2px;
+      flex-shrink: 0;
+    }
+
+    /* List adjustments for popup mode. */
+    .case-toc__list {
+      gap: var(--space-inset-xs); /* 4px between rows */
+      width: 100%;
+    }
+    .case-toc__link {
+      width: 100%;
+      font-size: var(--font-size-body-medium); /* 16px popup */
+    }
+  }
+
+  /* Tablet override — bigger viewport, larger inset (40 px from edges). */
+  @media (min-width: 768px) and (max-width: 1279px) {
+    .case-toc__fab {
+      bottom: 40px;
+      right: 40px;
+    }
+    .case-toc {
+      bottom: 40px;
+      right: calc(40px + 44px + 16px);
     }
   }
 </style>
 
 <script>
   /**
-   * TOC scroll-spy: highlight the link whose section currently dominates
-   * the viewport. Uses IntersectionObserver with a top offset matched to
-   * the sticky header (24 top + 56 height = 80) plus a small breathing room
-   * so a section becomes "active" right as it crosses the header.
+   * Two responsibilities:
+   *   1. Scroll-spy: highlight the link whose section currently dominates
+   *      the viewport (carried over from the original component).
+   *   2. FAB popup behaviour at ≤1279px: open on FAB-click, close on
+   *      FAB-click / outside-click / Esc / link-click. Selecting a link
+   *      navigates to its anchor — the close happens BEFORE the scroll.
    */
   function initTocScrollSpy() {
     const tocLinks = Array.from(document.querySelectorAll<HTMLAnchorElement>('[data-toc-link]'));
@@ -195,58 +362,43 @@ const {
       });
     };
 
-    // Track section visibility via IntersectionObserver, then pick the
-    // section closest to the top of the "active zone" (just below header).
-    const visible = new Map<string, number>(); // id → intersection ratio
-
+    const visible = new Map<string, number>();
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            visible.set(entry.target.id, entry.intersectionRatio);
-          } else {
-            visible.delete(entry.target.id);
-          }
+          if (entry.isIntersecting) visible.set(entry.target.id, entry.intersectionRatio);
+          else visible.delete(entry.target.id);
         });
 
-        // If nothing is intersecting (e.g. between sections), find the
-        // last section whose top is above the active line (header offset + 100).
         if (visible.size === 0) {
           const activeLine = 180;
           let lastAbove: HTMLElement | null = null;
           sections.forEach((s) => {
             if (s.getBoundingClientRect().top <= activeLine) lastAbove = s;
           });
-          if (lastAbove) setActive(lastAbove.id);
+          if (lastAbove) setActive((lastAbove as HTMLElement).id);
           return;
         }
 
-        // Otherwise pick the section whose top is closest to (but at or above)
-        // the active line.
         let chosen: HTMLElement | null = null;
         let chosenTop = -Infinity;
         sections.forEach((s) => {
           if (visible.has(s.id)) {
             const top = s.getBoundingClientRect().top;
-            // Prefer the section just below the active line (closest top to it from below),
-            // OR the last one we scrolled past.
             if (top <= 180 && top > chosenTop) {
               chosen = s;
               chosenTop = top;
             }
           }
         });
-        // Fallback: first visible section if none crossed the active line yet.
         if (!chosen) {
           for (const s of sections) {
             if (visible.has(s.id)) { chosen = s; break; }
           }
         }
-        if (chosen) setActive(chosen.id);
+        if (chosen) setActive((chosen as HTMLElement).id);
       },
       {
-        // top margin matches sticky header height + breathing room so a section
-        // counts as "visible" once it scrolls past the header.
         rootMargin: '-120px 0px -40% 0px',
         threshold: [0, 0.1, 0.5, 1],
       }
@@ -255,9 +407,72 @@ const {
     sections.forEach((s) => observer.observe(s));
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initTocScrollSpy);
-  } else {
+  function initTocFab() {
+    const wrapper = document.querySelector<HTMLElement>('[data-toc-wrapper]');
+    const fab = document.querySelector<HTMLButtonElement>('[data-toc-fab]');
+    if (!wrapper || !fab) return;
+
+    const close = () => {
+      wrapper.classList.remove('is-open');
+      fab.setAttribute('aria-expanded', 'false');
+      fab.setAttribute('aria-label', 'Open table of contents');
+    };
+    const open = () => {
+      wrapper.classList.add('is-open');
+      fab.setAttribute('aria-expanded', 'true');
+      fab.setAttribute('aria-label', 'Close table of contents');
+    };
+    const toggle = () => {
+      if (wrapper.classList.contains('is-open')) close();
+      else open();
+    };
+
+    fab.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggle();
+    });
+
+    // Outside-click closes the popup. Clicks on the FAB itself are stopped
+    // above so they don't double-toggle here.
+    document.addEventListener('click', (e) => {
+      if (!wrapper.classList.contains('is-open')) return;
+      const target = e.target as Node;
+      // If the click is inside the popup nav, don't close (let link handler do it).
+      const nav = wrapper.querySelector('.case-toc');
+      if (nav && nav.contains(target)) return;
+      close();
+    });
+
+    // Esc closes.
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && wrapper.classList.contains('is-open')) {
+        close();
+        fab.focus();
+      }
+    });
+
+    // Click on any link inside the TOC closes the popup, then native anchor
+    // navigation runs.
+    wrapper.querySelectorAll<HTMLAnchorElement>('[data-toc-link]').forEach((link) => {
+      link.addEventListener('click', () => close());
+    });
+
+    // If user crosses the breakpoint back to desktop, force-close to avoid
+    // leaving stale state lying around.
+    const mq = window.matchMedia('(min-width: 1280px)');
+    const handleBp = () => { if (mq.matches) close(); };
+    if (mq.addEventListener) mq.addEventListener('change', handleBp);
+    else mq.addListener(handleBp); // Safari < 14 fallback
+  }
+
+  function init() {
     initTocScrollSpy();
+    initTocFab();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
   }
 </script>

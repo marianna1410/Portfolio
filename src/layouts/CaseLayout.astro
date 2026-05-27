@@ -88,7 +88,29 @@ const {
     gap: 48px;
   }
 
-  /* Mobile: collapse to single column (no design yet — minimal fallback) */
+  /* Tablet + mobile (≤1279px): collapse the grid because the desktop
+     193+123+868 = 1184 + 64×2 padding = 1312 doesn't fit any narrower than
+     desktop. The TOC sidebar element stays in DOM but its children (FAB +
+     popup) self-position via `position: fixed` — so display:contents on
+     the sidebar removes its grid presence without losing the FAB. */
+  @media (max-width: 1279px) {
+    .case__wrap {
+      padding-inline: var(--container-padding-tablet); /* 32px */
+    }
+    .case__grid {
+      grid-template-columns: 1fr;
+    }
+    .case__sidebar {
+      display: contents;
+    }
+    .case__content {
+      width: 100%;
+      max-width: 868px;
+      margin-inline: auto;
+    }
+  }
+
+  /* Mobile-only refinements */
   @media (max-width: 767px) {
     .case {
       /* Mobile: 20 sticky + 32 visible = 52px padding-top. */
@@ -96,16 +118,10 @@ const {
     }
 
     .case__wrap {
-      padding-inline: var(--page-margin);
-    }
-
-    .case__grid {
-      grid-template-columns: 1fr;
+      padding-inline: var(--page-margin); /* 16px */
     }
 
     .case__content {
-      width: 100%;
-      max-width: 100%;
       gap: var(--space-stack-3xl); /* tighter on mobile until proper design exists */
     }
   }
