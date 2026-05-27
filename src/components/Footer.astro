@@ -179,8 +179,10 @@ const { variant = 'default' } = Astro.props;
     flex-shrink: 0;
   }
 
-  /* Hidden on mobile — decorative only */
-  @media (max-width: 767px) {
+  /* Hidden on mobile + narrow tablet — decorative only. The 309px fixed
+     width crowds the row below ~1024px, pushing the 4 link arrows past
+     the viewport edge. Reappears at >=1024px where there's room. */
+  @media (max-width: 1023px) {
     .footer__illustration {
       display: none;
     }

@@ -146,6 +146,21 @@ const { paragraph, role, methods } = Astro.props;
     white-space: pre-wrap; /* preserve double-spaces and the · separators verbatim */
   }
 
+  /* Tablet (768–1279): keep Role + Methods side-by-side but let Methods
+     shrink to the remaining space (fixed 551 + 180 + 73 = 804 doesn't fit
+     under 868 max-content). The gap also tightens since 73 px was tuned to
+     the desktop 868 column. */
+  @media (max-width: 1279px) {
+    .case-overview__details {
+      gap: var(--space-inline-3xl); /* 32px instead of 73 */
+    }
+    .case-overview__details-col--methods {
+      width: auto;
+      flex: 1 1 0;
+      min-width: 0; /* allow text to wrap below the 551px content */
+    }
+  }
+
   /* Mobile fallback (no Figma design yet — stack columns) */
   @media (max-width: 767px) {
     .case-overview__details {

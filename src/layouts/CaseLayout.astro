@@ -88,17 +88,21 @@ const {
     gap: 48px;
   }
 
-  /* Tablet + mobile (≤1279px): collapse the grid because the desktop
-     193+123+868 = 1184 + 64×2 padding = 1312 doesn't fit any narrower than
-     desktop. The TOC sidebar element stays in DOM but its children (FAB +
-     popup) self-position via `position: fixed` — so display:contents on
-     the sidebar removes its grid presence without losing the FAB. */
+  /* Tablet + mobile (≤1279px): drop the grid entirely.
+     Reason: at narrow widths a `grid-template-columns: 1fr` column will
+     auto-expand to the min-content size of any grid item with a wide
+     intrinsic element (image, long unbreakable token, etc.), and that
+     expansion BLOWS PAST the grid container itself — so the whole page
+     gets a horizontal scrollbar. Switching the inner layout to plain
+     block flow at ≤1279px sidesteps the min-content trap. The TOC
+     sidebar stays in DOM (via display:contents) so the FAB + popup
+     render, but neither is in flow (both are position:fixed). */
   @media (max-width: 1279px) {
     .case__wrap {
       padding-inline: var(--container-padding-tablet); /* 32px */
     }
     .case__grid {
-      grid-template-columns: 1fr;
+      display: block;
     }
     .case__sidebar {
       display: contents;

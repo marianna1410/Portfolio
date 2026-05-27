@@ -53,7 +53,10 @@ const { number, tags, title, image, imageAlt } = Astro.props;
   .case-hero {
     display: flex;
     flex-direction: column;
-    gap: 48px; /* Figma: gap between title block and image */
+    /* Desktop gap between title block and image — Marianna's call. The
+       mobile @media block keeps the previous 24 px (--space-stack-3xl)
+       tightening since the mobile flow already feels closer. */
+    gap: 32px;
     margin: 0;
   }
 
