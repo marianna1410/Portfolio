@@ -32,6 +32,11 @@ interface Highlight {
   body: string;    // application/elaboration paragraph below the quote
 }
 
+interface HypothesisItem {
+  label: string;   // caption suffix, e.g. "1", "2.1", "2.2"
+  text: string;
+}
+
 interface Props {
   number: number;
   headline: string;
@@ -47,10 +52,15 @@ interface Props {
   prototypeUrl: string;
   /** Defaults to "Interact with Prototype". */
   prototypeLabel?: string;
-  /** e.g. "Two findings from the desk research shaped this solution:" */
-  researchIntro: string;
-  highlights: Highlight[];
-  hypothesis: string;
+  /**
+   * Optional desk-research grounding block (intro + highlight cards) shown
+   * above the hypothesis. Present on Lucida solutions, absent on Vaia.
+   * Both researchIntro AND highlights must be provided together.
+   */
+  researchIntro?: string;
+  highlights?: Highlight[];
+  /** One or more labelled hypotheses (1 / 2.1 / 2.2 / …). */
+  hypotheses: HypothesisItem[];
   /** Optional id so the wrapping section is addressable via TOC. */
   id?: string;
 }
@@ -69,9 +79,11 @@ const {
   prototypeLabel = 'Interact with Prototype',
   researchIntro,
   highlights,
-  hypothesis,
+  hypotheses,
   id,
 } = Astro.props;
+
+const showResearch = !!researchIntro && Array.isArray(highlights) && highlights.length > 0;
 ---
 
 <article class="case-solution" id={id}>
@@ -148,23 +160,27 @@ const {
     />
   </a>
 
-  <section class="case-solution__research">
-    <p class="case-solution__research-intro">{researchIntro}</p>
-    {highlights.map((h) => (
-      <div class="case-highlight">
-        <span class="case-highlight__rail" aria-hidden="true"></span>
-        <div class="case-highlight__content">
-          <blockquote class="case-highlight__quote">{h.quote}</blockquote>
-          <p class="case-highlight__body">{h.body}</p>
+  {showResearch && (
+    <section class="case-solution__research">
+      <p class="case-solution__research-intro">{researchIntro}</p>
+      {highlights!.map((h) => (
+        <div class="case-highlight">
+          <span class="case-highlight__rail" aria-hidden="true"></span>
+          <div class="case-highlight__content">
+            <blockquote class="case-highlight__quote">{h.quote}</blockquote>
+            <p class="case-highlight__body">{h.body}</p>
+          </div>
         </div>
-      </div>
-    ))}
-  </section>
+      ))}
+    </section>
+  )}
 
-  <div class="case-solution__hypothesis">
-    <p class="case-solution__hypothesis-caption text-caption-mono">{`{HYPOTHESIS ${number}}`}</p>
-    <p class="case-solution__hypothesis-text">{hypothesis}</p>
-  </div>
+  {hypotheses.map((h) => (
+    <div class="case-solution__hypothesis">
+      <p class="case-solution__hypothesis-caption text-caption-mono">{`{HYPOTHESIS ${h.label}}`}</p>
+      <p class="case-solution__hypothesis-text">{h.text}</p>
+    </div>
+  ))}
 </article>
 
 <style>

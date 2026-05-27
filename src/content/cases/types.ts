@@ -29,17 +29,38 @@ export interface CriteriaBullet {
   plain: string;
 }
 
+export interface ProblemReason {
+  heading: string;
+  text: string;
+}
+
 export interface ProblemBlock {
   number: number;
   headline: string;
   image: ImageMetadata;
   imageAlt: string;
   paragraph: ParagraphPart[];
+  /**
+   * Optional "Why it happens" block rendered below the problem image —
+   * a sub-heading + explanatory paragraph. Used on Vaia P1; absent on
+   * Lucida problems.
+   */
+  reason?: ProblemReason;
 }
 
 export interface SolutionHighlight {
   quote: string;
   body: string;
+}
+
+/**
+ * One hypothesis under a solution. `label` is the caption suffix —
+ * single-hypothesis solutions use the solution's own number ("1"),
+ * solutions with multiple hypotheses use composite labels ("2.1", "2.2").
+ */
+export interface HypothesisItem {
+  label: string;
+  text: string;
 }
 
 export interface SolutionBlock {
@@ -53,9 +74,16 @@ export interface SolutionBlock {
   videoLabel: string;
   afterCaption: string;
   prototypeUrl: string;
-  researchIntro: string;
-  highlights: SolutionHighlight[];
-  hypothesis: string;
+  /**
+   * Optional "research findings" block above the hypothesis. Present on
+   * Lucida solutions (desk-research grounding), absent on Vaia solutions.
+   * Both researchIntro AND highlights must be provided together, or both
+   * omitted.
+   */
+  researchIntro?: string;
+  highlights?: SolutionHighlight[];
+  /** One or more hypotheses — labelled individually so captions can be 1 / 2.1 / 2.2. */
+  hypotheses: HypothesisItem[];
 }
 
 export interface CaseHero {

@@ -22,6 +22,11 @@ interface ParagraphPart {
   bold?: boolean;
 }
 
+interface ReasonBlock {
+  heading: string;
+  text: string;
+}
+
 interface Props {
   number: number;            // 1, 2, 3
   headline: string;
@@ -29,9 +34,14 @@ interface Props {
   paragraph: ParagraphPart[];
   image: ImageMetadata;
   imageAlt: string;
+  /**
+   * Optional "Why it happens" block rendered below the problem image.
+   * Used on Vaia P1; absent on Lucida problems and Vaia P2/P3.
+   */
+  reason?: ReasonBlock;
 }
 
-const { number, headline, paragraph, image, imageAlt } = Astro.props;
+const { number, headline, paragraph, image, imageAlt, reason } = Astro.props;
 ---
 
 <article class="case-problem">
@@ -65,6 +75,13 @@ const { number, headline, paragraph, image, imageAlt } = Astro.props;
       class="case-problem__image"
     />
   </div>
+
+  {reason && (
+    <div class="case-problem__reason">
+      <h3 class="case-problem__reason-heading">{reason.heading}</h3>
+      <p class="case-problem__reason-text">{reason.text}</p>
+    </div>
+  )}
 </article>
 
 <style>
@@ -126,5 +143,35 @@ const { number, headline, paragraph, image, imageAlt } = Astro.props;
     height: 100%;
     object-fit: cover;
     display: block;
+  }
+
+  /* ── Optional "Why it happens" reason block (Vaia P1) ──────────────── */
+  /* Same heading style as the research-findings/key-improvements subhead
+     (20px SemiBold #252525) for vertical-rhythm consistency. Body uses
+     body-large like other paragraph copy. */
+  .case-problem__reason {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-stack-xs); /* 4px — same as label/text rhythm above */
+  }
+
+  .case-problem__reason-heading {
+    margin: 0;
+    font-family: var(--font-family-body);
+    font-weight: var(--font-weight-semibold);
+    font-size: var(--font-size-headline); /* 20px */
+    line-height: var(--line-height-tight);
+    letter-spacing: var(--letter-spacing-wide);
+    color: var(--color-text-black);
+  }
+
+  .case-problem__reason-text {
+    margin: 0;
+    font-family: var(--font-family-body);
+    font-weight: var(--font-weight-regular);
+    font-size: var(--font-size-body-large);
+    line-height: var(--line-height-base);
+    letter-spacing: var(--letter-spacing-wide);
+    color: var(--color-text-grey-muted);
   }
 </style>

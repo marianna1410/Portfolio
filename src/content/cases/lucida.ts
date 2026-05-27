@@ -213,7 +213,12 @@ const lucida: CaseData = {
           body: 'Tasks present each new word inside a sentence or paired with the words it usually appears with, so users practice the word the way it actually lives in language.',
         },
       ],
-      hypothesis: `The redesign will turn saved words from a collected list into actively practiced vocabulary, if users can take them through progressive recall tasks with hints when stuck. I'd validate this by tracking the % of saved words practiced and the session completion rate.`,
+      hypotheses: [
+        {
+          label: '1',
+          text: `The redesign will turn saved words from a collected list into actively practiced vocabulary, if users can take them through progressive recall tasks with hints when stuck. I'd validate this by tracking the % of saved words practiced and the session completion rate.`,
+        },
+      ],
     },
     {
       number: 2,
@@ -241,7 +246,12 @@ const lucida: CaseData = {
           body: `The schedule is borrowed from Ebbinghaus's forgetting curve: a word returns a day after first practice, then a week later, then at progressively longer intervals. Each return lands when the word is most likely to have faded — that's exactly when retrieving it from memory does the most work.`,
         },
       ],
-      hypothesis: `The % of saved words that advance through at least one familiarity level within four weeks will increase, if users get each word back at the scheduled interval before it fades. I'd validate this by tracking that progression rate.`,
+      hypotheses: [
+        {
+          label: '2',
+          text: `The % of saved words that advance through at least one familiarity level within four weeks will increase, if users get each word back at the scheduled interval before it fades. I'd validate this by tracking that progression rate.`,
+        },
+      ],
     },
     {
       number: 3,
@@ -270,7 +280,12 @@ const lucida: CaseData = {
           body: `Lucida's lessons cover only the input and speaking parts. The mistakes review adds the missing targeted study layer: explicit grammar work tied directly to what the user got wrong in conversation.`,
         },
       ],
-      hypothesis: `The redesign will make mistake review a regular part of the learning routine, if users get grammar explanations and practice tasks tied to their own errors. I'd validate this by tracking the % of lessons followed by a completed review session and the average number of mistakes worked through per session.`,
+      hypotheses: [
+        {
+          label: '3',
+          text: `The redesign will make mistake review a regular part of the learning routine, if users get grammar explanations and practice tasks tied to their own errors. I'd validate this by tracking the % of lessons followed by a completed review session and the average number of mistakes worked through per session.`,
+        },
+      ],
     },
   ],
 
