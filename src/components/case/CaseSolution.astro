@@ -1,0 +1,416 @@
+---
+/**
+ * CaseSolution.astro — one Solution block (×3 used in Solutions section).
+ * Figma 472:17259 (Sol 1) / 472:17285 (Sol 2) / 472:17310 (Sol 3).
+ *
+ * Vertical rhythm (outer gap 32px between each chunk):
+ *   {SOLUTION N} caption + Headline       ← .case-solution__intro head
+ *   ↕ 16px (inside .__intro)
+ *   Bullets (arrow-right-bullet + text)
+ *   ↕ 32px
+ *   Before image  |  After video    (424 × 520 each)
+ *   each with 12px gap to its caption
+ *   ↕ 32px
+ *   "Interact with Prototype" CTA (56px, full-width white/border-grey)
+ *   ↕ 32px
+ *   Research intro paragraph (20 SemiBold #252525)
+ *   ↕ 16px (inside .__research)
+ *   Highlight(s) — grey rail + italic quote box + body
+ *   ↕ 32px
+ *   {HYPOTHESIS N} caption + paragraph (12px stack inside .__hypothesis)
+ */
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+import CaseSectionHeader from './CaseSectionHeader.astro';
+import arrowBulletIcon from '../../assets/icons/arrow-right-bullet.svg';
+// Black (#252525) diagonal arrow — matches Figma button 493:12900 chevron color.
+// (There's also a dark-grey #4A4A4A variant used elsewhere, e.g. dropdown items.)
+import diagonalArrow from '../../assets/icons/diagonal-arrow.svg';
+
+interface Highlight {
+  quote: string;   // italic quotation, displayed inside the grey quote box
+  body: string;    // application/elaboration paragraph below the quote
+}
+
+interface Props {
+  number: number;
+  headline: string;
+  bullets: string[];
+  beforeImage: ImageMetadata;
+  beforeImageAlt: string;
+  beforeCaption: string;
+  /** Public path to the after-video MP4, e.g. '/videos/case-lucida/solution-1.mp4' */
+  videoSrc: string;
+  /** Aria-label for the silent video (describes what it shows). */
+  videoLabel: string;
+  afterCaption: string;
+  prototypeUrl: string;
+  /** Defaults to "Interact with Prototype". */
+  prototypeLabel?: string;
+  /** e.g. "Two findings from the desk research shaped this solution:" */
+  researchIntro: string;
+  highlights: Highlight[];
+  hypothesis: string;
+  /** Optional id so the wrapping section is addressable via TOC. */
+  id?: string;
+}
+
+const {
+  number,
+  headline,
+  bullets,
+  beforeImage,
+  beforeImageAlt,
+  beforeCaption,
+  videoSrc,
+  videoLabel,
+  afterCaption,
+  prototypeUrl,
+  prototypeLabel = 'Interact with Prototype',
+  researchIntro,
+  highlights,
+  hypothesis,
+  id,
+} = Astro.props;
+---
+
+<article class="case-solution" id={id}>
+  <div class="case-solution__intro">
+    <CaseSectionHeader
+      caption={`{SOLUTION ${number}}`}
+      headline={headline}
+      as="h2"
+      size="h3"
+      captionTone="success"
+    />
+    <ul class="case-solution__bullets">
+      {bullets.map((b) => (
+        <li class="case-solution__bullet">
+          <Image
+            src={arrowBulletIcon}
+            alt=""
+            width={20}
+            height={20}
+            class="case-solution__bullet-icon"
+            aria-hidden="true"
+          />
+          <span class="case-solution__bullet-text">{b}</span>
+        </li>
+      ))}
+    </ul>
+  </div>
+
+  <div class="case-solution__compare">
+    <figure class="case-solution__compare-item">
+      <div class="case-solution__media">
+        <Image
+          src={beforeImage}
+          alt={beforeImageAlt}
+          width={848}
+          height={1040}
+          quality={90}
+          class="case-solution__media-img"
+        />
+      </div>
+      <figcaption class="case-solution__caption">{beforeCaption}</figcaption>
+    </figure>
+    <figure class="case-solution__compare-item">
+      <div class="case-solution__media case-solution__media--video">
+        <video
+          class="case-solution__video"
+          src={videoSrc}
+          aria-label={videoLabel}
+          autoplay
+          loop
+          muted
+          playsinline
+          preload="metadata"
+        ></video>
+      </div>
+      <figcaption class="case-solution__caption">{afterCaption}</figcaption>
+    </figure>
+  </div>
+
+  <a
+    class="case-solution__cta"
+    href={prototypeUrl}
+    target="_blank"
+    rel="noopener noreferrer"
+  >
+    <span class="case-solution__cta-label">{prototypeLabel}</span>
+    <Image
+      src={diagonalArrow}
+      alt=""
+      width={20}
+      height={20}
+      class="case-solution__cta-icon"
+      aria-hidden="true"
+    />
+  </a>
+
+  <section class="case-solution__research">
+    <p class="case-solution__research-intro">{researchIntro}</p>
+    {highlights.map((h) => (
+      <div class="case-highlight">
+        <span class="case-highlight__rail" aria-hidden="true"></span>
+        <div class="case-highlight__content">
+          <blockquote class="case-highlight__quote">{h.quote}</blockquote>
+          <p class="case-highlight__body">{h.body}</p>
+        </div>
+      </div>
+    ))}
+  </section>
+
+  <div class="case-solution__hypothesis">
+    <p class="case-solution__hypothesis-caption text-caption-mono">{`{HYPOTHESIS ${number}}`}</p>
+    <p class="case-solution__hypothesis-text">{hypothesis}</p>
+  </div>
+</article>
+
+<style>
+  .case-solution {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-stack-3xl); /* 32px between chunks */
+    width: 100%;
+  }
+
+  /* ── Intro: header + bullets ──────────────────────────────────────── */
+  .case-solution__intro {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-stack-lg); /* 16px */
+    width: 100%;
+  }
+
+  .case-solution__bullets {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-stack-sm); /* 8px */
+    width: 100%;
+  }
+
+  .case-solution__bullet {
+    display: flex;
+    gap: var(--space-inline-sm); /* 8px */
+    align-items: flex-start;
+  }
+
+  .case-solution__bullet-icon {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    /* Optical alignment: the 18px line-height of body-large is 26.64px,
+       so the arrow's vertical center sits ~3px above the text x-height.
+       A small top offset visually anchors it to the first text line. */
+    margin-top: 0.18em;
+  }
+
+  .case-solution__bullet-text {
+    flex: 1;
+    font-family: var(--font-family-body);
+    font-weight: var(--font-weight-regular);
+    font-size: var(--font-size-body-large);
+    line-height: var(--line-height-base);
+    letter-spacing: var(--letter-spacing-wide);
+    color: var(--color-text-grey-muted);
+  }
+
+  /* ── Before / After comparison ────────────────────────────────────── */
+  .case-solution__compare {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    /* Figma: 868 - 424*2 = 20px gap between columns */
+    column-gap: 20px;
+    width: 100%;
+  }
+
+  .case-solution__compare-item {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-stack-md); /* 12px */
+  }
+
+  .case-solution__media {
+    width: 100%;
+    aspect-ratio: 424 / 520;
+    border-radius: var(--radius-l);
+    overflow: hidden;
+    background-color: var(--color-bg-light-grey);
+  }
+
+  .case-solution__media-img,
+  .case-solution__video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .case-solution__caption {
+    margin: 0;
+    font-family: var(--font-family-body);
+    font-weight: var(--font-weight-regular);
+    font-size: var(--font-size-body-large);
+    line-height: var(--line-height-base);
+    letter-spacing: var(--letter-spacing-wide);
+    color: var(--color-text-grey-muted);
+  }
+
+  /* ── CTA: Interact with Prototype ─────────────────────────────────── */
+  /* States per Figma 493:12900 (button/large/secondary):
+       Default → border #BBB, label #4A4A4A, icon #252525
+       Hover   → border #4A4A4A, label #252525 (no bg change)
+       Focused → border #BBB + 2px white inner ring + 4px black outer ring
+     Width is stretched to full content column (Marianna's call); Figma's
+     256px fixed width is overridden intentionally. */
+  .case-solution__cta {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-inset-sm); /* 8px */
+    height: 56px;
+    padding: var(--space-inset-xs) var(--space-inset-md)
+             var(--space-inset-xs) var(--space-inset-lg);
+    background: var(--color-bg-white);
+    border: 1px solid var(--color-stroke-medium-grey); /* #BBB */
+    border-radius: var(--radius-l);
+    text-decoration: none;
+    width: 100%;
+    transition:
+      border-color var(--duration-fast) var(--ease-out),
+      color        var(--duration-fast) var(--ease-out);
+  }
+
+  .case-solution__cta:hover {
+    border-color: var(--color-stroke-dark-grey); /* #4A4A4A */
+  }
+  .case-solution__cta:hover .case-solution__cta-label {
+    color: var(--color-text-black); /* #252525 */
+  }
+
+  .case-solution__cta:focus-visible {
+    outline: none;
+    box-shadow: var(--shadow-focus); /* 2px white + 4px #252525 ring */
+  }
+
+  .case-solution__cta-label {
+    font-family: var(--font-family-body);
+    font-weight: var(--font-weight-medium);
+    font-size: var(--font-size-body-medium); /* 16px */
+    line-height: var(--line-height-tight);
+    letter-spacing: var(--letter-spacing-normal);
+    color: var(--color-text-dark-grey); /* #4A4A4A — default state */
+    transition: color var(--duration-fast) var(--ease-out);
+  }
+
+  .case-solution__cta-icon {
+    width: 20px;
+    height: 20px;
+    display: block;
+    flex-shrink: 0;
+  }
+
+  /* ── Research findings block ─────────────────────────────────────── */
+  .case-solution__research {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-stack-lg); /* 16px */
+    width: 100%;
+  }
+
+  .case-solution__research-intro {
+    margin: 0;
+    font-family: var(--font-family-body);
+    font-weight: var(--font-weight-semibold);
+    font-size: var(--font-size-headline); /* 20px */
+    line-height: var(--line-height-tight);
+    letter-spacing: var(--letter-spacing-wide);
+    color: var(--color-text-black);
+  }
+
+  /* ── Highlight (grey rail + italic quote + body) ──────────────────── */
+  .case-highlight {
+    display: flex;
+    gap: var(--space-inline-lg); /* 16px */
+    align-items: stretch;
+    width: 100%;
+  }
+
+  .case-highlight__rail {
+    width: 4px;
+    flex-shrink: 0;
+    background: var(--color-bg-grey-muted);
+    border-radius: var(--radius-pill);
+    align-self: stretch;
+  }
+
+  .case-highlight__content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-stack-md); /* 12px */
+    justify-content: center;
+    min-width: 0;
+  }
+
+  .case-highlight__quote {
+    margin: 0;
+    padding: var(--space-inset-sm); /* 8px */
+    background-color: var(--color-bg-light-grey);
+    border-radius: var(--radius-l);
+    font-family: var(--font-family-body);
+    font-style: italic;
+    font-weight: var(--font-weight-regular);
+    font-size: var(--font-size-body-large);
+    line-height: var(--line-height-base);
+    letter-spacing: var(--letter-spacing-wide);
+    color: var(--color-text-grey-muted);
+    white-space: pre-wrap;
+  }
+
+  .case-highlight__body {
+    margin: 0;
+    font-family: var(--font-family-body);
+    font-weight: var(--font-weight-regular);
+    font-size: var(--font-size-body-large);
+    line-height: var(--line-height-base);
+    letter-spacing: var(--letter-spacing-wide);
+    color: var(--color-text-grey-muted);
+  }
+
+  /* ── Hypothesis ──────────────────────────────────────────────────── */
+  .case-solution__hypothesis {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-stack-md); /* 12px */
+    width: 100%;
+  }
+
+  .case-solution__hypothesis-caption {
+    margin: 0;
+    color: var(--color-text-grey-muted);
+  }
+
+  .case-solution__hypothesis-text {
+    margin: 0;
+    font-family: var(--font-family-body);
+    font-weight: var(--font-weight-regular);
+    font-size: var(--font-size-body-large);
+    line-height: var(--line-height-base);
+    letter-spacing: var(--letter-spacing-wide);
+    color: var(--color-text-grey-muted);
+  }
+
+  /* ── Mobile (≤767px) ─────────────────────────────────────────────── */
+  @media (max-width: 767px) {
+    .case-solution__compare {
+      grid-template-columns: 1fr;
+      row-gap: var(--space-stack-3xl);
+    }
+  }
+</style>

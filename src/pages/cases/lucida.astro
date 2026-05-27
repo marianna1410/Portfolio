@@ -12,11 +12,20 @@ import CaseResearchMethods from '../../components/case/CaseResearchMethods.astro
 import CaseResearchFindings from '../../components/case/CaseResearchFindings.astro';
 import CaseResearchProblemSelection from '../../components/case/CaseResearchProblemSelection.astro';
 import CaseProblem from '../../components/case/CaseProblem.astro';
+import CaseSolution from '../../components/case/CaseSolution.astro';
+import CaseSummary from '../../components/case/CaseSummary.astro';
+import CaseNextProject from '../../components/case/CaseNextProject.astro';
+import { PROTOTYPES } from '../../lib/config';
 import heroImage from '../../assets/projects/cases/lucida/hero.png';
+// Next-project preview image — reuses the Vaia card from Works (same source).
+import vaiaPreview from '../../assets/projects/vaia-default.png';
 import userFeedbackImage from '../../assets/projects/cases/lucida/user-feedback.png';
 import problem1Image from '../../assets/projects/cases/lucida/Problem 1.png';
 import problem2Image from '../../assets/projects/cases/lucida/Problem 2.png';
 import problem3Image from '../../assets/projects/cases/lucida/Problem 3.png';
+import before1Image from '../../assets/projects/cases/lucida/before/before-1.png';
+import before2Image from '../../assets/projects/cases/lucida/before/before-2.png';
+import before3Image from '../../assets/projects/cases/lucida/before/before-3.png';
 // Platform icons used inside the Research methodology callout
 import iconLucida   from '../../assets/projects/cases/lucida/platforms/lucida.png';
 import iconPraktika from '../../assets/projects/cases/lucida/platforms/praktika.png';
@@ -96,6 +105,114 @@ const problemSelectionBullets = [
     bold: 'Does the problem cause users to abandon the app?',
     plain: `If feedback includes signals like "has to rely on third-party apps for this" or "it's not actually teaching me" → high impact.`,
   },
+];
+
+// Solutions × 3 — Figma 472:17259 / 472:17285 / 472:17310.
+// Each solution shows: headline + bullets + before/after (image vs MP4) +
+// "Interact with Prototype" CTA + research highlights + hypothesis.
+// Video files live in public/videos/case-lucida/ (currently uncompressed
+// placeholders, gitignored — Marianna ships web-optimized ~2 MB versions).
+const solutions = [
+  {
+    number: 1,
+    headline: 'Turn the dictionary from a static list into a training ground',
+    bullets: [
+      `Added an onboarding flow that introduces the dictionary's new role as a training ground.`,
+      'Allowed users to pick which saved words to train per session, instead of running through the whole list.',
+      'Designed a 4-task progression per session, from translation matching to using the word in a full sentence.',
+      'Added hints on harder tasks: a tap surfaces a clue without giving the answer away.',
+    ],
+    beforeImage: before1Image,
+    beforeImageAlt: 'Before: Lucida dictionary — a static list of saved words with no practice or recall exercises.',
+    beforeCaption: 'Users can only view new words in a static list.',
+    videoSrc: '/videos/case-lucida/learn-new-words.mp4',
+    videoLabel: 'After: redesigned dictionary turns saved words into a 4-task practice session with progressive difficulty and hints.',
+    afterCaption: 'Available interactive exercises of varying difficulty levels for reinforcement.',
+    prototypeUrl: PROTOTYPES.lucida.problem1,
+    researchIntro: 'Two findings from the desk research shaped this solution:',
+    highlights: [
+      {
+        quote: '“ Active recall forms long-term memory better than rereading”  (Washington University).',
+        body: 'Each task asks users to pull the word from memory rather than review it: typing the translation, completing a sentence, using the word in a full reply. The whole session runs as a series of retrievals from memory, not a passive review.',
+      },
+      {
+        quote: '“ Language is stored as patterns and collocations, rather than as isolated words”  (Wray, 2002).',
+        body: 'Tasks present each new word inside a sentence or paired with the words it usually appears with, so users practice the word the way it actually lives in language.',
+      },
+    ],
+    hypothesis: `The redesign will turn saved words from a collected list into actively practiced vocabulary, if users can take them through progressive recall tasks with hints when stuck. I'd validate this by tracking the % of saved words practiced and the session completion rate.`,
+  },
+  {
+    number: 2,
+    headline: 'Replace one-time review with interval repetition for lasting retention',
+    bullets: [
+      'Added onboarding that explains why spaced repetition is important and how it works.',
+      `Built a fixed schedule based on Ebbinghaus's forgetting curve: a day after first practice, then a week, then at longer intervals.`,
+      'Reused the task progression from Vocab training, with one harder open-ended task added at the end.',
+      'Surfaced 5 familiarity levels per word (Known, Buddy, Friend, Peer, Family), deepening with each repetition.',
+    ],
+    beforeImage: before2Image,
+    beforeImageAlt: 'Before: newly saved words sit in the list without any scheduled review.',
+    beforeCaption: 'New words are saved in the list but are not remembered by users.',
+    videoSrc: '/videos/case-lucida/spaced-repetition.mp4',
+    videoLabel: 'After: a spaced repetition system schedules each word to return at expanding intervals.',
+    afterCaption: 'Implemented a repetition system to reinforce new words and expressions for the long term.',
+    prototypeUrl: PROTOTYPES.lucida.problem2,
+    researchIntro: 'One finding from the desk research shaped this solution:',
+    highlights: [
+      {
+        quote: '“ Spaced practice significantly improves long-term retention”  (Roediger & Karpicke, 2006).',
+        body: `The schedule is borrowed from Ebbinghaus's forgetting curve: a word returns a day after first practice, then a week later, then at progressively longer intervals. Each return lands when the word is most likely to have faded — that's exactly when retrieving it from memory does the most work.`,
+      },
+    ],
+    hypothesis: `The % of saved words that advance through at least one familiarity level within four weeks will increase, if users get each word back at the scheduled interval before it fades. I'd validate this by tracking that progression rate.`,
+  },
+  {
+    number: 3,
+    headline: 'Surface past mistakes as exercises users can actually work through',
+    bullets: [
+      `Added a "Review mistakes" prompt at the end of every lesson, so corrections are accessible while the lesson is still fresh.`,
+      'Built an onboarding screen that explains the three-step session before practice starts.',
+      'Showed each mistake as a direct comparison: what the user said vs. the correct version, with a grammar rule and examples.',
+      'Added two practice exercises per mistake: a multiple-choice task and a sentence-completion task that users answer by voice or keyboard.',
+      'Added mid-session progress saving so users can return without starting over.',
+    ],
+    beforeImage: before3Image,
+    beforeImageAlt: 'Before: after a lesson, the user is prompted straight into the next lesson with no review of past mistakes.',
+    beforeCaption: 'The user sees their mistakes only during the lesson with the tutor, but after finishing, they are immediately prompted to start the next lesson.',
+    videoSrc: '/videos/case-lucida/review-mistakes.mp4',
+    videoLabel: 'After: an end-of-lesson review walks the user through each mistake with grammar context and practice tasks.',
+    afterCaption: `After finishing the lesson, it's recommended to review mistakes and complete exercises to reinforce the correct answers. You can always come back to them later.`,
+    prototypeUrl: PROTOTYPES.lucida.problem3,
+    researchIntro: 'One finding from the desk research shaped this solution:',
+    highlights: [
+      {
+        quote: '“ Effective language learning requires a balance of input (reading, listening), production (speaking, writing), targeted study (grammar, vocabulary), and fluency practice ”  (Nation, 2007).',
+        body: `Lucida's lessons cover only the input and speaking parts. The mistakes review adds the missing targeted study layer: explicit grammar work tied directly to what the user got wrong in conversation.`,
+      },
+    ],
+    hypothesis: `The redesign will make mistake review a regular part of the learning routine, if users get grammar explanations and practice tasks tied to their own errors. I'd validate this by tracking the % of lessons followed by a completed review session and the average number of mistakes worked through per session.`,
+  },
+];
+
+// Summary section — Figma 472:17336.
+// Closing block that recaps the case in one paragraph, lists the
+// step-by-step approach, then surfaces the three headline improvements.
+const summaryDescription = 'Lucida AI lets users practice speaking with an AI tutor and get corrected in real time. The research revealed a consistent pattern: corrections land in the moment, new words get saved, but neither makes it into long-term memory. The redesign targets three flows that turn one-time lesson content into practiced, retained knowledge.';
+
+const summaryApproach = [
+  `Walked through Lucida's core learner flows and mapped breakdowns against Nielsen's heuristics.`,
+  'Collected and analyzed 100+ reviews of Lucida and 4 peer apps across 5 platforms to identify recurring pain points.',
+  'Read research on effective language learning to identify which mechanics the app was missing.',
+  'Prioritized three problems based on impact (blocks fluency, appears across platforms, signals abandonment) and effort at design level.',
+  'Designed three net-new flows: Vocab training, Spaced repetition, and Mistakes review.',
+  'Grounded each solution in desk research findings to connect design decisions to learning science.',
+];
+
+const summaryImprovements = [
+  'Turned the dictionary from a static word list into a practice session with progressive recall tasks, from translation matching to building full sentences.',
+  `Introduced a spaced repetition schedule built on Ebbinghaus's forgetting curve, bringing each word back before memory drops.`,
+  'Added a mistakes review flow that opens directly after every lesson, with grammar explanations and practice tasks for each error.',
 ];
 
 // Each problem statement follows the "When [subject] try to [action], they
@@ -212,14 +329,55 @@ const problems = [
   </section>
 
   <CaseDivider />
+
+  <section class="case-solutions" id="solutions">
+    {solutions.map((s) => (
+      <CaseSolution
+        number={s.number}
+        headline={s.headline}
+        bullets={s.bullets}
+        beforeImage={s.beforeImage}
+        beforeImageAlt={s.beforeImageAlt}
+        beforeCaption={s.beforeCaption}
+        videoSrc={s.videoSrc}
+        videoLabel={s.videoLabel}
+        afterCaption={s.afterCaption}
+        prototypeUrl={s.prototypeUrl}
+        researchIntro={s.researchIntro}
+        highlights={s.highlights}
+        hypothesis={s.hypothesis}
+      />
+    ))}
+  </section>
+
+  <CaseDivider />
+
+  <CaseSummary
+    id="summary"
+    description={summaryDescription}
+    approach={summaryApproach}
+    improvements={summaryImprovements}
+  />
+
+  <CaseDivider />
+
+  <CaseNextProject
+    number="02"
+    tags={['EdTech', 'Redesign Concept']}
+    headline="Restoring students' control and transparency over automated exam preparation"
+    href="/cases/vaia"
+    image={vaiaPreview}
+    imageAlt="Vaia case study preview: AI-driven exam preparation flow on mobile."
+  />
 </CaseLayout>
 
 <style>
-  /* Research is composed of 3 sub-blocks separated by 48px; the wrapping
-     section makes them addressable as #research and lets them share that
-     internal vertical rhythm. */
+  /* Research / Problems / Solutions are composed of multiple sub-blocks
+     separated by 48px; the wrapping section makes them addressable as
+     #research / #problems / #solutions and shares that vertical rhythm. */
   .case-research,
-  .case-problems {
+  .case-problems,
+  .case-solutions {
     display: flex;
     flex-direction: column;
     gap: 48px;

@@ -22,9 +22,10 @@ interface Props {
   size?: 'h3' | 'h4';
   /**
    * Caption text color. Default 'muted' (#737373) is used by Research / Overview
-   * / Solutions / Summary. 'error' (#D9321C) is used by {PROBLEM N} headers.
+   * / Summary. 'error' (#D9321C) is used by {PROBLEM N} headers.
+   * 'success' (#248434) is used by {SOLUTION N} headers.
    */
-  captionTone?: 'muted' | 'error';
+  captionTone?: 'muted' | 'error' | 'success';
   id?: string;
 }
 
@@ -55,6 +56,10 @@ const headlineClass = size === 'h4' ? 'text-h4-medium' : 'text-h3';
 
   .case-section-header__caption--error {
     color: var(--color-system-error); /* #D9321C — used by {PROBLEM N} headers */
+  }
+
+  .case-section-header__caption--success {
+    color: var(--color-system-success); /* #248434 — used by {SOLUTION N} headers */
   }
 
   .case-section-header__headline {

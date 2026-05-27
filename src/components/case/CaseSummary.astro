@@ -1,0 +1,193 @@
+---
+/**
+ * CaseSummary.astro — closing "The case at a glance" block per Figma 472:17336.
+ *
+ * Vertical rhythm (outer gap 32px between major blocks):
+ *   {SUMMARY} caption + Headline + description    ← .case-summary__intro (gap 16)
+ *   ↕ 32px
+ *   "Approach" subhead + ordered list (6 items)    ← .case-summary__block (gap 16)
+ *   ↕ 32px
+ *   "Key improvements" subhead + arrow bullets     ← .case-summary__block (gap 16)
+ *
+ * Content is data-driven so this component can be reused by Vaia later
+ * (different paragraph + different bullets, same skeleton).
+ */
+import { Image } from 'astro:assets';
+import CaseSectionHeader from './CaseSectionHeader.astro';
+import arrowBulletIcon from '../../assets/icons/arrow-right-bullet.svg';
+
+interface Props {
+  /** "{SUMMARY}" caption used as the section header. Override per-case if needed. */
+  caption?: string;
+  /** H3 headline — "The case at a glance" by default. */
+  headline?: string;
+  /** Intro paragraph that summarises the case in one short block. */
+  description: string;
+  /** 6 short sentences describing the working approach (Figma 472:17345). */
+  approach: string[];
+  /** 3 short sentences describing the headline improvements (Figma 535:5230). */
+  improvements: string[];
+  /** Optional id so the wrapping section is addressable via TOC (#summary). */
+  id?: string;
+}
+
+const {
+  caption = '{Summary}',
+  headline = 'The case at a glance',
+  description,
+  approach,
+  improvements,
+  id,
+} = Astro.props;
+---
+
+<section class="case-summary" id={id}>
+  <div class="case-summary__intro">
+    <CaseSectionHeader
+      caption={caption}
+      headline={headline}
+      as="h2"
+      size="h3"
+      captionTone="muted"
+    />
+    <p class="case-summary__description">{description}</p>
+  </div>
+
+  <div class="case-summary__block">
+    <h3 class="case-summary__subhead">Approach</h3>
+    <ol class="case-summary__steps">
+      {approach.map((item) => (
+        <li class="case-summary__step">{item}</li>
+      ))}
+    </ol>
+  </div>
+
+  <div class="case-summary__block">
+    <h3 class="case-summary__subhead">Key improvements</h3>
+    <ul class="case-summary__bullets">
+      {improvements.map((item) => (
+        <li class="case-summary__bullet">
+          <Image
+            src={arrowBulletIcon}
+            alt=""
+            width={20}
+            height={20}
+            class="case-summary__bullet-icon"
+            aria-hidden="true"
+          />
+          <span class="case-summary__bullet-text">{item}</span>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>
+
+<style>
+  .case-summary {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-stack-3xl); /* 32px between major blocks */
+    width: 100%;
+  }
+
+  /* ── Intro: caption + h3 + description ───────────────────────────── */
+  .case-summary__intro {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-stack-lg); /* 16px */
+    width: 100%;
+  }
+
+  .case-summary__description {
+    margin: 0;
+    font-family: var(--font-family-body);
+    font-weight: var(--font-weight-regular);
+    font-size: var(--font-size-body-large); /* 18px */
+    line-height: var(--line-height-base);   /* 1.48 */
+    letter-spacing: var(--letter-spacing-wide);
+    color: var(--color-text-grey-muted);
+  }
+
+  /* ── Approach / Key improvements: shared subhead + list wrapper ──── */
+  .case-summary__block {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-stack-lg); /* 16px */
+    width: 100%;
+  }
+
+  .case-summary__subhead {
+    margin: 0;
+    font-family: var(--font-family-body);
+    font-weight: var(--font-weight-semibold);
+    font-size: var(--font-size-headline); /* 20px */
+    line-height: var(--line-height-tight);
+    letter-spacing: var(--letter-spacing-wide);
+    color: var(--color-text-black);
+  }
+
+  /* ── Ordered list (Approach) ─────────────────────────────────────── */
+  .case-summary__steps {
+    /* Figma: items have `margin-start: 27px` (browser default indent) and
+       `margin-bottom: 8px`. Decimal markers stay at default browser style. */
+    margin: 0;
+    padding-left: 27px;
+    list-style-type: decimal;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-stack-sm); /* 8px between items */
+  }
+
+  .case-summary__step {
+    font-family: var(--font-family-body);
+    font-weight: var(--font-weight-regular);
+    font-size: var(--font-size-body-large);
+    line-height: var(--line-height-base);
+    letter-spacing: var(--letter-spacing-wide);
+    color: var(--color-text-grey-muted);
+  }
+
+  /* Native ::marker inherits font from the <li>; force its colour to match
+     so the digits don't render in the default browser black. */
+  .case-summary__step::marker {
+    color: var(--color-text-grey-muted);
+  }
+
+  /* ── Arrow bullets (Key improvements) ────────────────────────────── */
+  .case-summary__bullets {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-stack-sm); /* 8px */
+    width: 100%;
+  }
+
+  .case-summary__bullet {
+    display: flex;
+    gap: var(--space-inline-sm); /* 8px */
+    align-items: flex-start;
+  }
+
+  .case-summary__bullet-icon {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    /* Same optical-alignment offset used in CaseSolution bullets — anchors
+       the 20px icon to the first line of body-large text (line-height 1.48). */
+    margin-top: 0.18em;
+  }
+
+  .case-summary__bullet-text {
+    flex: 1;
+    font-family: var(--font-family-body);
+    font-weight: var(--font-weight-regular);
+    font-size: var(--font-size-body-large);
+    line-height: var(--line-height-base);
+    letter-spacing: var(--letter-spacing-wide);
+    color: var(--color-text-grey-muted);
+  }
+
+  /* ── Mobile (≤767px): no overrides for now — block stack keeps working ─ */
+</style>

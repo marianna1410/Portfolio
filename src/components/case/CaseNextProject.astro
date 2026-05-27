@@ -1,0 +1,271 @@
+---
+/**
+ * CaseNextProject.astro — "Keep reading" card at the bottom of a case study
+ * page. Figma 472:17358 (rendered on Lucida → Vaia direction).
+ *
+ * Vertical rhythm:
+ *   Keep reading                 ← h2 32px Medium
+ *   ↕ 24px (--space-stack-2xl)
+ *   Card (radius 20, bg light-grey, padding 16)
+ *
+ * Card row (24px gap):
+ *   [Image 252×162]   [Tags rail / Headline / Read Case Study link]
+ *   (right column is flex-col justify-between, full card height)
+ *
+ * The whole card is a single anchor so the user can click anywhere inside it
+ * to navigate to the next case. Tags + label inside are decorative spans;
+ * the only interactive element is the wrapping <a>.
+ */
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+import diagonalArrow from '../../assets/icons/diagonal-arrow-dark-grey.svg';
+
+interface Props {
+  /** Section heading, default "Keep reading". */
+  heading?: string;
+  /** Project case number, e.g. "02" — shown in the first tag pill. */
+  number: string;
+  /** Additional tags shown to the right of the number pill (e.g. ["EdTech", "Redesign Concept"]). */
+  tags: string[];
+  /** Card headline — the short project descriptor. */
+  headline: string;
+  /** Where the card links to (the next case study URL). */
+  href: string;
+  /** Preview image (ratio ~252/162). */
+  image: ImageMetadata;
+  imageAlt: string;
+  /** Label for the inline "Read Case Study" affordance. */
+  ctaLabel?: string;
+  /** Optional id to address this block from the TOC. */
+  id?: string;
+}
+
+const {
+  heading = 'Keep reading',
+  number,
+  tags,
+  headline,
+  href,
+  image,
+  imageAlt,
+  ctaLabel = 'Read Case Study',
+  id,
+} = Astro.props;
+---
+
+<section class="case-next" id={id}>
+  <h2 class="case-next__heading">{heading}</h2>
+
+  <a class="case-next__card" href={href} aria-label={`${ctaLabel}: ${headline}`}>
+    <div class="case-next__media">
+      <Image
+        src={image}
+        alt={imageAlt}
+        width={504}
+        height={324}
+        quality={90}
+        class="case-next__media-img"
+      />
+    </div>
+
+    <div class="case-next__body">
+      <div class="case-next__top">
+        <ul class="case-next__tags" aria-hidden="true">
+          <li class="case-next__tag case-next__tag--number">{number}</li>
+          {tags.map((t) => (
+            <li class="case-next__tag">{t}</li>
+          ))}
+        </ul>
+        <p class="case-next__headline">{headline}</p>
+      </div>
+
+      <span class="case-next__cta">
+        <span class="case-next__cta-label">{ctaLabel}</span>
+        <Image
+          src={diagonalArrow}
+          alt=""
+          width={20}
+          height={20}
+          class="case-next__cta-icon"
+          aria-hidden="true"
+        />
+      </span>
+    </div>
+  </a>
+</section>
+
+<style>
+  .case-next {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-stack-2xl); /* 24px between heading and card */
+    width: 100%;
+  }
+
+  .case-next__heading {
+    margin: 0;
+    font-family: var(--font-family-body);
+    font-weight: var(--font-weight-medium);
+    font-size: var(--font-size-h3); /* 32px desktop / 24px mobile */
+    line-height: var(--line-height-tight);
+    letter-spacing: var(--letter-spacing-normal);
+    color: var(--color-text-black);
+  }
+
+  /* ── Card ────────────────────────────────────────────────────────── */
+  /* States per Figma 505:7536 (card / default + hover + focus):
+       Default → bg light-grey, no visible border, default image
+       Hover   → bg light-grey, 1px solid #E9E9E9 border, image scales 1.06
+       Focus   → bg light-grey, no border, 2px white + 4px black focus ring
+     A transparent 1px border lives on the default state so toggling a coloured
+     border on hover doesn't shift the card's 1px in either direction. */
+  .case-next__card {
+    display: flex;
+    gap: var(--space-inline-2xl); /* 24px */
+    align-items: stretch;
+    width: 100%;
+    padding: var(--space-inset-lg); /* 16px */
+    background-color: var(--color-bg-light-grey);
+    border: 1px solid transparent;
+    border-radius: var(--radius-2xl); /* 20px */
+    text-decoration: none;
+    color: inherit;
+    transition: border-color var(--duration-fast) var(--ease-out);
+  }
+
+  .case-next__card:hover {
+    border-color: var(--color-stroke-light); /* #E9E9E9 */
+  }
+
+  .case-next__card:focus-visible {
+    outline: none;
+    /* Focus shows the ring instead of the border (border stays transparent). */
+    border-color: transparent;
+    box-shadow: var(--shadow-focus);
+  }
+
+  /* ── Image (252×162 desktop) ────────────────────────────────────── */
+  .case-next__media {
+    flex-shrink: 0;
+    width: 252px;
+    height: 162px;
+    border-radius: var(--radius-l); /* 12px */
+    overflow: hidden;
+    background-color: var(--color-bg-grey-muted);
+  }
+
+  .case-next__media-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    /* Subtle Ken-Burns zoom on hover (Figma: phone image grows ~6% on hover).
+       Lives on the image so the rounded media-frame keeps its size + crops. */
+    transition: transform 240ms var(--ease-out);
+  }
+
+  .case-next__card:hover .case-next__media-img {
+    transform: scale(1.06);
+  }
+
+  /* ── Body (right column) ────────────────────────────────────────── */
+  .case-next__body {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .case-next__top {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-stack-lg); /* 16px between tag rail and headline */
+    width: 100%;
+  }
+
+  /* Tag rail (number + extra tags) */
+  .case-next__tags {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    gap: var(--space-inline-sm); /* 8px */
+    flex-wrap: wrap;
+  }
+
+  .case-next__tag {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-inset-sm) var(--space-inset-lg); /* 8px 16px */
+    background-color: var(--color-bg-white);
+    border-radius: var(--radius-l);
+    font-family: var(--font-family-mono);
+    font-weight: var(--font-weight-regular);
+    font-size: var(--font-size-caption-mono); /* 14px desktop / 12px mobile */
+    line-height: var(--line-height-base);
+    letter-spacing: var(--letter-spacing-wide);
+    color: var(--color-text-grey-muted);
+    white-space: nowrap;
+  }
+
+  .case-next__tag--number {
+    /* "02" pill keeps a fixed 40px width per Figma to look uniform with future
+       numbers ("03", "04"…) without growing/shrinking on different digits. */
+    width: 40px;
+    padding-inline: 0;
+  }
+
+  .case-next__headline {
+    margin: 0;
+    font-family: var(--font-family-body);
+    font-weight: var(--font-weight-medium);
+    font-size: var(--font-size-headline); /* 20px */
+    line-height: var(--line-height-tight);
+    letter-spacing: var(--letter-spacing-wide);
+    color: var(--color-text-black);
+  }
+
+  /* ── "Read Case Study" inline link ─────────────────────────────── */
+  .case-next__cta {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-inset-sm); /* 8px */
+    height: 32px;
+    padding: var(--space-inset-xs) 2px var(--space-inset-xs) var(--space-inset-xs);
+    border-radius: var(--radius-l);
+    color: var(--color-text-dark-grey);
+    align-self: flex-start;
+  }
+
+  .case-next__cta-label {
+    font-family: var(--font-family-body);
+    font-weight: var(--font-weight-medium);
+    font-size: var(--font-size-body-medium); /* 16px */
+    line-height: var(--line-height-tight);
+    letter-spacing: var(--letter-spacing-normal);
+  }
+
+  .case-next__cta-icon {
+    width: 20px;
+    height: 20px;
+    display: block;
+    flex-shrink: 0;
+  }
+
+  /* ── Mobile (≤767px): stack image above content, smaller image ──── */
+  @media (max-width: 767px) {
+    .case-next__card {
+      flex-direction: column;
+      gap: var(--space-stack-xl); /* 16px */
+    }
+
+    .case-next__media {
+      width: 100%;
+      height: auto;
+      aspect-ratio: 252 / 162;
+    }
+  }
+</style>
