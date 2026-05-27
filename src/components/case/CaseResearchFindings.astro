@@ -20,9 +20,14 @@ interface Props {
   image: ImageMetadata; // User's feedback composite
   imageAlt: string;
   caption: string;
+  /**
+   * CSS aspect-ratio string for the image container — defaults to the
+   * Lucida ratio "868 / 536". Each case can override (Vaia ships "868 / 424").
+   */
+  aspectRatio?: string;
 }
 
-const { heading, items, image, imageAlt, caption } = Astro.props;
+const { heading, items, image, imageAlt, caption, aspectRatio = '868 / 536' } = Astro.props;
 ---
 
 <div class="research-findings">
@@ -36,7 +41,7 @@ const { heading, items, image, imageAlt, caption } = Astro.props;
   </div>
 
   <div class="research-findings__media">
-    <div class="research-findings__image-wrap">
+    <div class="research-findings__image-wrap" style={`aspect-ratio: ${aspectRatio};`}>
       <Image
         src={image}
         alt={imageAlt}
@@ -96,7 +101,10 @@ const { heading, items, image, imageAlt, caption } = Astro.props;
 
   .research-findings__image-wrap {
     width: 100%;
-    aspect-ratio: 868 / 536;
+    /* aspect-ratio is set inline per case (default 868/536 — Lucida).
+       Vaia overrides to 868/424 via the `aspectRatio` prop because its
+       findings composite is shorter; the previous fixed 868/536 was
+       cropping it with object-fit: cover. */
     background-color: var(--color-bg-light-grey); /* #F4F4F3 — backdrop per Figma */
     border-radius: var(--radius-l); /* 12px */
     overflow: hidden;

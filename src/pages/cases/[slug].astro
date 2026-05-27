@@ -24,7 +24,8 @@ export async function getStaticPaths() {
   // imports in this frontmatter aren't visible here. Import sources
   // directly. Register every case data module in the array below.
   const { default: lucida } = await import('../../content/cases/lucida');
-  const cases: CaseData[] = [lucida];
+  const { default: vaia } = await import('../../content/cases/vaia');
+  const cases: CaseData[] = [lucida, vaia];
   return cases.map((c) => ({
     params: { slug: c.slug },
     props: { case: c },
@@ -70,6 +71,7 @@ const { hero, overview, research, problems, solutions, summary, nextCard } = dat
       image={research.findingsImage}
       imageAlt={research.findingsImageAlt}
       caption={research.findingsCaption}
+      aspectRatio={research.findingsImageRatio}
     />
 
     <CaseResearchProblemSelection

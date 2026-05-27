@@ -13,6 +13,22 @@ html {
   scroll-behavior: smooth;
 }
 
+/* Anchor-scroll offset for case-study sections.
+   The sticky header sits in the top ~80px of the viewport (24px sticky
+   offset + 56px pill on desktop, 20px + 56px = 76px on mobile). Without
+   scroll-margin-top, smooth-scrolled anchors land flush with viewport top
+   and the header occludes the section heading. Values per Marianna's spec
+   give a breathing room of 16/8 px below the pill: 96px desktop, 84px
+   mobile. */
+.case [id] {
+  scroll-margin-top: 96px;
+}
+@media (max-width: 767px) {
+  .case [id] {
+    scroll-margin-top: 84px;
+  }
+}
+
 body {
   font-family: var(--font-family-body);
   font-weight: var(--font-weight-regular);

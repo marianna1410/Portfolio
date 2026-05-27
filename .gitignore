@@ -8,10 +8,6 @@ dist/
 # Local debug folder — playwright screenshots, scratch scripts
 /.tmp/
 
-# Case study videos for Vaia — uncompressed placeholders until Marianna
-# ships web-compressed versions (~2-3 MB each). Lucida is already committed.
-/public/videos/case-vaia/
-
 # Logs
 logs
 *.log

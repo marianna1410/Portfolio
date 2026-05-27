@@ -110,6 +110,12 @@ export interface CaseResearch {
   findingsImage: ImageMetadata;
   findingsImageAlt: string;
   findingsCaption: string;
+  /**
+   * Aspect ratio of the findings composite image as a CSS aspect-ratio
+   * string (e.g. "868 / 536"). Optional — defaults to "868 / 536" (the
+   * Lucida ratio). Vaia uses "868 / 424".
+   */
+  findingsImageRatio?: string;
   selectionTitle: string;
   selectionDescription: string;
   selectionImpactLeadBold: string;

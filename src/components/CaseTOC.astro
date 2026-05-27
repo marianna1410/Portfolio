@@ -281,15 +281,24 @@ const {
       pointer-events: auto;
     }
 
-    /* Title row: "Table of Contents" — mono caption, py-1 (4px top/bottom). */
+    /* Title row: "Table of Contents" — mono caption.
+       Padding matches Figma 768:20633 → I768:20633;768:17188: padding-left
+       12 (indents text to 24 px from container outer edge alongside the
+       container's own 12 px inset) and py-4 (4 top + 4 bottom). The 4 px
+       padding-bottom stacks on top of the parent's 8 px flex gap to
+       produce the 12 px visible distance between title and divider per
+       Marianna's spec. Line-height uses --line-height-loose (1.4), Figma's
+       Fira Code caption-mono leading. padding-left is a literal 12 px
+       because --space-inset-md crosses 8/12 between mobile and tablet
+       while we need a constant 12 px across the whole popup range. */
     .case-toc__title {
       display: block;
       margin: 0;
-      padding: var(--space-inset-xs) 0; /* 4px 0 */
+      padding: var(--space-inset-xs) 0 var(--space-inset-xs) 12px;
       font-family: var(--font-family-mono);
       font-weight: var(--font-weight-regular);
       font-size: var(--font-size-caption-mono);
-      line-height: var(--line-height-base);
+      line-height: var(--line-height-loose);
       letter-spacing: var(--letter-spacing-wide);
       color: var(--color-text-grey-muted);
     }
