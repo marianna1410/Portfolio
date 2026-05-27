@@ -1,0 +1,155 @@
+---
+/**
+ * Dynamic case study route. Generates one page per case data module
+ * registered below. Each module exports a fully-typed CaseData object
+ * (see src/content/cases/types.ts) and the route renders it through
+ * the same component set the static lucida.astro page used to call.
+ */
+import CaseLayout from '../../layouts/CaseLayout.astro';
+import CaseHero from '../../components/case/CaseHero.astro';
+import CaseProjectOverview from '../../components/case/CaseProjectOverview.astro';
+import CaseDivider from '../../components/case/CaseDivider.astro';
+import CaseResearchMethods from '../../components/case/CaseResearchMethods.astro';
+import CaseResearchFindings from '../../components/case/CaseResearchFindings.astro';
+import CaseResearchProblemSelection from '../../components/case/CaseResearchProblemSelection.astro';
+import CaseProblem from '../../components/case/CaseProblem.astro';
+import CaseSolution from '../../components/case/CaseSolution.astro';
+import CaseSummary from '../../components/case/CaseSummary.astro';
+import CaseNextProject from '../../components/case/CaseNextProject.astro';
+
+import type { CaseData } from '../../content/cases/types';
+
+export async function getStaticPaths() {
+  // Astro evaluates getStaticPaths in an isolated scope, so top-level
+  // imports in this frontmatter aren't visible here. Import sources
+  // directly. Register every case data module in the array below.
+  const { default: lucida } = await import('../../content/cases/lucida');
+  const cases: CaseData[] = [lucida];
+  return cases.map((c) => ({
+    params: { slug: c.slug },
+    props: { case: c },
+  }));
+}
+
+interface Props {
+  case: CaseData;
+}
+
+const { case: data } = Astro.props;
+const { hero, overview, research, problems, solutions, summary, nextCard } = data;
+---
+
+<CaseLayout title={data.title} description={data.description}>
+  <CaseHero
+    number={hero.number}
+    tags={hero.tags}
+    title={hero.title}
+    image={hero.image}
+    imageAlt={hero.imageAlt}
+  />
+
+  <CaseProjectOverview
+    paragraph={overview.paragraph}
+    role={overview.role}
+    methods={overview.methods}
+  />
+
+  <CaseDivider />
+
+  <section class="case-research" id="research">
+    <CaseResearchMethods
+      caption={research.methodsCaption}
+      headline={research.methodsHeadline}
+      intro={research.methodsIntro}
+      callouts={research.callouts}
+    />
+
+    <CaseResearchFindings
+      heading={research.findingsHeading}
+      items={research.findingsItems}
+      image={research.findingsImage}
+      imageAlt={research.findingsImageAlt}
+      caption={research.findingsCaption}
+    />
+
+    <CaseResearchProblemSelection
+      title={research.selectionTitle}
+      description={research.selectionDescription}
+      impactLeadBold={research.selectionImpactLeadBold}
+      impactLeadPlain={research.selectionImpactLeadPlain}
+      impactBullets={research.selectionImpactBullets}
+      effortBold={research.selectionEffortBold}
+      effortPlain={research.selectionEffortPlain}
+    />
+  </section>
+
+  <CaseDivider />
+
+  <section class="case-problems" id="problems">
+    {problems.map((p) => (
+      <CaseProblem
+        number={p.number}
+        headline={p.headline}
+        paragraph={p.paragraph}
+        image={p.image}
+        imageAlt={p.imageAlt}
+      />
+    ))}
+  </section>
+
+  <CaseDivider />
+
+  <section class="case-solutions" id="solutions">
+    {solutions.map((s) => (
+      <CaseSolution
+        number={s.number}
+        headline={s.headline}
+        bullets={s.bullets}
+        beforeImage={s.beforeImage}
+        beforeImageAlt={s.beforeImageAlt}
+        beforeCaption={s.beforeCaption}
+        videoSrc={s.videoSrc}
+        videoLabel={s.videoLabel}
+        afterCaption={s.afterCaption}
+        prototypeUrl={s.prototypeUrl}
+        researchIntro={s.researchIntro}
+        highlights={s.highlights}
+        hypothesis={s.hypothesis}
+      />
+    ))}
+  </section>
+
+  <CaseDivider />
+
+  <CaseSummary
+    id="summary"
+    description={summary.description}
+    approach={summary.approach}
+    improvements={summary.improvements}
+  />
+
+  <CaseDivider />
+
+  <CaseNextProject
+    number={nextCard.number}
+    tags={nextCard.tags}
+    headline={nextCard.headline}
+    href={`/cases/${nextCard.slug}`}
+    image={nextCard.image}
+    imageAlt={nextCard.imageAlt}
+  />
+</CaseLayout>
+
+<style>
+  /* Research / Problems / Solutions are composed of multiple sub-blocks
+     separated by 48px; the wrapping section makes them addressable as
+     #research / #problems / #solutions and shares that vertical rhythm. */
+  .case-research,
+  .case-problems,
+  .case-solutions {
+    display: flex;
+    flex-direction: column;
+    gap: 48px;
+    width: 100%;
+  }
+</style>
