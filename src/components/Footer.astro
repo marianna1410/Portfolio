@@ -1,12 +1,25 @@
 ---
+/**
+ * Footer.astro — global site footer. Two variants:
+ *   'default' (home pages) — outer light-grey background, inner WHITE card.
+ *   'case'    (case study pages, Figma 472:17361) — colors INVERTED:
+ *                outer WHITE background, inner LIGHT-GREY card.
+ * Everything else (typography, links, illustration) is identical.
+ */
 import { Image } from 'astro:assets';
 import diagonalArrow from '../assets/icons/diagonal-arrow-dark-grey.svg';
 import footerDottedLine from '../assets/icons/footer-dotted-line.svg';
 import footerBird from '../assets/icons/footer-bird.svg';
 import { CONTACT, RESUME_URL } from '../lib/config.ts';
+
+interface Props {
+  variant?: 'default' | 'case';
+}
+
+const { variant = 'default' } = Astro.props;
 ---
 
-<footer class="footer" aria-label="Site footer">
+<footer class:list={['footer', `footer--${variant}`]} aria-label="Site footer">
   <div class="footer__card">
     <div class="footer__row">
 
@@ -90,11 +103,14 @@ import { CONTACT, RESUME_URL } from '../lib/config.ts';
 <style>
   /* ====== Outer footer shell ====== */
   .footer {
-    background-color: var(--color-bg-light-grey);
     padding-top: var(--space-stack-md);       /* 12px — matches Figma pt */
     padding-bottom: var(--space-stack-3xl);   /* 32px — matches Figma pb */
     padding-inline: var(--container-padding-mobile); /* 20px mobile */
   }
+
+  /* Color variants (only the bgs swap between outer + card). */
+  .footer--default { background-color: var(--color-bg-light-grey); }
+  .footer--case    { background-color: var(--color-bg-white); }
 
   @media (min-width: 768px) {
     .footer {
@@ -108,12 +124,15 @@ import { CONTACT, RESUME_URL } from '../lib/config.ts';
     }
   }
 
-  /* ====== White card ====== */
+  /* ====== Inner card ====== */
   .footer__card {
-    background-color: var(--color-bg-white);
     border-radius: var(--radius-2xl);
     padding: var(--space-inline-3xl); /* 32px all sides */
   }
+
+  /* Inner card color is the inverse of the outer shell. */
+  .footer--default .footer__card { background-color: var(--color-bg-white); }
+  .footer--case    .footer__card { background-color: var(--color-bg-light-grey); }
 
   /* Desktop: fix card height to 178px, content top-aligned */
   @media (min-width: 768px) {

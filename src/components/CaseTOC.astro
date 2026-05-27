@@ -63,14 +63,18 @@ const {
 
 <style>
   .case-toc {
-    /* Outer frame from Figma: 193×243, inset 12px */
+    /* Outer frame from Figma: 193×243, inset 12px on sides+bottom only.
+       Padding-top = 0 (Marianna's call): the first link's top sits flush
+       with the TOC outer top, putting its baseline at the same vertical
+       level as the header pill text. */
     width: 193px;
-    padding: var(--space-inset-md);
-    /* Sticky: total 16px visual gap from header pill bottom to the first
-       link's TEXT baseline, with that 16 absorbed by the TOC's own paddings
-       (12px outer + 4px on the link). So sticky outer top = pill bottom = 80. */
+    padding: 0 var(--space-inset-md) var(--space-inset-md);
+    /* Sticky alignment with header pill: both use top:24. Header pill is
+       centered horizontally in the viewport; the TOC sits in the left
+       sidebar grid column, so they don't overlap horizontally. Mobile
+       breakpoint hides TOC entirely. */
     position: sticky;
-    top: 80px;
+    top: 24px;
     align-self: start;
   }
 

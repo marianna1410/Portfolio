@@ -8,12 +8,15 @@ interface Props {
   description?: string;
   /** 'home' = nav with Works/Experience/About. 'case' = Go Home link. */
   headerVariant?: 'home' | 'case';
+  /** 'default' = light-grey bg / white card. 'case' = inverted (white bg / light-grey card). */
+  footerVariant?: 'default' | 'case';
 }
 
 const {
   title,
   description = 'Marianna Delihioz — Designer who creates digital experiences for humans.',
   headerVariant = 'home',
+  footerVariant = 'default',
 } = Astro.props;
 ---
 
@@ -34,6 +37,6 @@ const {
     <main id="main">
       <slot />
     </main>
-    <Footer />
+    <Footer variant={footerVariant} />
   </body>
 </html>
