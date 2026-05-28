@@ -61,7 +61,6 @@ const navPrefix = variant === 'home' ? '#' : '/#';
         class="header__contact-menu"
         role="menu"
         aria-label="Contact options"
-        hidden
         data-contact-menu
       >
         <li role="none">
@@ -136,7 +135,6 @@ const navPrefix = variant === 'home' ? '#' : '/#';
     class="header__menu-dropdown"
     role="menu"
     aria-label="Site menu — navigation and contacts"
-    hidden
     data-menu-menu
   >
     {/* Nav tabs — full-width buttons with SVG dotted border, stacked vertically */}
@@ -339,6 +337,15 @@ const navPrefix = variant === 'home' ? '#' : '/#';
     display: block;
     width: 20px;
     height: 20px;
+    /* Base transition = closing curve (rotate back, 150ms ease-in). */
+    transition: transform var(--duration-fast) var(--ease-in);
+  }
+
+  /* Rotate 180° while the dropdown is open (animations.md §3.3).
+     Opening curve = 200ms ease-out. */
+  .header__contact-button[aria-expanded="true"] .header__contact-chevron {
+    transform: rotate(180deg);
+    transition: transform var(--duration-base) var(--ease-out);
   }
 
   /* ====== Desktop Contact dropdown ====== */
@@ -346,7 +353,6 @@ const navPrefix = variant === 'home' ? '#' : '/#';
     position: absolute;
     top: calc(100% + var(--space-stack-sm) + var(--space-stack-sm));
     left: 50%;
-    transform: translateX(-50%);
     z-index: var(--z-dropdown);
     width: 125px;
     padding: var(--space-inset-md);
@@ -354,10 +360,33 @@ const navPrefix = variant === 'home' ? '#' : '/#';
     border: 1px solid var(--color-stroke-light);
     border-radius: var(--radius-l);
     box-shadow: var(--shadow-elevated);
+    /* Closed/closing base state (animations.md §3.2): faded + slid up 8px.
+       translateX(-50%) keeps it centred on the trigger. visibility:hidden
+       removes it from the a11y tree + tab order when closed; the delayed
+       visibility transition keeps it visible through the 150ms fade-out.
+       Base transition = the CLOSING curve (150ms ease-in). */
+    opacity: 0;
+    visibility: hidden;
+    transform: translateX(-50%) translateY(-8px);
+    pointer-events: none;
+    transition:
+      opacity var(--duration-fast) var(--ease-in),
+      transform var(--duration-fast) var(--ease-in),
+      visibility 0s linear var(--duration-fast);
   }
 
-  .header__contact-menu[hidden] {
-    display: none;
+  /* Open state (animations.md §3.1): faded in + slid into place.
+     Overrides the transition with the OPENING curve (200ms ease-out);
+     visibility flips to visible immediately (no delay). */
+  .header__contact-menu.is-open {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0);
+    pointer-events: auto;
+    transition:
+      opacity var(--duration-base) var(--ease-out),
+      transform var(--duration-base) var(--ease-out),
+      visibility 0s;
   }
 
   .header__contact-menu-link {
@@ -407,12 +436,15 @@ const navPrefix = variant === 'home' ? '#' : '/#';
     display: block;
     width: 20px;
     height: 20px;
-    transition: transform var(--duration-fast) var(--ease-out);
+    /* Base transition = closing curve (150ms ease-in). */
+    transition: transform var(--duration-fast) var(--ease-in);
   }
 
-  /* Rotate chevron when menu is open (a11y hint) */
+  /* Rotate chevron when menu is open (a11y hint + animations.md §3.3).
+     Opening curve = 200ms ease-out. */
   .header__menu-button[aria-expanded="true"] .header__menu-chevron {
     transform: rotate(180deg);
+    transition: transform var(--duration-base) var(--ease-out);
   }
 
   /* ====== Mobile Menu dropdown ======
@@ -441,10 +473,31 @@ const navPrefix = variant === 'home' ? '#' : '/#';
     row-gap: var(--space-stack-sm); /* 8px between tabs */
     list-style: none;
     margin: 0;
+    /* Closed/closing base state (animations.md §3.2): faded + slid up 8px.
+       visibility:hidden removes it from a11y tree + tab order when closed;
+       delayed visibility transition keeps it through the 150ms fade-out.
+       Base transition = closing curve (150ms ease-in). */
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-8px);
+    pointer-events: none;
+    transition:
+      opacity var(--duration-fast) var(--ease-in),
+      transform var(--duration-fast) var(--ease-in),
+      visibility 0s linear var(--duration-fast);
   }
 
-  .header__menu-dropdown[hidden] {
-    display: none;
+  /* Open state (animations.md §3.1): faded in + slid into place.
+     Opening curve = 200ms ease-out; visibility flips immediately. */
+  .header__menu-dropdown.is-open {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+    pointer-events: auto;
+    transition:
+      opacity var(--duration-base) var(--ease-out),
+      transform var(--duration-base) var(--ease-out),
+      visibility 0s;
   }
 
   /* ====== Nav tab — inline SVG dotted border, full-width, centered text ======
@@ -572,16 +625,22 @@ const navPrefix = variant === 'home' ? '#' : '/#';
 
     const isOpen = () => trigger.getAttribute('aria-expanded') === 'true';
 
+    // Visibility-based gating (no `hidden`/display:none): the menu is always in
+    // layout (position:absolute, zero reflow cost) and hidden via the CSS base
+    // state (opacity 0 + visibility hidden). This way the open/close transition
+    // always runs — display:none→block would skip the first animation frame.
+    // visibility:hidden still removes the closed menu from the a11y tree and
+    // tab order, and aria-expanded reflects state.
     const open = () => {
       trigger.setAttribute('aria-expanded', 'true');
-      menu.removeAttribute('hidden');
+      menu.classList.add('is-open');
       // Focus first menu item per a11y.md 2.5
       menuItems()[0]?.focus();
     };
 
     const close = (returnFocus = true) => {
       trigger.setAttribute('aria-expanded', 'false');
-      menu.setAttribute('hidden', '');
+      menu.classList.remove('is-open');
       if (returnFocus) trigger.focus();
     };
 
