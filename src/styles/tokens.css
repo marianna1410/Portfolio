@@ -183,6 +183,7 @@
   /* Durations */
   --duration-instant:     100ms;
   --duration-fast:        150ms;
+  --duration-base:        200ms; /* state transitions, dropdown open, page fade (animations.md §2/§3/§1.2) */
   --duration-medium:      250ms;
   --duration-slow:        400ms;
   --duration-stack-swap:  500ms;

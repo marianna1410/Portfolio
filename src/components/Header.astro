@@ -217,6 +217,21 @@ const navPrefix = variant === 'home' ? '#' : '/#';
     padding: var(--space-inset-sm);
     background-color: var(--color-bg-light-grey);
     border-radius: var(--radius-2xl);
+    /* Default state: transparent border + no shadow. Border kept at 1px
+       transparent so the Scrolling state only animates color (no layout
+       shift). Per animations.md §2 — animate border + box-shadow, 200ms. */
+    border: 1px solid transparent;
+    box-shadow: none;
+    transition:
+      border-color var(--duration-base) var(--ease-out),
+      box-shadow var(--duration-base) var(--ease-out);
+  }
+
+  /* Scrolling state (scrollY > 8px) — thin stroke + elevated shadow.
+     Toggled via data-scrolled on .header by the scroll listener below. */
+  .header[data-scrolled="true"] .header__pill {
+    border-color: var(--color-stroke-light);
+    box-shadow: var(--shadow-elevated);
   }
 
   /* Case variant: fixed pill width 492 (Figma 472:17103) with content
@@ -649,10 +664,47 @@ const navPrefix = variant === 'home' ? '#' : '/#';
     });
   };
 
+  /*
+   * Header Default ↔ Scrolling state (animations.md §2).
+   * scrollY > 8px → data-scrolled="true" (border + shadow fade in, 200ms).
+   * back to 0–7px → default. rAF-throttled so the scroll handler stays cheap.
+   * The CSS transition is killed automatically under prefers-reduced-motion
+   * by the global baseline, so the state swap becomes instant there.
+   */
+  const initScrollState = () => {
+    const THRESHOLD = 8;
+
+    // Query .header fresh each call so it works after Astro swaps <body>
+    // (the header element is recreated, but window persists).
+    const apply = () => {
+      const header = document.querySelector<HTMLElement>('.header');
+      if (!header) return;
+      header.dataset.scrolled = window.scrollY > THRESHOLD ? 'true' : 'false';
+    };
+
+    // Sync current page's header on every page-load.
+    apply();
+
+    // window survives view transitions — bind the scroll listener only once.
+    if ((window as any).__headerScrollBound) return;
+    (window as any).__headerScrollBound = true;
+
+    let ticking = false;
+    window.addEventListener('scroll', () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        ticking = false;
+        apply();
+      });
+    }, { passive: true });
+  };
+
   const initHeader = () => {
     initDropdown({ triggerSelector: '[data-contact-trigger]', menuSelector: '[data-contact-menu]' });
     initDropdown({ triggerSelector: '[data-menu-trigger]',    menuSelector: '[data-menu-menu]'    });
     initSmoothScroll();
+    initScrollState();
   };
 
   // Astro View Transitions fires astro:page-load on every page swap; bind there.
