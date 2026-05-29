@@ -7,6 +7,7 @@
  * Everything else (typography, links, illustration) is identical.
  */
 import { Image } from 'astro:assets';
+import ArrowSwap from './ArrowSwap.astro';
 import diagonalArrow from '../assets/icons/diagonal-arrow-dark-grey.svg';
 import footerDottedLine from '../assets/icons/footer-dotted-line.svg';
 import footerBird from '../assets/icons/footer-bird.svg';
@@ -54,7 +55,7 @@ const { variant = 'default' } = Astro.props;
               aria-label={`Email Marianna at ${CONTACT.email} (opens mail client)`}
             >
               <span>Email</span>
-              <Image src={diagonalArrow} alt="" width={20} height={20} class="footer__link-arrow" />
+              <ArrowSwap icon={diagonalArrow} class="footer__link-arrow" />
             </a>
           </li>
           <li>
@@ -65,7 +66,7 @@ const { variant = 'default' } = Astro.props;
               class="footer__link text-label"
             >
               <span>LinkedIn</span>
-              <Image src={diagonalArrow} alt="" width={20} height={20} class="footer__link-arrow" />
+              <ArrowSwap icon={diagonalArrow} class="footer__link-arrow" />
               <span class="sr-only">(opens in new tab)</span>
             </a>
           </li>
@@ -77,7 +78,7 @@ const { variant = 'default' } = Astro.props;
               class="footer__link text-label"
             >
               <span>Telegram</span>
-              <Image src={diagonalArrow} alt="" width={20} height={20} class="footer__link-arrow" />
+              <ArrowSwap icon={diagonalArrow} class="footer__link-arrow" />
               <span class="sr-only">(opens in new tab)</span>
             </a>
           </li>
@@ -89,7 +90,7 @@ const { variant = 'default' } = Astro.props;
               class="footer__link text-label"
             >
               <span>Resume</span>
-              <Image src={diagonalArrow} alt="" width={20} height={20} class="footer__link-arrow" />
+              <ArrowSwap icon={diagonalArrow} class="footer__link-arrow" />
               <span class="sr-only">(opens in new tab)</span>
             </a>
           </li>

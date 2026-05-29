@@ -1,5 +1,6 @@
 ---
 import { Image } from 'astro:assets';
+import ArrowSwap from './ArrowSwap.astro';
 import logoSvg from '../assets/icons/logo.svg';
 import chevronDownWhite from '../assets/icons/chevron-down-white.svg';
 import diagonalArrow from '../assets/icons/diagonal-arrow-dark-grey.svg';
@@ -71,7 +72,7 @@ const navPrefix = variant === 'home' ? '#' : '/#';
             aria-label={`Email Marianna at ${CONTACT.email} (opens mail client)`}
           >
             <span>Email</span>
-            <Image src={diagonalArrow} alt="" width={20} height={20} class="header__contact-menu-arrow" />
+            <ArrowSwap icon={diagonalArrow} class="header__contact-menu-arrow" />
           </a>
         </li>
         <li role="none">
@@ -83,7 +84,7 @@ const navPrefix = variant === 'home' ? '#' : '/#';
             rel="noopener noreferrer"
           >
             <span>LinkedIn</span>
-            <Image src={diagonalArrow} alt="" width={20} height={20} class="header__contact-menu-arrow" />
+            <ArrowSwap icon={diagonalArrow} class="header__contact-menu-arrow" />
             <span class="sr-only">(opens in new tab)</span>
           </a>
         </li>
@@ -96,7 +97,7 @@ const navPrefix = variant === 'home' ? '#' : '/#';
             rel="noopener noreferrer"
           >
             <span>Telegram</span>
-            <Image src={diagonalArrow} alt="" width={20} height={20} class="header__contact-menu-arrow" />
+            <ArrowSwap icon={diagonalArrow} class="header__contact-menu-arrow" />
             <span class="sr-only">(opens in new tab)</span>
           </a>
         </li>
@@ -154,7 +155,7 @@ const navPrefix = variant === 'home' ? '#' : '/#';
         aria-label={`Email Marianna at ${CONTACT.email} (opens mail client)`}
       >
         <span>Email</span>
-        <Image src={diagonalArrow} alt="" width={20} height={20} class="header__menu-contact-arrow" />
+        <ArrowSwap icon={diagonalArrow} class="header__menu-contact-arrow" />
       </a>
       <a
         href={CONTACT.linkedin}
@@ -164,7 +165,7 @@ const navPrefix = variant === 'home' ? '#' : '/#';
         rel="noopener noreferrer"
       >
         <span>LinkedIn</span>
-        <Image src={diagonalArrow} alt="" width={20} height={20} class="header__menu-contact-arrow" />
+        <ArrowSwap icon={diagonalArrow} class="header__menu-contact-arrow" />
         <span class="sr-only">(opens in new tab)</span>
       </a>
       <a
@@ -175,7 +176,7 @@ const navPrefix = variant === 'home' ? '#' : '/#';
         rel="noopener noreferrer"
       >
         <span>Telegram</span>
-        <Image src={diagonalArrow} alt="" width={20} height={20} class="header__menu-contact-arrow" />
+        <ArrowSwap icon={diagonalArrow} class="header__menu-contact-arrow" />
         <span class="sr-only">(opens in new tab)</span>
       </a>
     </li>

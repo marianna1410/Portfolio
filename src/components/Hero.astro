@@ -6,6 +6,7 @@ import avatar    from '../assets/hero/hero-avatar.png';
 import heroPaper from '../assets/hero/hero-paper.svg';
 // Arrow icon for the button
 import diagonalArrow from '../assets/icons/diagonal-arrow.svg';
+import ArrowSwap from './ArrowSwap.astro';
 // Decorative icons — desktop set (10 icons, 256px sources for 4x retina at 64px display)
 import iconClaude         from '../assets/icons/icon-claude.png';
 import iconClever         from '../assets/icons/icon-clever.png';
@@ -121,13 +122,7 @@ import { RESUME_URL } from '../lib/config.ts';
             aria-label="Open Resume (opens in new tab)"
           >
             <span>Open Resume</span>
-            <Image
-              src={diagonalArrow}
-              alt=""
-              width={20}
-              height={20}
-              class="hero__resume-btn-icon"
-            />
+            <ArrowSwap icon={diagonalArrow} class="hero__resume-btn-icon" />
           </a>
 
           <!-- Caption -->
@@ -327,6 +322,15 @@ import { RESUME_URL } from '../lib/config.ts';
     border-radius: var(--radius-l);
     color: var(--color-text-dark-grey);
     white-space: nowrap;
+    transition: border-color var(--duration-fast) var(--ease-out); /* 150ms */
+  }
+
+  /* Hover: border darkens to stroke/dark-grey. Pointer-only — no hover
+     on touch. */
+  @media (hover: hover) and (pointer: fine) {
+    .hero__resume-btn:hover {
+      border-color: var(--color-stroke-dark-grey);
+    }
   }
 
   .hero__resume-btn-icon {
@@ -467,7 +471,11 @@ import { RESUME_URL } from '../lib/config.ts';
       padding-right: var(--space-inset-sm);
     }
 
-    .hero__resume-btn-icon {
+    /* Arrow shrinks to 16px on mobile. ArrowSwap renders its own scoped
+       elements, so reach into them with :global from the (scoped) button. */
+    .hero__resume-btn-icon,
+    .hero__resume-btn :global(.arrow-swap),
+    .hero__resume-btn :global(.arrow-swap-icon) {
       width: 16px;
       height: 16px;
     }

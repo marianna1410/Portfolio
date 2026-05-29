@@ -22,6 +22,7 @@
 import { Image } from 'astro:assets';
 import type { ImageMetadata } from 'astro';
 import CaseSectionHeader from './CaseSectionHeader.astro';
+import ArrowSwap from '../ArrowSwap.astro';
 import arrowBulletIcon from '../../assets/icons/arrow-right-bullet.svg';
 // Black (#252525) diagonal arrow — matches Figma button 493:12900 chevron color.
 // (There's also a dark-grey #4A4A4A variant used elsewhere, e.g. dropdown items.)
@@ -150,14 +151,7 @@ const showResearch = !!researchIntro && Array.isArray(highlights) && highlights.
     rel="noopener noreferrer"
   >
     <span class="case-solution__cta-label">{prototypeLabel}</span>
-    <Image
-      src={diagonalArrow}
-      alt=""
-      width={20}
-      height={20}
-      class="case-solution__cta-icon"
-      aria-hidden="true"
-    />
+    <ArrowSwap icon={diagonalArrow} class="case-solution__cta-icon" />
   </a>
 
   {showResearch && (

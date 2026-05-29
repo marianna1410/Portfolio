@@ -19,6 +19,7 @@
 import { Image } from 'astro:assets';
 import type { ImageMetadata } from 'astro';
 import diagonalArrow from '../../assets/icons/diagonal-arrow-dark-grey.svg';
+import ArrowSwap from '../ArrowSwap.astro';
 
 interface Props {
   /** Section heading, default "Keep reading". */
@@ -81,14 +82,7 @@ const {
 
       <span class="case-next__cta">
         <span class="case-next__cta-label">{ctaLabel}</span>
-        <Image
-          src={diagonalArrow}
-          alt=""
-          width={20}
-          height={20}
-          class="case-next__cta-icon"
-          aria-hidden="true"
-        />
+        <ArrowSwap icon={diagonalArrow} class="case-next__cta-icon" />
       </span>
     </div>
   </a>

@@ -124,8 +124,9 @@ Spec: `Portfolio dev planning/animations.md`. Honor `prefers-reduced-motion` (a1
 |------|--------|
 | Header Default ↔ Scrolling transition (border + shadow, 200ms) | ✅ committed |
 | Contact + Menu dropdown open/close (fade + slide 8px + chevron rotate) | ✅ committed |
-| Footer contact-link hover animation | ⬜ **NEXT** — first dot-arrow pilot was scrapped; redo as something simpler |
-| Text-link hover (color shift) for plain nav/dropdown links | ⬜ |
+| Diagonal-arrow swap-on-hover (footer + header dropdown/menu + hero + case CTAs) | ✅ committed — reusable `ArrowSwap.astro`, 400ms ease-out, gated `(hover:hover)`, focus-visible ungated |
+| Hero "Open Resume" border-color hover (→ stroke/dark-grey, 150ms) | ✅ committed |
+| Text-link hover (color shift) for plain nav/dropdown links | ⬜ **NEXT** |
 | Works / Next-case card image cross-fade (250ms) | ⬜ |
 | TOC active-state transition (200ms) | ⬜ |
 | Page transitions (Astro View Transitions, fade) | ⬜ |
