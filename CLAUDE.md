@@ -92,7 +92,10 @@ Curated copies go into `src/assets/`.
 
 ## Phase progress (as of last working session)
 
-**Phase 1 — Static skeleton + a11y** — IN PROGRESS
+**Phase 1 — Static skeleton + a11y** — ✅ DONE (all 3 pages built & responsive)
+**Phase 2 — Micro-animations** — 🔄 CURRENT PHASE
+
+### Phase 1 (complete)
 
 | # | Task | Status |
 |---|------|--------|
@@ -101,17 +104,33 @@ Curated copies go into `src/assets/`.
 | 3 | Generate tokens.css from Figma | ✅ |
 | 4 | Set up fonts (Inter Tight, Fira Code via Fontsource) | ✅ |
 | 5 | Build Header (desktop + mobile Menu w/ a11y + smooth scroll) | ✅ |
-| 6 | Build Footer (static) | ✅ |
+| 6 | Build Footer | ✅ |
 | 7 | Build Home Hero section (desktop + mobile) | ✅ |
 | 8 | Build Home Works section (desktop + mobile, hover swap) | ✅ |
-| 9 | Build Home Experience section | ⬜ **NEXT** |
-| 10 | Build Home Behind the Screen section | ⬜ |
-| 11 | Build Case template + dynamic route | ⬜ |
-| 12 | Write Lucida + Vaia MDX content | ⬜ |
-| 13 | Mobile-first responsive pass (final sweep) | ⬜ |
-| 14 | Phase 1 accessibility audit | ⬜ |
+| 9 | Build Home Experience section (redesign Figma 798:12038) | ✅ |
+| 10 | Build Home Behind the Screen section | ✅ |
+| 11 | Build Case template + dynamic route | ✅ |
+| 12 | Lucida + Vaia case content (TS data modules, NOT MDX — see note) | ✅ |
+| 13 | Mobile responsive pass across all sections | ✅ |
+| 14 | Phase 1 accessibility audit (final formal sweep) | ⬜ deferred |
 
-Phases 2 (micro-animations), 3 (GSAP complex), 4 (QA + Deploy) — pending after Phase 1.
+> Note: case content ended up as typed TS data modules (`src/content/cases/lucida.ts`, `vaia.ts`) consumed by `[slug].astro` + `CaseSolution`/`CaseTOC` components — the planned MDX approach was dropped.
+
+### Phase 2 — Micro-animations (CURRENT)
+
+Spec: `Portfolio dev planning/animations.md`. Honor `prefers-reduced-motion` (a11y.md 6.12 baseline already in global.css). Build per-element, preview link before each commit, commit per logical unit.
+
+| Task | Status |
+|------|--------|
+| Header Default ↔ Scrolling transition (border + shadow, 200ms) | ✅ committed |
+| Contact + Menu dropdown open/close (fade + slide 8px + chevron rotate) | ✅ committed |
+| Footer contact-link hover animation | ⬜ **NEXT** — first dot-arrow pilot was scrapped; redo as something simpler |
+| Text-link hover (color shift) for plain nav/dropdown links | ⬜ |
+| Works / Next-case card image cross-fade (250ms) | ⬜ |
+| TOC active-state transition (200ms) | ⬜ |
+| Page transitions (Astro View Transitions, fade) | ⬜ |
+
+Phases 3 (GSAP: ScrollSmoother, Hero orbit, Travelling fan-out, Footer bird), 4 (QA + Deploy) — after Phase 2.
 
 ## Key technical decisions made (don't relitigate without asking)
 
@@ -249,26 +268,30 @@ When the resume URL changes, edit `src/lib/config.ts` only — it's wired into H
 
 Last commits on `main` (pushed to `origin/main`):
 ```
+713ea93  fix(footer,lucida): tighter mobile footer link gap + update Lucida proto link
+e565752  feat(behind): Behind the Screen refinements per Figma 472:16885
+4ad04c7  feat(experience): redesign per Figma 798:12038 + mobile adaptation
+4bcfb99  feat(header): animate Contact + Menu dropdowns (fade + slide 8px + arrow)
+0ea024d  feat(header): animate Default ↔ Scrolling state (border + shadow, 200ms)
+39157b5  feat(case-vaia): build Vaia case study + tighten case-template chrome
+128ca8a  refactor(case): typed data modules + dynamic [slug] route for cases
+7362215  feat(case-lucida): Solutions, Summary, and Next project card
 8969224  feat(works): Selected Works section per Figma node 472:16047
-fe82196  feat(mobile): pixel-perfect Hero + Mobile menu per Figma node 647:23550
-3677f5a  feat(hero): Hero section with 4x assets, drop-shadow holes, optical text fix
-e5daf81  feat(footer): build static Footer component from Figma
-8ef0108  fix(header): 8px visible gap between pill bottom and dropdown top
-3cfc91f  fix(header): letter-spacing, dropdown alignment, mobile full-width
-476faa8  feat(fonts): self-host Inter Tight + Fira Code via Fontsource
-52c3df3  feat(tokens): generate tokens.css from Figma styles + variables
-4c64d38  chore: scaffold Astro project + folder structure
-36c4d93  Initial commit (pre-Claude)
 ```
+(Earlier scaffold/tokens/fonts/hero/footer commits below these.)
+
+Working tree clean as of last session. The first footer dot-arrow hover-animation
+pilot was **scrapped** (DotArrow.astro deleted, Footer + global.css reverted) — to be
+redone simpler. No uncommitted WIP.
 
 Remote: `https://github.com/marianna1410/Portfolio.git`. Marianna sometimes asks for "local commit only, don't push to GitHub yet". Always ASK before push.
 
 ## How to resume next session — quick start
 
 1. Read this CLAUDE.md (you're doing it now).
-2. Read the 5 spec files in `Portfolio dev planning/` (especially `mobile-adaptation.md`).
-3. Marianna will say something like "робимо Experience section" and provide a Figma node ID.
-4. Workflow:
+2. Read the 5 spec files in `Portfolio dev planning/` (especially `animations.md` — we're in **Phase 2: micro-animations** — and `mobile-adaptation.md`).
+3. **Current phase = animations.** Next up: redo the footer contact-link hover animation (simpler than the scrapped dot-arrow pilot), then the remaining Phase 2 items above. For any NEW static section/tweak, Marianna gives a Figma node ID and the build workflow below applies.
+4. Workflow (building/adjusting a section):
    - `mcp__figma__get_design_context fileKey=Md80hD9zZmtUsYs9ZLg8hM nodeId=...` → get structure
    - `mcp__figma__get_screenshot` → download via curl into `.tmp/` → Read
    - Check `Assets/Images/{section}/` for prepared PNG assets (often there)
