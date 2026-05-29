@@ -168,7 +168,7 @@ const {
     line-height: var(--line-height-base);
     letter-spacing: var(--letter-spacing-wide);
     white-space: nowrap;
-    transition: color var(--duration-fast) var(--ease-out);
+    transition: color var(--duration-base) var(--ease-out); /* 200ms (animations.md §8.2) */
   }
 
   .case-toc__link--active { color: var(--color-text-black); }
@@ -182,13 +182,21 @@ const {
     flex-shrink: 0;
     position: relative;
   }
+  /* Two triangles stacked in the slot; cross-fade via opacity (not display)
+     so the active-state change animates smoothly. 200ms ease-out. */
   .case-toc__icon-img {
     position: absolute;
     inset: 0;
-    display: none;
+    display: block;
+    opacity: 0;
+    transition: opacity var(--duration-base) var(--ease-out);
   }
-  .case-toc__link--active .case-toc__icon-img--active { display: block; }
-  .case-toc__link:hover:not(.case-toc__link--active) .case-toc__icon-img--hover { display: block; }
+  /* Active section (scroll-spy driven): black triangle fades in. */
+  .case-toc__link--active .case-toc__icon-img--active { opacity: 1; }
+  /* Hover on a non-active link: grey triangle — pointer devices only. */
+  @media (hover: hover) and (pointer: fine) {
+    .case-toc__link:hover:not(.case-toc__link--active) .case-toc__icon-img--hover { opacity: 1; }
+  }
 
   .case-toc__link:focus-visible {
     outline: none;

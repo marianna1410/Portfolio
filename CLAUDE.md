@@ -127,12 +127,13 @@ Spec: `Portfolio dev planning/animations.md`. Honor `prefers-reduced-motion` (a1
 | Arrow swap-on-hover (footer + header dropdown/menu + hero + case CTAs + Contact chevron ↓ + Go Home ←) | ✅ committed — reusable `ArrowSwap.astro`, `direction` prop (arrow travels where it points), 400ms ease-out, gated `(hover:hover)`, focus-visible ungated. Contact swap suppressed while dropdown open (chevron points up). |
 | Hero "Open Resume" border-color hover (→ stroke/dark-grey, 150ms) | ✅ committed |
 | Header nav tabs (Works/Experience/About) hover → text/muted (150ms) | ✅ committed |
-| Text-link hover (color shift) for remaining plain/dropdown links | ⬜ **NEXT** |
-| Works / Next-case card image cross-fade (250ms) | ⬜ |
-| TOC active-state transition (200ms) | ⬜ |
-| Page transitions (Astro View Transitions, fade) | ⬜ |
+| Text-link hover (color shift) for remaining plain/dropdown links | ⏸️ skipped — covered ad-hoc; only "bare" dropdown text remains, deferred |
+| Works card image hover | ✅ done (local) — switched from 2-image cross-fade to **Ken-Burns zoom** `scale(1.06)` 250ms ease-out (matches Next-case card), per Marianna. Unused `*-hover.png` assets deleted. |
+| Next-case card image zoom (scale 1.06) | ✅ already built in Phase 1 |
+| TOC active-state transition (200ms) | ✅ done (local) — link colour + triangle icon now cross-fade via opacity (was display-toggle), 200ms ease-out |
+| Page transitions (Astro View Transitions) | ✅ done (local) — `<ClientRouter />` in BaseLayout + root cross-fade (old ease-in / new ease-out, 200ms) in global.css; reduced-motion disables it |
 
-Phases 3 (GSAP: ScrollSmoother, Hero orbit, Travelling fan-out, Footer bird), 4 (QA + Deploy) — after Phase 2.
+> **Phase 2 essentially complete** (pending commit/push of the last 3 local changes). Phases 3 (GSAP: ScrollSmoother, Hero orbit, Travelling fan-out, Footer bird), 4 (QA + Deploy) next.
 
 ## Key technical decisions made (don't relitigate without asking)
 

@@ -1,9 +1,7 @@
 ---
 import { Image } from 'astro:assets';
 import lucidaDefault from '../assets/projects/lucida-default.png';
-import lucidaHover   from '../assets/projects/lucida-hover.png';
 import vaiaDefault   from '../assets/projects/vaia-default.png';
-import vaiaHover     from '../assets/projects/vaia-hover.png';
 
 /**
  * Selected Works data — kept inline here since there are only 2 cases.
@@ -16,7 +14,6 @@ const works = [
     tags: ['Language Learning', 'Redesign Concept'],
     title: 'Bringing structure and confidence to speaking practice through proven learning patterns',
     defaultImg: lucidaDefault,
-    hoverImg: lucidaHover,
   },
   {
     slug: 'vaia',
@@ -24,7 +21,6 @@ const works = [
     tags: ['EdTech', 'Redesign Concept'],
     title: "Restoring students' control and transparency over automated exam preparation",
     defaultImg: vaiaDefault,
-    hoverImg: vaiaHover,
   },
 ];
 ---
@@ -53,16 +49,7 @@ const works = [
                   width={1212}
                   height={784}
                   quality={95}
-                  class="works__image-default"
-                />
-                <Image
-                  src={work.hoverImg}
-                  alt=""
-                  width={1212}
-                  height={784}
-                  quality={95}
-                  class="works__image-hover"
-                  aria-hidden="true"
+                  class="works__image-img"
                 />
               </div>
             </div>
@@ -203,7 +190,7 @@ const works = [
     text-wrap: balance;
   }
 
-  /* ====== Image area with hover swap ====== */
+  /* ====== Image area with hover zoom (Ken-Burns, matches Next-case card) ====== */
   .works__image {
     position: relative;
     flex: 1 1 auto;
@@ -222,9 +209,9 @@ const works = [
     }
   }
 
-  /* Both images fill the container; hover layered on top with opacity 0 by default */
-  .works__image-default,
-  .works__image-hover {
+  /* Single image fills the rounded frame; the frame's overflow:hidden crops
+     the gentle Ken-Burns zoom on hover (same effect as the Next-case card). */
+  .works__image-img {
     position: absolute;
     inset: 0;
     width: 100%;
@@ -232,40 +219,19 @@ const works = [
     object-fit: cover;
     object-position: center;
     display: block;
-    transition: opacity var(--duration-medium) var(--ease-out);
+    transition: transform var(--duration-medium) var(--ease-out); /* 250ms */
   }
 
-  .works__image-hover {
-    opacity: 0;
-  }
-
-  /* Hover state: swap images. Also on keyboard focus for a11y. */
-  .works__card:hover .works__image-default,
-  .works__card:focus-visible .works__image-default {
-    opacity: 0;
-  }
-
-  .works__card:hover .works__image-hover,
-  .works__card:focus-visible .works__image-hover {
-    opacity: 1;
-  }
-
-  /* Touch devices — disable hover swap; default image always shown */
-  @media (pointer: coarse) {
-    .works__card:hover .works__image-default,
-    .works__card:focus-visible .works__image-default {
-      opacity: 1;
-    }
-    .works__card:hover .works__image-hover,
-    .works__card:focus-visible .works__image-hover {
-      opacity: 0;
+  /* Hover: image grows ~6%. Pointer-only — no hover on touch. */
+  @media (hover: hover) and (pointer: fine) {
+    .works__card:hover .works__image-img {
+      transform: scale(1.06);
     }
   }
 
-  /* Respect prefers-reduced-motion — skip the crossfade animation */
+  /* Respect prefers-reduced-motion — no zoom. */
   @media (prefers-reduced-motion: reduce) {
-    .works__image-default,
-    .works__image-hover {
+    .works__image-img {
       transition: none;
     }
   }

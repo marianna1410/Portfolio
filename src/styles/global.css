@@ -107,3 +107,27 @@ body {
     scroll-behavior: auto !important;
   }
 }
+
+/* ─── Page transitions (Astro View Transitions, animations.md §1.2) ───
+   Minimalist cross-fade between pages: old fades out (ease-in), new fades
+   in (ease-out), both 200ms. No slide/scale. The `*` reduced-motion rule
+   above does NOT match these pseudo-elements, so gate them explicitly. */
+@keyframes vt-page-out { from { opacity: 1; } to { opacity: 0; } }
+@keyframes vt-page-in  { from { opacity: 0; } to { opacity: 1; } }
+
+@media (prefers-reduced-motion: no-preference) {
+  ::view-transition-old(root) {
+    animation: vt-page-out var(--duration-base) var(--ease-in) both; /* 200ms */
+  }
+  ::view-transition-new(root) {
+    animation: vt-page-in var(--duration-base) var(--ease-out) both; /* 200ms */
+  }
+}
+
+/* Reduced motion: no cross-fade — instant swap (animations.md §0.1). */
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none !important;
+  }
+}
