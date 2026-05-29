@@ -12,7 +12,7 @@ export const CONTACT = {
 export const PROTOTYPES = {
   lucida: {
     problem1: 'https://www.figma.com/proto/A1JJoDAqgctnLSh9KiUjeQ/Lucida_Case-Study?node-id=854-9621',
-    problem2: 'https://www.figma.com/proto/A1JJoDAqgctnLSh9KiUjeQ/Lucida_Case-Study?node-id=854-9017',
+    problem2: 'https://www.figma.com/proto/A1JJoDAqgctnLSh9KiUjeQ/Lucida_Case-Study?node-id=854-9621&viewport=363%2C-124%2C0.29&t=KLY12ndoUXySXLhL-1&scaling=scale-down&content-scaling=fixed&starting-point-node-id=854%3A9552&page-id=854%3A8918',
     problem3: 'https://www.figma.com/proto/A1JJoDAqgctnLSh9KiUjeQ/Lucida_Case-Study?node-id=854-10076',
   },
   vaia: {

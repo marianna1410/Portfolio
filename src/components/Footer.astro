@@ -233,8 +233,16 @@ const { variant = 'default' } = Astro.props;
     display: flex;
     align-items: center;
     flex-wrap: wrap;
-    gap: var(--space-inline-lg); /* 16px between links */
+    gap: var(--space-inline-lg); /* 16px desktop / 12px mobile between links */
     list-style: none;
+  }
+
+  /* Mobile: reduce the gap between links — both horizontal and the
+     vertical gap between wrapped rows — from 12px to 8px. */
+  @media (max-width: 767px) {
+    .footer__links {
+      gap: var(--space-inline-sm); /* 8px (both axes) */
+    }
   }
 
   /* ====== Individual link ====== */
