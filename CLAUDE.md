@@ -133,7 +133,13 @@ Spec: `Portfolio dev planning/animations.md`. Honor `prefers-reduced-motion` (a1
 | TOC active-state transition (200ms) | ✅ done (local) — link colour + triangle icon now cross-fade via opacity (was display-toggle), 200ms ease-out |
 | Page transitions (Astro View Transitions) | ✅ done (local) — `<ClientRouter />` in BaseLayout + root cross-fade (old ease-in / new ease-out, 200ms) in global.css; reduced-motion disables it |
 
-> **Phase 2 essentially complete** (pending commit/push of the last 3 local changes). Phases 3 (GSAP: ScrollSmoother, Hero orbit, Travelling fan-out, Footer bird), 4 (QA + Deploy) next.
+> **Phase 2 essentially complete.** Phase 3 (GSAP) next — scope decisions made:
+> - **ScrollSmoother — ❌ DROPPED** (Marianna). Its transform wrapper breaks
+>   `position: sticky` (header pill, TOC sidebar) + `position: fixed` (TOC FAB).
+>   Keep native `scroll-behavior: smooth` + `scroll-margin-top` (already in global.css).
+> - **Travelling click-swap — ❌ DROPPED** (Marianna). Only the fan-out reveal stays.
+> - Remaining Phase 3: Hero icon orbit, Travelling fan-out reveal, Footer bird.
+> Phase 4 = QA + Deploy.
 
 ## Key technical decisions made (don't relitigate without asking)
 

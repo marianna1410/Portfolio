@@ -6,11 +6,9 @@
  *                outer WHITE background, inner LIGHT-GREY card.
  * Everything else (typography, links, illustration) is identical.
  */
-import { Image } from 'astro:assets';
 import ArrowSwap from './ArrowSwap.astro';
 import diagonalArrow from '../assets/icons/diagonal-arrow-dark-grey.svg';
-import footerDottedLine from '../assets/icons/footer-dotted-line.svg';
-import footerBird from '../assets/icons/footer-bird.svg';
+import birdRaw from '../assets/icons/footer-bird.svg?raw';
 import { CONTACT, RESUME_URL } from '../lib/config.ts';
 
 interface Props {
@@ -18,6 +16,53 @@ interface Props {
 }
 
 const { variant = 'default' } = Astro.props;
+
+/**
+ * Dotted line + bird "highlight wave" (animations.md §11.1).
+ * The line is rebuilt as discrete dots (the source SVG is one dashed path),
+ * the bird already ships as 99 individual <circle>s. Every dot gets an
+ * animation-delay proportional to its left-to-right position, so a soft
+ * darkening wave (grey → text/black) travels along the line and into the
+ * bird, looping. Pure CSS — see .footer__dot below.
+ */
+// Wave timing — line and bird sweep at DIFFERENT paces (decoupled):
+const LINE_DURATION = 4.5; // s — wave crossing the dotted line (the brisk "as-before" pace)
+const BIRD_DURATION = 0.9; // s — wave crossing the bird (kept slow on purpose)
+const WAVE_CYCLE = LINE_DURATION + BIRD_DURATION; // total loop; pushed to CSS via --wave-cycle
+
+// Line dots: evenly spaced along the 273px line (viewBox 0 0 275 2).
+const lineDots: { cx: number; absX: number; delay: number }[] = [];
+for (let x = 1; x <= 273; x += 8) lineDots.push({ cx: x, absX: x, delay: 0 });
+
+// Bird dots: parsed from the source SVG; absolute x offset by the bird's
+// left position (278px) so it orders after the line.
+const birdDots = [...birdRaw.matchAll(/cx="([\d.]+)"\s+cy="([\d.]+)"/g)].map((m) => ({
+  cx: Number(m[1]),
+  cy: Number(m[2]),
+  absX: 278 + Number(m[1]),
+  delay: 0,
+}));
+
+// Delay is keyed to each dot's HORIZONTAL position (not its index) and
+// quantized into vertical columns, so dots sharing an x-band light up together
+// — the wave sweeps left → right covering several rows at once (rather than
+// crawling dot-by-dot, which read as a diagonal bottom-up climb in the bird).
+// The line and the bird run at their own even paces, joined at the seam.
+const WAVE_BIN = 2; // px — width of one wavefront column
+
+// delay = (when the band reaches this dot) − cycle → negative, seamless, L→R.
+const assignWave = (dots: { absX: number; delay: number }[], tStart: number, duration: number) => {
+  const xs = dots.map((d) => d.absX);
+  const min = Math.min(...xs);
+  const span = (Math.max(...xs) - min) || 1;
+  dots.forEach((d) => {
+    const colX = Math.round(d.absX / WAVE_BIN) * WAVE_BIN; // snap to column
+    const u = (colX - min) / span;                          // 0 … 1 within this segment
+    d.delay = tStart + u * duration - WAVE_CYCLE;
+  });
+};
+assignWave(lineDots, 0, LINE_DURATION);
+assignWave(birdDots, LINE_DURATION, BIRD_DURATION);
 ---
 
 <footer class:list={['footer', `footer--${variant}`]} aria-label="Site footer">
@@ -28,21 +73,27 @@ const { variant = 'default' } = Astro.props;
         <p class="text-h4-medium">Ready to start building?</p>
       </div>
 
-      <div class="footer__illustration" aria-hidden="true">
-        <Image
-          src={footerDottedLine}
-          alt=""
-          width={273}
-          height={2}
+      <div class="footer__illustration" aria-hidden="true" style={`--wave-cycle:${WAVE_CYCLE}s`}>
+        <svg
           class="footer__illustration-line"
-        />
-        <Image
-          src={footerBird}
-          alt=""
-          width={27}
-          height={34}
+          viewBox="0 0 275 2"
+          preserveAspectRatio="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          {lineDots.map((d) => (
+            <circle class="footer__dot" cx={d.cx} cy="1" r="1" style={`animation-delay:${d.delay}s`} />
+          ))}
+        </svg>
+        <svg
           class="footer__illustration-bird"
-        />
+          viewBox="0 0 27.1529 34.3031"
+          preserveAspectRatio="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          {birdDots.map((d) => (
+            <circle class="footer__dot" cx={d.cx} cy={d.cy} r="0.75" style={`animation-delay:${d.delay}s`} />
+          ))}
+        </svg>
       </div>
 
       <div class="footer__links-group">
@@ -206,6 +257,31 @@ const { variant = 'default' } = Astro.props;
     width: 27px;
     height: 34px;
     display: block;
+  }
+
+  /* ── Dot highlight wave (animations.md §11.1) ──
+     Every dot (line + bird) darkens grey → text/black → grey. Each dot's
+     animation-delay is set inline (frontmatter) from its left-to-right
+     position, so the bright band sweeps along the line and into the bird,
+     looping seamlessly. */
+  .footer__dot {
+    fill: var(--color-stroke-medium-grey); /* #BBBBBB base */
+    animation: footer-dot-wave var(--wave-cycle, 5.4s) ease-in-out infinite; /* duration fed from frontmatter */
+  }
+
+  @keyframes footer-dot-wave {
+    0%   { fill: var(--color-stroke-medium-grey); }
+    6%   { fill: var(--color-text-black); }   /* #252525 peak */
+    12%  { fill: var(--color-stroke-medium-grey); }
+    100% { fill: var(--color-stroke-medium-grey); }
+  }
+
+  /* Reduced motion: no wave — dots stay at the base grey. */
+  @media (prefers-reduced-motion: reduce) {
+    .footer__dot {
+      animation: none;
+      fill: var(--color-stroke-medium-grey);
+    }
   }
 
   /* ====== Links group (right column) ====== */

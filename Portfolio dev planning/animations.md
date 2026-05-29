@@ -75,6 +75,13 @@ GSAP з 2024 повністю безкоштовний (включно з Scroll
 
 ### 1.1. Smooth scroll — GSAP ScrollSmoother
 
+> **❌ СКАСОВАНО (рішення Marianna, Phase 3).** ScrollSmoother НЕ використовуємо:
+> він огортає контент у transform-обгортку, що ламає `position: sticky`
+> (хедер-пілюля, TOC-сайдбар) і `position: fixed` (TOC FAB). Лишаємо
+> **нативний smooth-scroll**: `scroll-behavior: smooth` + `scroll-margin-top`
+> на якорях (вже працює, у `global.css`). Без momentum-ефекту — і без ризику
+> для верстки. Текст нижче залишено для історії, не імплементувати.
+
 **Реалізація:** GSAP ScrollSmoother (https://gsap.com/docs/v3/Plugins/ScrollSmoother/).
 
 **Параметри:**
@@ -235,7 +242,8 @@ Cross-fade між default-image і hover-image.
 - Easing: `ease-out`.
 - Спрацьовує **один раз** на сесію (не повторюється при повторному скролі).
 
-**Click-swap (інтерактив):**
+**Click-swap (інтерактив): ❌ СКАСОВАНО (рішення Marianna, Phase 3).**
+Click-swap фото НЕ робимо. Лишається тільки fan-out reveal при появі (вище). Текст нижче залишено для історії, але не імплементувати.
 
 **Референс:** https://penghsuanlee.com/about — секція з фото внизу сторінки, де клік перемикає верхню картку в стопці.
 
