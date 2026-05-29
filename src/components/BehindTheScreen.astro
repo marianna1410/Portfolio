@@ -2,7 +2,8 @@
 import { Image } from 'astro:assets';
 // Raw import so we can inline the border SVG (vector-effect="non-scaling-stroke"
 // renders inconsistently through <img>; inline SVG works reliably everywhere).
-import endBorderSvg from '../assets/icons/behind-end-border.svg?raw';
+import endBorderSvg       from '../assets/icons/behind-end-border.svg?raw';
+import endBorderMobileSvg from '../assets/icons/behind-end-border-mobile.svg?raw';
 import heartIcon    from '../assets/icons/heart.png';
 import checkboxIcon from '../assets/icons/checkbox-check.svg';
 import buildingImg  from '../assets/behind-the-screen/building.png';
@@ -32,6 +33,7 @@ const bioParagraphs = [
   '→ reading an interesting book about psychology',
   '→ watching long podcasts and interviews',
   '→ taking new courses',
+  '→ listening to music',
   '→ scrolling on Pinterest',
   '→ on the road',
 ];
@@ -100,11 +102,18 @@ const bioParagraphs = [
 
       <!-- That's it -->
       <article class="behind__card behind__card--end">
-        {/* Inline SVG + inline style (Astro's scoped CSS doesn't apply
-            to nodes injected via set:html, so we bypass it explicitly). */}
+        {/* Inline SVG borders (class-tagged; styled via :global since Astro's
+            scoped CSS doesn't reach set:html nodes). Desktop uses the
+            pathLength/non-scaling border; mobile swaps to a border drawn at the
+            card's real size (346×66, 16px corners) so the dots wrap the corners
+            cleanly without distortion. Breakpoint toggle is in CSS below. */}
         <Fragment set:html={endBorderSvg.replace(
           '<svg',
-          '<svg aria-hidden="true" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;display:block;z-index:1;"'
+          '<svg aria-hidden="true" class="behind__end-border behind__end-border--desktop"'
+        )} />
+        <Fragment set:html={endBorderMobileSvg.replace(
+          '<svg',
+          '<svg aria-hidden="true" class="behind__end-border behind__end-border--mobile"'
         )} />
         {/* Raw <img> (not Astro Image) so the dotted-heart PNG stays
             sharp — Astro's webp conversion softened the dots. */}
@@ -225,22 +234,28 @@ const bioParagraphs = [
     padding-block-start: calc(var(--scallop-diameter) + 20px);
     box-sizing: border-box;
 
-    mask-image: radial-gradient(
-      circle calc(var(--scallop-diameter) / 2) at 50% 0,
-      transparent calc(100% - 1px),
-      #000 100%
-    );
-    mask-size: var(--scallop-tile) 100%;
+    /* Scalloped top edge with HALF-circles at BOTH top corners (Marianna:
+       torn edges per Figma). Two radial-gradient layers — a disc anchored to
+       each tile's LEFT (0%) and RIGHT (100%) edge — are composited with
+       `intersect` so the cut = union of both discs. Adjacent tiles merge into
+       full teeth at every interior boundary, while the card's own left/right
+       edges clip the outermost discs into clean half-circles.
+       `--teeth` tiles fit exactly across 100% width → corners stay half
+       circles at any card width (desktop ~424px and mobile both use 11). */
+    --teeth: 11;
+    --scallop-r: calc(var(--scallop-diameter) / 2);
+    mask-image:
+      radial-gradient(circle var(--scallop-r) at 0 0,    transparent calc(var(--scallop-r) - 1px), #000 var(--scallop-r)),
+      radial-gradient(circle var(--scallop-r) at 100% 0, transparent calc(var(--scallop-r) - 1px), #000 var(--scallop-r));
+    mask-size: calc(100% / var(--teeth)) 100%;
     mask-repeat: repeat-x;
-    mask-position: center top;
-    -webkit-mask-image: radial-gradient(
-      circle calc(var(--scallop-diameter) / 2) at 50% 0,
-      transparent calc(100% - 1px),
-      #000 100%
-    );
-    -webkit-mask-size: var(--scallop-tile) 100%;
+    mask-composite: intersect;
+    -webkit-mask-image:
+      radial-gradient(circle var(--scallop-r) at 0 0,    transparent calc(var(--scallop-r) - 1px), #000 var(--scallop-r)),
+      radial-gradient(circle var(--scallop-r) at 100% 0, transparent calc(var(--scallop-r) - 1px), #000 var(--scallop-r));
+    -webkit-mask-size: calc(100% / var(--teeth)) 100%;
     -webkit-mask-repeat: repeat-x;
-    -webkit-mask-position: center top;
+    -webkit-mask-composite: source-in;
   }
 
   .behind__about-text {
@@ -309,10 +324,11 @@ const bioParagraphs = [
   }
 
   /* Shared photo box. Specific transforms applied below.
-     White 4px border + rounded corners + drop shadow (Figma effect). */
+     The white frame is already baked into the exported PNGs, so NO CSS border
+     here (a CSS border would double the frame thickness). Rounded corners +
+     overflow kept so the box-shadow follows the photo's rounded silhouette. */
   .behind__photo {
     position: absolute;
-    border: 4px solid var(--color-bg-white);
     border-radius: var(--radius-l); /* 12px */
     overflow: hidden;
   }
@@ -421,7 +437,9 @@ const bioParagraphs = [
     align-items: stretch;
   }
 
-  .behind__end-border {
+  /* Injected via set:html → scoped attrs aren't added to these nodes, so use
+     :global. Desktop border shown by default; mobile border hidden until ≤767px. */
+  :global(.behind__end-border) {
     position: absolute;
     inset: 0;
     width: 100%;
@@ -431,10 +449,8 @@ const bioParagraphs = [
     z-index: var(--z-base);
   }
 
-  .behind__end-border :global(img) {
-    display: block;
-    width: 100%;
-    height: 100%;
+  :global(.behind__end-border--mobile) {
+    display: none;
   }
 
   .behind__end-heart {
@@ -548,6 +564,12 @@ const bioParagraphs = [
       gap: var(--space-inline-md);
       padding: var(--space-inset-xl); /* 16px */
     }
+
+    /* The card is now a short 64px-tall row. Swap to the flat-card border
+       (drawn at 346×66, 16px corners) so the dots wrap the corners — the tall
+       desktop border would leave the flat corners empty here. */
+    :global(.behind__end-border--desktop) { display: none; }
+    :global(.behind__end-border--mobile)  { display: block; }
 
     .behind__end-heart {
       width: 32px;

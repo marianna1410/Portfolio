@@ -79,7 +79,7 @@
   --font-size-label:        16px; /* label / button text; mobile → 14px */
   --font-size-caption:      14px;
   --font-size-caption-mono: 14px; /* Fira Code captions — stable, no mobile override */
-  --font-size-body-mono-lg: 20px; /* Fira Code large body; mobile → 16px */
+  --font-size-body-mono-lg: 18px; /* Fira Code large body (Marianna: 20→18); mobile → 16px */
 
   /* Line heights */
   --line-height-tight:  1.1;
