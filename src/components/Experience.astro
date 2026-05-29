@@ -1,33 +1,42 @@
 ---
 import { Image } from 'astro:assets';
-import craftPattern from '../assets/icons/experience-craft-pattern.svg';
-import bazaPattern  from '../assets/icons/experience-baza-pattern.svg';
-import arrowBullet  from '../assets/icons/arrow-right-bullet.svg';
-import paperSlice   from '../assets/icons/paper-slice.png';
-import paperTexture from '../assets/icons/paper-texture.png';
-import borderCraft  from '../assets/icons/experience-card-border-craft.svg';
-import borderBaza   from '../assets/icons/experience-card-border-baza.svg';
+import craftPattern  from '../assets/icons/experience-craft-pattern.svg';
+import bazaPattern   from '../assets/icons/experience-baza-pattern.svg';
+import workBorder    from '../assets/icons/experience-work-border.svg';
+import paperSlice    from '../assets/icons/paper-slice.png';
+import paperTexture  from '../assets/icons/paper-texture.png';
 
 /**
- * Experience section — Figma node 472:16053.
- * Two experience cards (Craft, Baza) + Skills grid of paper-textured pills.
+ * Experience section — Figma node 798:12038 (redesign from original 472:16053).
  *
- * Card borders: SVG with stroke-dasharray="0.1 8" + non-scaling-stroke +
- * preserveAspectRatio="none" — native CSS `border-style: dashed` can't render
- * the tiny-dot + 8px-gap pattern from Figma.
+ * Layout: single "Work experience" card (light-grey bg, 32px padding) with a
+ * two-column grid: Timeline (212px, dates + vertical line + dot) | Companies (1fr).
+ * Below the card: Skills grid of paper-textured pills (same as before, 868px).
  *
- * Skill pills: paper-slice end-caps (notches face OUTWARD per Figma) +
- * fixed-position paper-texture background — all pills share same crop region
- * so long pills don't stretch the texture (matches Figma frame-2316 trick).
+ * Key changes from v1:
+ *  - Content max-width: 800px → 868px
+ *  - Experience block: dashed-border cards → single timeline+companies card
+ *  - Bullets: arrow SVG → numbered (01, 02…) in Fira Code
+ *  - Company meta: added companyType shown after a dot separator
+ *
+ * Timeline vertical line drawn via ::after on the first aside + ::before on the
+ * second aside, so it runs exactly from first-dot-bottom through the job gap to
+ * second-dot-center without extending past the endpoints.
+ *
+ * Mobile (≤767px): collapses to single column — dates appear inline above each
+ * company block; timeline line/dot hidden; card padding reduces.
  */
+
 const jobs = [
   {
     pattern: craftPattern,
-    border: borderCraft,
     role: 'UX/UI Designer',
     company: 'Craft Innovations',
-    dates: 'Dec 2023 - Nov 2025',
-    bullets: [
+    companyType: 'Research & Design firm',
+    dateRange: 'Dec 2023 — Nov 2025',
+    durationCount: '2 years',
+    employmentType: 'full-time',
+    contributions: [
       'Contributed to 8 projects within a design team over two years, including web platforms and e-commerce solutions.',
       'Conducted a comprehensive UX audit to identify and resolve usability issues, significantly enhancing the overall experience of an online banking platform.',
       'Key contributor to a full-scale e-commerce store redesign and the development of a large-scale UI kit from scratch, partnering with the team on all stages from user flows to developer handoffs.',
@@ -36,11 +45,13 @@ const jobs = [
   },
   {
     pattern: bazaPattern,
-    border: borderBaza,
     role: 'Junior UX/UI Designer',
     company: 'Baza Trainee Ukraine',
-    dates: 'Jul 2023 - Dec 2023',
-    bullets: [
+    companyType: 'Non-profit organization',
+    dateRange: 'Jul 2023 — Dec 2023',
+    durationCount: '6 months',
+    employmentType: 'part-time',
+    contributions: [
       "Helped design a children's e-reading web platform, focusing on creating engaging experiences for young audiences.",
       'Designed user flows for quiz interactions using the established design system.',
       'Collaborated closely with a cross-functional team of designers and developers, gaining hands-on experience with the product development process.',
@@ -58,54 +69,89 @@ const skillRows = [
 
 <section class="experience" id="experience" aria-labelledby="experience-heading">
   <div class="experience__inner">
+
     <!-- Title block -->
     <header class="experience__title-block">
-      <p class="experience__caption text-caption-mono">{` {EXPERIENCE}`}</p>
+      <p class="experience__caption text-caption-mono">{`{EXPERIENCE}`}</p>
       <h2 id="experience-heading" class="experience__heading text-h2">
         2+ years of UX-led design from corporate websites to scalable product platforms
       </h2>
     </header>
 
-    <!-- Experience cards -->
-    <div class="experience__cards">
-      {jobs.map((job) => (
-        <article class="experience__card">
-          <Image
-            src={job.border}
-            alt=""
-            class="experience__card-border"
-            aria-hidden="true"
-          />
-          <div class="experience__card-head">
-            <div class="experience__role">
-              <div class="experience__pattern" aria-hidden="true">
-                <Image src={job.pattern} alt="" width={52} height={52} />
-              </div>
-              <div class="experience__role-info">
-                <p class="experience__role-title text-body-large-medium">{job.role}</p>
-                <p class="experience__role-company text-body-medium-regular">{job.company}</p>
+    <!-- Work experience card -->
+    <div class="experience__work" aria-label="Work history">
+      <!-- Dashed border overlay (same dot pattern as old individual cards) -->
+      <Image
+        src={workBorder}
+        alt=""
+        aria-hidden="true"
+        class="experience__work-border"
+        width={868}
+        height={882}
+      />
+      <!--
+        CSS Grid: 212px (timeline) | 1fr (companies).
+        Each job maps to two grid children: an aside + a company div, interleaved.
+        Grid auto-placement fills col 1 then col 2, so they land on the same row.
+        Child order: aside[0], company[0], aside[1], company[1].
+      -->
+      <div class="experience__work-body">
+        {jobs.map((job, index) => (
+          <>
+            {/* ── Timeline aside (column 1) ────────────────── */}
+            <div
+              class:list={[
+                'experience__aside',
+                index === 0 && 'experience__aside--first',
+                index === jobs.length - 1 && 'experience__aside--last',
+              ]}
+            >
+              {/* Dot: desktop → right of dates (on the timeline line); mobile → left of date row */}
+              <div class="experience__aside-dot" aria-hidden="true"></div>
+              <div class="experience__aside-text">
+                <p class="experience__aside-dates text-caption-mono">{job.dateRange}</p>
+                <p class="experience__aside-duration text-caption-mono"><span class="experience__aside-count">{job.durationCount}</span><span class="experience__aside-type">{job.employmentType}</span></p>
               </div>
             </div>
-            <span class="experience__dates text-caption-mono">{job.dates}</span>
-          </div>
 
-          <ul class="experience__bullets">
-            {job.bullets.map((bullet) => (
-              <li class="experience__bullet">
-                <Image
-                  src={arrowBullet}
-                  alt=""
-                  width={20}
-                  height={20}
-                  class="experience__bullet-icon"
-                  aria-hidden="true"
-                />
-                <p class="experience__bullet-text text-body-large-regular">{bullet}</p>
-              </li>
-            ))}
-          </ul>
-        </article>
-      ))}
+            {/* ── Company content (column 2) ───────────────── */}
+            <div
+              class:list={[
+                'experience__company',
+                index > 0 && 'experience__company--gap',
+              ]}
+            >
+              <div class="experience__company-header">
+                <div class="experience__company-pattern" aria-hidden="true">
+                  <Image src={job.pattern} alt="" width={52} height={52} />
+                </div>
+                <div class="experience__company-info">
+                  <p class="experience__company-role text-headline-medium">{job.role}</p>
+                  <p class="experience__company-meta text-body-medium-regular">
+                    <span class="experience__company-name">{job.company}</span>
+                    <span class="experience__company-dot" aria-hidden="true"></span>
+                    <span class="experience__company-type">{job.companyType}</span>
+                  </p>
+                </div>
+              </div>
+
+              <ol class="experience__contributions">
+                {job.contributions.map((text, i) => (
+                  <li class:list={[
+                    'experience__contribution',
+                    i < job.contributions.length - 1 && 'experience__contribution--sep',
+                  ]}>
+                    <span class="experience__contribution-num text-caption-mono">
+                      {String(i + 1).padStart(2, '0')}
+                    </span>
+                    <p class="experience__contribution-text text-body-large-regular">{text}</p>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          </>
+        ))}
+      </div>
     </div>
 
     <!-- Skills -->
@@ -116,9 +162,8 @@ const skillRows = [
           <li class="experience__skills-row">
             <ul class="experience__skills-pills">
               {row.map((skill, i) => (
-                <li class={`skill-pill${i < row.length - 1 ? ' skill-pill--overlap' : ''}`}>
-                  {/* Raw <img> (not Astro Image) so the slice PNG is served
-                      as-is — Astro's webp conversion blurred the texture. */}
+                <li class:list={['skill-pill', i < row.length - 1 && 'skill-pill--overlap']}>
+                  {/* Raw <img> (not Astro Image) — Astro's webp conversion blurs the paper texture */}
                   <img
                     src={paperSlice.src}
                     width={20}
@@ -147,10 +192,12 @@ const skillRows = [
         ))}
       </ul>
     </div>
+
   </div>
 </section>
 
 <style define:vars={{ paperTextureUrl: `url(${paperTexture.src})` }}>
+
   /* ====== Section shell ====== */
   .experience {
     background-color: var(--color-bg-white);
@@ -176,7 +223,7 @@ const skillRows = [
     flex-direction: column;
     align-items: center;
     gap: var(--space-stack-5xl); /* 48px desktop / 32px mobile */
-    max-width: 800px;
+    max-width: 868px; /* Figma content width per redesign (was 800px) */
     margin-inline: auto;
     width: 100%;
   }
@@ -189,7 +236,6 @@ const skillRows = [
     align-items: center;
     text-align: center;
     width: 100%;
-    max-width: 766px;
   }
 
   .experience__caption {
@@ -203,140 +249,339 @@ const skillRows = [
     text-wrap: balance;
   }
 
-  /* ====== Cards container ====== */
-  .experience__cards {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-stack-2xl); /* 24px desktop / 20px mobile */
+  /* ====== Work experience card ====== */
+  .experience__work {
     width: 100%;
+    background-color: var(--color-bg-white); /* Figma: Background/white (was light-grey) */
+    border-radius: var(--radius-2xl); /* 20px desktop / 16px mobile */
+    /*
+      Card padding matches Figma node 798:168582:
+      content starts at (32, 32) → padding 32px all sides.
+      Uses --space-inline-3xl (= 32px desktop / 24px mobile) as the closest token.
+    */
+    padding: var(--space-inline-3xl); /* 32px desktop */
+    position: relative; /* for the absolute-positioned border overlay */
   }
 
-  /* ====== Single experience card ====== */
-  .experience__card {
-    position: relative;
-    background-color: var(--color-bg-white);
-    border-radius: var(--radius-xl); /* 16px desktop / 12px mobile */
-    padding: var(--space-inset-2xl); /* 24px desktop */
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-stack-xl); /* 20px desktop / 16px mobile */
-  }
-
-  /* Mobile: tighter card padding (16px) per Marianna's spec.
-     Uses --space-inset-xl which resolves to 16px on mobile. */
-  @media (max-width: 767px) {
-    .experience__card {
-      padding: var(--space-inset-xl); /* 16px on mobile */
-    }
-  }
-
-  /* Dashed border SVG fills the card; preserveAspectRatio="none" stretches
-     the path to any card height while non-scaling-stroke keeps dash uniform. */
-  .experience__card-border {
+  /*
+    Dashed border overlay — same dot pattern as old individual experience cards.
+    SVG uses stroke-dasharray="0.1 8" + vector-effect="non-scaling-stroke" so it
+    scales to any card height while the dot size and gap remain fixed.
+    Hidden on mobile (single-column layout, different aspect ratio would distort corners).
+  */
+  .experience__work-border {
     position: absolute;
     inset: 0;
     width: 100%;
     height: 100%;
     pointer-events: none;
     display: block;
+    border-radius: var(--radius-2xl);
   }
 
-  /* ====== Card head: role + dates ====== */
-  .experience__card-head {
+  @media (max-width: 767px) {
+    .experience__work {
+      padding: var(--space-inset-2xl); /* 20px mobile (Figma container x=20) */
+    }
+  }
+
+  /* ====== Work body — CSS Grid: 212px timeline | 1fr companies ====== */
+  /*
+    Grid children in DOM order: aside[0], company[0], aside[1], company[1].
+    CSS auto-placement lands each pair on the same row, so heights match naturally.
+
+    Timeline column width: 212px (Figma aside frame width).
+    Dot lane: rightmost 12px of the timeline column.
+    Dot center: 212px - 12px(pad-right) - 6px(half dot) = 194px from grid left.
+  */
+  .experience__work-body {
+    display: grid;
+    grid-template-columns: 212px 1fr;
+    position: relative; /* for the continuous timeline line */
+  }
+
+  /*
+    Continuous DOTTED timeline line — runs from the first dot center straight
+    down through both jobs to the bottom of the last job's content (so the line
+    continues below the second date too, per spec). Both dots sit on top of it
+    (their white fill occludes the line behind each dot).
+    Same dot pattern as the contribution separators: 2px round dots, 8px apart.
+    Dot-lane center = 212px col − 12px aside padding-right − 6px half-dot = 194px.
+  */
+  .experience__work-body::before {
+    content: '';
+    position: absolute;
+    left: 193px;  /* 194px center − 1px (half of 2px width) */
+    top: 10px;    /* center of first dot (4px margin-top + 6px half-dot) */
+    bottom: 0;    /* down through the last job to the bottom of its content */
+    width: 2px;
+    background-image: radial-gradient(circle, var(--color-stroke-medium-grey) 1px, transparent 1px);
+    background-position: top center;
+    background-size: 2px 8px;
+    background-repeat: repeat-y;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ====== Timeline aside (left column) ====== */
+  .experience__aside {
     display: flex;
     align-items: flex-start;
-    justify-content: space-between;
-    gap: var(--space-inline-sm); /* 8px minimum gap between role and badge */
-    width: 100%;
-    /* Allow badge to wrap to next line if it can't fit with the 8px gap. */
-    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: var(--space-inline-lg); /* 16px gap between text and dot */
+    padding-right: 12px; /* Figma aside pr=12: positions dot 12px from aside right edge */
+    position: relative;
   }
 
-  .experience__role {
+  /* Desktop: dot sits to the RIGHT of the dates (on the timeline line).
+     DOM has dot first, so push it last via order. (Mobile resets to left.) */
+  .experience__aside-dot {
+    order: 2;
+  }
+
+  /* Gap between job 1 and job 2 (matches Figma 48px spacing between company blocks).
+     The continuous dotted line on .experience__work-body::before runs through this gap. */
+  .experience__aside--last {
+    padding-top: var(--space-stack-5xl); /* 48px desktop */
+  }
+
+  /* Dates and duration text */
+  .experience__aside-text {
     display: flex;
-    align-items: center;
-    gap: var(--space-inline-md); /* 12px desktop / 8px mobile */
+    flex-direction: column;
+    gap: var(--space-stack-sm); /* 8px */
+    text-align: right;
+  }
+
+  .experience__aside-dates {
+    color: var(--color-text-black);
+    margin: 0;
+    white-space: nowrap;
+  }
+
+  .experience__aside-duration {
+    color: var(--color-text-grey-muted);
+    margin: 0;
+    white-space: nowrap;
+  }
+
+  /* "·" separator before the employment type.
+     Desktop: "2 years · full-time".  Mobile (count hidden): "… 2025 · full-time". */
+  .experience__aside-type::before {
+    content: '·';
+    margin-inline: var(--space-inset-xs); /* 4px each side */
+  }
+
+  /* Timeline dot — 12×12 white-fill circle with BLACK 1px ring (Figma: fill
+     Background/white, stroke Text/black 1px inside). Sits on the dotted line.
+     The 4px white box-shadow halo carves a 4px gap in the dotted line around
+     the circle (per spec: more breathing room between line and circle). */
+  .experience__aside-dot {
+    box-sizing: border-box; /* 1px inside stroke → 12px outer like Figma */
+    width: 12px;
+    height: 12px;
+    flex-shrink: 0;
+    margin-top: 4px; /* optical: aligns dot center with first baseline of dates text */
+    border-radius: 50%;
+    border: 1px solid var(--color-text-black);
+    background-color: var(--color-bg-white); /* occludes the dotted line behind it */
+    box-shadow: 0 0 0 var(--space-inset-xs) var(--color-bg-white); /* 4px white gap halo */
+    position: relative;
+    z-index: 1; /* above the timeline line */
+  }
+
+  /* ====== Company content (right column) ====== */
+  /* Figma container (806:187307): flex-col, gap-8px between header and list, pl-32 */
+  .experience__company {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-stack-sm); /* 8px — Figma gap between header and list */
+    padding-left: var(--space-inline-3xl); /* 32px — Figma header x=32 within companies */
     min-width: 0;
   }
 
-  .experience__pattern {
+  .experience__company--gap {
+    padding-top: var(--space-stack-5xl); /* 48px — matches gap between Figma company blocks */
+  }
+
+  /* Company header: pattern icon + role + company meta (Figma items-start) */
+  .experience__company-header {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-inline-lg); /* 16px — Figma gap between pattern and info container */
+  }
+
+  /* Pattern icon — light-grey rounded tile (Figma 806:187309: bg Background/light
+     grey, radius 12px). The pattern image has transparency so the grey shows through. */
+  .experience__company-pattern {
     width: 52px;
     height: 52px;
     flex-shrink: 0;
     overflow: hidden;
+    background-color: var(--color-bg-light-grey);
+    border-radius: var(--radius-l); /* 12px */
   }
 
-  .experience__pattern :global(img) {
+  .experience__company-pattern :global(img) {
     display: block;
     width: 100%;
     height: 100%;
   }
 
-  .experience__role-info {
+  .experience__company-info {
     display: flex;
     flex-direction: column;
-    gap: 0; /* per Marianna: role title sits flush above company name */
+    gap: var(--space-stack-xs); /* 4px — Figma gap between role title and company meta */
+    padding-top: 2px; /* Figma pt-2 — optical alignment of text block with pattern icon */
     min-width: 0;
   }
 
-  .experience__role-title {
+  .experience__company-role {
     color: var(--color-text-black);
     margin: 0;
   }
 
-  .experience__role-company {
-    color: var(--color-text-grey-muted);
-    margin: 0;
-  }
-
-  /* Dates Tag — Figma node 676:15746 */
-  .experience__dates {
-    color: var(--color-text-grey-muted);
-    background-color: var(--color-bg-light-grey);
-    padding: var(--space-inset-sm) var(--space-inset-lg); /* 8px 16px */
-    border-radius: var(--radius-l); /* 12px */
-    white-space: nowrap;
-    flex-shrink: 0;
-    display: inline-flex;
+  .experience__company-meta {
+    display: flex;
     align-items: center;
-    justify-content: center;
-    /* Vertical optical alignment with role title baseline */
-    margin-top: 4px;
+    gap: var(--space-inline-sm); /* 8px */
+    margin: 0;
+    flex-wrap: wrap;
   }
 
-  /* ====== Bullets ====== */
-  .experience__bullets {
+  .experience__company-name,
+  .experience__company-type {
+    color: var(--color-text-grey-muted);
+  }
+
+  /*
+    3×3 dot separator between company name and type.
+    Figma: bg-[#bbb] opacity-50 → --color-stroke-medium-grey (#BBBBBB) at 50% opacity.
+  */
+  .experience__company-dot {
+    display: inline-block;
+    width: 3px;
+    height: 3px;
+    border-radius: 50%;
+    background-color: var(--color-stroke-medium-grey);
+    opacity: 0.5;
+    flex-shrink: 0;
+  }
+
+  /* ====== Contributions list ====== */
+  /*
+    Figma structure (806:187692 + items):
+      List: pl-24px → sets 24px left indent for all items
+      Items: pt-16px pb-16px, gap-16px between number and text
+      Number container: w-28px, pt-3px (optical mono baseline alignment)
+      No extra padding-left on items — list provides the indent
+  */
+  .experience__contributions {
     list-style: none;
     padding: 0;
     margin: 0;
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-stack-sm); /* 8px */
-    width: 100%;
-    position: relative; /* sit above border SVG */
+    /* No margin-top: parent .experience__company flex gap (8px) handles header→list spacing */
+    padding-left: var(--space-inline-2xl); /* 24px left indent (Figma list pl-24) */
   }
 
-  .experience__bullet {
+  .experience__contribution {
     display: flex;
     align-items: flex-start;
-    gap: var(--space-inline-sm); /* 8px */
-    width: 100%;
+    gap: var(--space-inline-lg); /* 16px between number and text */
+    padding-top: var(--space-inset-lg);    /* 16px top (Figma pt-16) */
+    padding-bottom: var(--space-inset-lg); /* 16px bottom (Figma pb-16/17) */
+    /* No padding-left: the <ol> provides the 24px left indent */
   }
 
-  .experience__bullet-icon {
-    width: 20px;
-    height: 20px;
+  /*
+    Dotted separator between items — NOT on the last item.
+    Matches the card border's dot pattern (stroke-dasharray="0.1 8"):
+    2px round dots spaced 8px apart, drawn along the item's bottom edge.
+    (CSS `border-dashed` renders long dashes — wrong; we need fine round dots.)
+  */
+  .experience__contribution--sep {
+    background-image: radial-gradient(circle, var(--color-stroke-medium-grey) 1px, transparent 1px);
+    background-position: left bottom;
+    background-size: 8px 2px;
+    background-repeat: repeat-x;
+  }
+
+  .experience__contribution-num {
+    color: var(--color-text-grey-muted);
+    min-width: 28px; /* Figma number container w-28 */
     flex-shrink: 0;
-    display: block;
-    /* Optical alignment with first line of text */
-    margin-top: 2px;
+    padding-top: 3px; /* Figma pt-3 — optical mono baseline alignment */
   }
 
-  .experience__bullet-text {
+  .experience__contribution-text {
     color: var(--color-text-grey-muted);
     margin: 0;
     flex: 1 1 0;
     min-width: 0;
+  }
+
+  /* ====== Mobile: collapse to single column (Figma 826:10080) ====== */
+  @media (max-width: 767px) {
+    /*
+      Single column. DOM order (aside1, company1, aside2, company2) stacks as:
+      date row → company → [dotted Line 4] → date row → company.
+    */
+    .experience__work-body {
+      grid-template-columns: 1fr;
+    }
+
+    /* Hide only the continuous vertical timeline line (dots stay — shown left of each date) */
+    .experience__work-body::before {
+      display: none;
+    }
+
+    /* Date row: [dot] dateRange · employmentType — dot on the LEFT, single line */
+    .experience__aside {
+      justify-content: flex-start;
+      align-items: center;
+      padding-right: 0;
+      gap: var(--space-inline-sm); /* 8px between dot and date text */
+      margin-bottom: var(--space-stack-xl); /* 16px gap to the company block below */
+    }
+
+    /* Reset desktop order — dot first (left) on mobile */
+    .experience__aside-dot {
+      order: 0;
+      margin-top: 0; /* centered with the single date line via align-items */
+      box-shadow: none; /* no timeline line to carve a gap into */
+    }
+
+    /* dates + duration inline on one row */
+    .experience__aside-text {
+      flex-direction: row;
+      align-items: baseline;
+      gap: 0; /* the "·" before type provides spacing */
+      text-align: left;
+    }
+
+    /* Mobile drops the duration count ("2 years"/"6 months"); shows only the type */
+    .experience__aside-count {
+      display: none;
+    }
+
+    /* Horizontal dotted separator between the two jobs (Figma Line 4).
+       Drawn at the top of the second date row, with 20px breathing room each side. */
+    .experience__aside--last {
+      padding-top: var(--space-stack-2xl);  /* 20px below the line, above the date */
+      margin-top: var(--space-stack-2xl);   /* 20px above the line, below job 1 */
+      background-image: radial-gradient(circle, var(--color-stroke-medium-grey) 1px, transparent 1px);
+      background-position: left top;
+      background-size: 8px 2px;
+      background-repeat: repeat-x;
+    }
+
+    /* Company sits directly under its date row — no extra top gap (margin handles it) */
+    .experience__company {
+      padding-left: 0;
+    }
+    .experience__company--gap {
+      padding-top: 0;
+    }
   }
 
   /* ====== Skills section ====== */
@@ -375,7 +620,7 @@ const skillRows = [
     width: 100%;
   }
 
-  /* ====== Skill pill — paper-textured Label (Figma component 314:12925+) ====== */
+  /* ====== Skill pill — paper-textured Label ====== */
   .skill-pill {
     flex: 1 1 0;
     min-width: 0;
@@ -385,7 +630,7 @@ const skillRows = [
     position: relative;
   }
 
-  /* Adjacent pills overlap by 4px to mimic Figma `mr-[-4px]` */
+  /* Adjacent pills overlap by 4px (matches Figma negative margin) */
   .skill-pill--overlap {
     margin-right: -4px;
   }
@@ -398,10 +643,8 @@ const skillRows = [
     object-fit: fill;
   }
 
-  /* FLIP both caps so notches face OUTWARD (outer pill edges) per Figma.
-     Source slice asset has rounded LEFT edge + notches on RIGHT, so:
-     - Left cap: flip → notches go to LEFT (outer pill edge)
-     - Right cap: no flip → notches stay on RIGHT (outer pill edge) */
+  /* FLIP left cap so notches face OUTWARD per Figma.
+     Source slice: rounded LEFT + notches on RIGHT. Flip → notches go LEFT. */
   .skill-pill__cap--left {
     transform: scaleX(-1);
   }
@@ -414,17 +657,12 @@ const skillRows = [
     align-items: center;
     justify-content: center;
     overflow: hidden;
-    /* Paper texture rendered LARGER than the pill body so each pill
-       shows a small, sharp window of the texture (matches Figma
-       frame-2316 trick: width 309%, height 484% of body). This keeps
-       the paper grain fine instead of stretched-looking. Source PNG is
-       1200×1800 portrait crumpled paper from Figma (downscaled to 600×900
-       for delivery). */
+    /*
+      Paper texture rendered larger than the pill body so each pill shows a
+      small, sharp window of the texture (Figma frame-2316 trick: ~309% × 484%).
+    */
     background-image: var(--paperTextureUrl);
     background-size: 309% 484%;
-    /* Source PNG was pre-cropped from the top-left quadrant of Figma's
-       crumpled-paper asset, so the whole image is fold-free — any
-       position works and centering keeps the crop balanced across pills. */
     background-position: center;
     background-repeat: no-repeat;
   }
@@ -438,29 +676,25 @@ const skillRows = [
     white-space: nowrap;
   }
 
-  /* Mobile: collapse the row structure so all pills flow in a single
-     wrap-flow. Each pill keeps its natural content width — no growing
-     to fill the row, no banner-stretched lonely pills. Trailing space
-     on the right of each wrap-line is acceptable per Marianna's spec. */
+  /* Mobile: collapse rows into a single flex-wrap flow */
   @media (max-width: 767px) {
     .experience__skills-rows {
       flex-direction: row;
       flex-wrap: wrap;
-      gap: 0; /* spacing handled via row-gap below + pill margin */
+      gap: 0;
       row-gap: var(--space-stack-sm); /* 8px between wrap-lines */
     }
 
-    /* Display:contents lets all .skill-pill items become direct visual
-       siblings of .experience__skills-rows, merging the 4 data-rows into
-       one continuous wrap-flow. DOM list semantics preserved for a11y. */
+    /* display:contents merges all pills into one continuous wrap flow
+       while preserving list semantics for a11y */
     .experience__skills-row,
     .experience__skills-pills {
       display: contents;
     }
 
     .skill-pill {
-      flex: 0 0 auto; /* natural content width, no grow/shrink */
-      margin-right: -4px; /* overlap into next pill (incl. wrap boundaries) */
+      flex: 0 0 auto;
+      margin-right: -4px;
     }
   }
 </style>

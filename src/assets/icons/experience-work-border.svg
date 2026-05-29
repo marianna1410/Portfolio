@@ -1,0 +1,6 @@
+<svg width="868" height="882" viewBox="0 0 868 882" fill="none" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Rounded-rect border (rx=20) drawn as a PATH starting at the bottom-edge MIDDLE,
+       so the dash-pattern seam (where the first/last dot can crowd together) sits at the
+       least-visible spot instead of the top-left corner. Dots: 0.1/8 dash, non-scaling. -->
+  <path pathLength="3483" d="M434,881 H21 C9.954,881 1,872.046 1,861 V21 C1,9.954 9.954,1 21,1 H847 C858.046,1 867,9.954 867,21 V861 C867,872.046 858.046,881 847,881 H434 Z" stroke="#BBBBBB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.1 8" vector-effect="non-scaling-stroke"/>
+</svg>
