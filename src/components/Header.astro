@@ -27,7 +27,7 @@ const navPrefix = variant === 'home' ? '#' : '/#';
       </a>
     ) : (
       <a href="/" class="header__go-home text-label">
-        <Image src={arrowLeftBullet} alt="" width={20} height={20} class="header__go-home-icon" />
+        <ArrowSwap icon={arrowLeftBullet} direction="left" class="header__go-home-icon" />
         <span>Go Home</span>
       </a>
     )}
@@ -54,7 +54,7 @@ const navPrefix = variant === 'home' ? '#' : '/#';
         data-contact-trigger
       >
         <span>Contact</span>
-        <Image src={chevronDownWhite} alt="" width={20} height={20} class="header__contact-chevron" />
+        <ArrowSwap icon={chevronDownWhite} direction="down" class="header__contact-chevron" />
       </button>
 
       <ul
@@ -282,6 +282,15 @@ const navPrefix = variant === 'home' ? '#' : '/#';
     color: var(--color-text-dark-grey);
     background-color: var(--color-bg-light-grey);
     white-space: nowrap;
+    transition: color var(--duration-fast) var(--ease-out); /* 150ms */
+  }
+
+  /* Hover: the hovered tab's text shifts to muted grey; the others stay
+     put. Pointer-only — no hover on touch. */
+  @media (hover: hover) and (pointer: fine) {
+    .header__nav-link:hover {
+      color: var(--color-text-grey-muted);
+    }
   }
 
   /* Hide nav on mobile — Menu dropdown carries nav links there */
@@ -334,19 +343,32 @@ const navPrefix = variant === 'home' ? '#' : '/#';
     white-space: nowrap;
   }
 
-  .header__contact-chevron {
-    display: block;
-    width: 20px;
-    height: 20px;
-    /* Base transition = closing curve (rotate back, 150ms ease-in). */
+  /* The chevron is an ArrowSwap (hover = swap-down). The 180° open-rotate
+     lives on the WHOLE box; inner icons handle the swap independently.
+     The wrapper carries ArrowSwap's own scope, so reach it with :global
+     from the (scoped) button.
+     Base transition = closing curve (rotate back, 150ms ease-in). */
+  .header__contact-button :global(.header__contact-chevron) {
     transition: transform var(--duration-fast) var(--ease-in);
   }
 
   /* Rotate 180° while the dropdown is open (animations.md §3.3).
      Opening curve = 200ms ease-out. */
-  .header__contact-button[aria-expanded="true"] .header__contact-chevron {
+  .header__contact-button[aria-expanded="true"] :global(.header__contact-chevron) {
     transform: rotate(180deg);
     transition: transform var(--duration-base) var(--ease-out);
+  }
+
+  /* When the dropdown is OPEN the chevron points up — suppress the hover
+     swap so it stays still (only the 180° rotate is meaningful there).
+     Higher specificity than ArrowSwap's global button:hover rules. */
+  .header__contact-button[aria-expanded="true"]:hover :global(.arrow-swap-icon--out),
+  .header__contact-button[aria-expanded="true"]:focus-visible :global(.arrow-swap-icon--out) {
+    transform: none;
+  }
+  .header__contact-button[aria-expanded="true"]:hover :global(.arrow-swap-icon--in),
+  .header__contact-button[aria-expanded="true"]:focus-visible :global(.arrow-swap-icon--in) {
+    transform: var(--swap-in-start, translate(0, -100%));
   }
 
   /* ====== Desktop Contact dropdown ====== */

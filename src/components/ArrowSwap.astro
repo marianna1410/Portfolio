@@ -1,31 +1,54 @@
 ---
 /**
- * ArrowSwap.astro — diagonal-arrow icon with hover swap.
+ * ArrowSwap.astro — arrow icon with directional hover swap.
  *
  * Two identical arrows stacked in a clipped box. On hover of the enclosing
- * link the visible arrow slides out along its own diagonal (top-right) while
- * an identical copy slides in from the opposite corner to land exactly where
- * the first one sat — reads as one continuous diagonal motion. 400ms ease-out.
+ * link/button the visible arrow slides OUT in the direction it points, while
+ * an identical copy slides IN from the opposite side to land exactly where
+ * the first one sat — reads as one continuous motion. 400ms ease-out.
  *
- * The icon is passed in so colour variants (black / dark-grey) stay per-call.
- * Pass `class` for per-site layout tweaks (e.g. optical margin) — it lands on
- * the wrapper box. Trigger is the nearest ancestor <a>/<button> :hover.
+ * `direction` picks the travel axis (default 'up-right' for the diagonal ↗
+ * arrows). The out/in vectors are emitted as CSS custom properties so the
+ * same rules drive every direction.
+ *
+ * The icon is passed in so colour variants stay per-call. Pass `class` for
+ * per-site layout tweaks (e.g. optical margin) — it lands on the wrapper box.
+ * Trigger is the nearest ancestor <a>/<button> :hover / :focus-visible.
  *
  * animations.md §10.3 / §11.2. Honors prefers-reduced-motion (no movement).
  */
 import { Image } from 'astro:assets';
 import type { ImageMetadata } from 'astro';
 
+type Direction = 'up-right' | 'down-right' | 'down' | 'up' | 'left' | 'right';
+
 interface Props {
   icon: ImageMetadata;
   size?: number;
+  /** Direction the arrow points / travels on hover. Default 'up-right' (↗). */
+  direction?: Direction;
   class?: string;
 }
 
-const { icon, size = 20, class: className } = Astro.props;
+/** out = exit vector (where it points); inStart = the opposite corner. */
+const VECTORS: Record<Direction, { out: string; inStart: string }> = {
+  'up-right':   { out: 'translate(100%, -100%)', inStart: 'translate(-100%, 100%)' },
+  'down-right': { out: 'translate(100%, 100%)',  inStart: 'translate(-100%, -100%)' },
+  'down':       { out: 'translate(0, 100%)',     inStart: 'translate(0, -100%)' },
+  'up':         { out: 'translate(0, -100%)',    inStart: 'translate(0, 100%)' },
+  'left':       { out: 'translate(-100%, 0)',    inStart: 'translate(100%, 0)' },
+  'right':      { out: 'translate(100%, 0)',     inStart: 'translate(-100%, 0)' },
+};
+
+const { icon, size = 20, direction = 'up-right', class: className } = Astro.props;
+const v = VECTORS[direction] ?? VECTORS['up-right'];
 ---
 
-<span class:list={['arrow-swap', className]} aria-hidden="true" style={`--arrow-size:${size}px`}>
+<span
+  class:list={['arrow-swap', className]}
+  aria-hidden="true"
+  style={`--arrow-size:${size}px; --swap-out:${v.out}; --swap-in-start:${v.inStart};`}
+>
   <Image src={icon} alt="" width={size} height={size} class="arrow-swap-icon arrow-swap-icon--out" />
   <Image src={icon} alt="" width={size} height={size} class="arrow-swap-icon arrow-swap-icon--in" />
 </span>
@@ -49,16 +72,16 @@ const { icon, size = 20, class: className } = Astro.props;
     transition: transform var(--duration-slow) var(--ease-out); /* 400ms */
   }
 
-  /* Incoming copy waits one box down-left, outside the clip area. */
+  /* Incoming copy waits one box away on the opposite side, outside the clip. */
   .arrow-swap-icon--in {
-    transform: translate(-100%, 100%);
+    transform: var(--swap-in-start, translate(-100%, 100%));
   }
 
   /* Keyboard focus drives the swap on any device (focus-visible is
      keyboard-only — a touch tap never triggers it). */
   :global(a):focus-visible .arrow-swap-icon--out,
   :global(button):focus-visible .arrow-swap-icon--out {
-    transform: translate(100%, -100%); /* exit top-right */
+    transform: var(--swap-out, translate(100%, -100%)); /* exit toward point */
   }
   :global(a):focus-visible .arrow-swap-icon--in,
   :global(button):focus-visible .arrow-swap-icon--in {
@@ -70,7 +93,7 @@ const { icon, size = 20, class: className } = Astro.props;
   @media (hover: hover) and (pointer: fine) {
     :global(a):hover .arrow-swap-icon--out,
     :global(button):hover .arrow-swap-icon--out {
-      transform: translate(100%, -100%);
+      transform: var(--swap-out, translate(100%, -100%));
     }
     :global(a):hover .arrow-swap-icon--in,
     :global(button):hover .arrow-swap-icon--in {
@@ -91,7 +114,7 @@ const { icon, size = 20, class: className } = Astro.props;
     :global(a):focus-visible .arrow-swap-icon--in,
     :global(button):hover .arrow-swap-icon--in,
     :global(button):focus-visible .arrow-swap-icon--in {
-      transform: translate(-100%, 100%);
+      transform: var(--swap-in-start, translate(-100%, 100%));
     }
   }
 </style>
