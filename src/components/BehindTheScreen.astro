@@ -67,7 +67,7 @@ const bioParagraphs = [
           </div>
           <span class="behind__travel-tag text-caption-mono">44° 25′ 55″ N</span>
         </div>
-        <div class="behind__travel-photos" aria-hidden="true">
+        <div class="behind__travel-photos" data-fan-photos aria-hidden="true">
           <div class="behind__photo behind__photo--river">
             <Image src={riverImg} alt="" width={296} height={368} quality={90} />
           </div>
@@ -83,7 +83,7 @@ const bioParagraphs = [
       <!-- Latest books -->
       <article class="behind__card behind__card--books">
         <h3 class="behind__books-title text-h4-medium">The latest books I've read</h3>
-        <ul class="behind__books-list">
+        <ul class="behind__books-list" data-strike-list>
           {books.map((book) => (
             <li class="behind__book">
               <Image
@@ -348,6 +348,10 @@ const bioParagraphs = [
     left: 77px;
     top: 19px;
     transform: rotate(-30deg);
+    /* Fan-out reveal (animations.md §7.1): 600ms transform from stacked-
+       at-building-center → final tilted spot. Stagger handled per-card. */
+    transition: transform var(--duration-fan-out-card, 600ms) var(--ease-out);
+    will-change: transform;
     box-shadow:
       -6.667px 110px 30.833px 0 rgba(102, 102, 102, 0),
       -4.167px 70px 28.333px 0 rgba(102, 102, 102, 0.01),
@@ -361,6 +365,10 @@ const bioParagraphs = [
     left: 206px;
     top: 19px;
     transform: rotate(30deg);
+    /* Fan-out reveal (animations.md §7.1): same 600ms transform, staggered
+       120ms after river so the two sides fan out one after the other. */
+    transition: transform var(--duration-fan-out-card, 600ms) var(--ease-out) 120ms;
+    will-change: transform;
     box-shadow:
       -8px 132px 37px 0 rgba(102, 102, 102, 0),
       -5px 84px 34px 0 rgba(102, 102, 102, 0.01),
@@ -419,8 +427,51 @@ const bioParagraphs = [
 
   .behind__book-title {
     color: var(--color-neutral-grey-200);
-    text-decoration: line-through;
+    /* Custom strikethrough (animatable). Native text-decoration: line-through
+       can't be scaled in/out, so we draw a horizontal line via ::after on the
+       title span and animate scaleX from 0 → 1, left-anchored. Per-book
+       stagger lives on :nth-child(n) below. */
+    position: relative;
     margin: 0;
+  }
+
+  .behind__book-title::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    /* 58% (not 50%) because the span's geometric center sits above the
+       optical middle of the letterforms — line-height pads the bbox top
+       with empty space, so a true 50% reads as "too high" through the text.
+       58% lands the strike through the x-height middle (Marianna's note). */
+    top: 58%;
+    height: 1.5px;
+    background: currentColor;
+    transform-origin: left center;
+    /* Default = revealed (no-JS fallback + post-animation state). JS sets
+       data-strike-state="initial" on the <ul> to hide all lines, then
+       removes it on viewport-enter so the transitions kick in. */
+    transform: translateY(-50%) scaleX(1);
+    transition: transform 700ms var(--ease-out);
+    pointer-events: none;
+  }
+
+  /* Stagger: book #1 → 0ms, #2 → 500ms, #3 → 1000ms (slower-paced reveal
+     per Marianna; was 0/300/600). */
+  .behind__book:nth-child(2) .behind__book-title::after { transition-delay: 500ms; }
+  .behind__book:nth-child(3) .behind__book-title::after { transition-delay: 1000ms; }
+
+  /* Pre-animation state — lines hidden, no transition (so JS toggling the
+     attribute doesn't make them animate OUT, only IN when removed). */
+  .behind__books-list[data-strike-state="initial"] .behind__book-title::after {
+    transform: translateY(-50%) scaleX(0);
+    transition: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .behind__book-title::after {
+      transition: none;
+    }
   }
 
   /* ====== That's it (col 3, row 2) ====== */
@@ -584,4 +635,127 @@ const bioParagraphs = [
       align-self: center;
     }
   }
+
+  /* ====== Travelling fan-out reveal — initial (stacked) state ======
+     animations.md §7.1. JS adds data-fan-state="initial" before observing,
+     which snaps river+fontan onto building's center with NO rotation and
+     NO transition (so it doesn't animate INTO the stacked state). When
+     the section scrolls into view, JS removes the attribute → the
+     default .behind__photo--river/fontan transitions kick in and the
+     cards fan out to their tilted positions (river first, fontan +120ms).
+
+     Translate offsets = distance from each photo's center to building's
+     center (frame 432×232, building center ≈ 216, 115.5):
+       river  center 151,111  → dx +65,  dy +4.5
+       fontan center 280,111  → dx -64,  dy +4.5 */
+  .behind__travel-photos[data-fan-state="initial"] .behind__photo--river {
+    transform: translate(65px, 4.5px) rotate(0deg);
+    transition: none;
+  }
+
+  .behind__travel-photos[data-fan-state="initial"] .behind__photo--fontan {
+    transform: translate(-64px, 4.5px) rotate(0deg);
+    transition: none;
+  }
+
+  /* Reduced motion — final fanned state from the start; no animation.
+     JS already short-circuits (doesn't set the initial attribute), but
+     belt-and-braces: kill the transition so any forced toggle is instant. */
+  @media (prefers-reduced-motion: reduce) {
+    .behind__photo--river,
+    .behind__photo--fontan {
+      transition: none;
+    }
+  }
 </style>
+
+<script>
+  /* Behind-the-Screen animations.
+     1) Travelling fan-out reveal (animations.md §7.1) — river + fontan
+        emerge from behind the building card when the photos enter view.
+     2) Books strikethrough reveal — three list lines draw L→R with a
+        stagger, but ONLY after the fan-out has settled (Marianna's note —
+        otherwise both animations fight for attention). The wait is
+        implemented via a shared Promise reset per page mount. */
+
+  // Reset per page mount — otherwise on a second visit (Astro ClientRouter)
+  // the previously-resolved promise would let the books strike fire
+  // immediately, skipping the wait.
+  let fanoutDoneResolve: (() => void) | undefined;
+  let fanoutDone: Promise<void>;
+  function resetFanoutPromise() {
+    fanoutDone = new Promise<void>((r) => { fanoutDoneResolve = r; });
+  }
+  resetFanoutPromise();
+
+  // Fan-out timing matches the CSS: river at delay 0 + 600ms, fontan at
+  // delay 120ms + 600ms. The last card finishes at 720ms after IO fires.
+  const FANOUT_TOTAL_MS = 720;
+
+  function initTravelFanOut() {
+    const photos = document.querySelector<HTMLElement>('[data-fan-photos]');
+    if (!photos || photos.dataset.fanInit === '1') return;
+    photos.dataset.fanInit = '1';
+
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      fanoutDoneResolve?.();
+      return;
+    }
+
+    photos.setAttribute('data-fan-state', 'initial');
+
+    const io = new IntersectionObserver((entries, obs) => {
+      for (const entry of entries) {
+        if (entry.isIntersecting) {
+          requestAnimationFrame(() => {
+            photos.removeAttribute('data-fan-state');
+            setTimeout(() => fanoutDoneResolve?.(), FANOUT_TOTAL_MS);
+          });
+          obs.unobserve(entry.target);
+        }
+      }
+    }, { threshold: 0.4 });
+
+    io.observe(photos);
+  }
+
+  function initBooksStrike() {
+    const list = document.querySelector<HTMLElement>('[data-strike-list]');
+    if (!list || list.dataset.strikeInit === '1') return;
+    list.dataset.strikeInit = '1';
+
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    list.setAttribute('data-strike-state', 'initial');
+
+    const io = new IntersectionObserver((entries, obs) => {
+      for (const entry of entries) {
+        if (entry.isIntersecting) {
+          // Wait until the fan-out reveal has settled before drawing the
+          // strikethrough lines (so the eye doesn't track both at once).
+          fanoutDone.then(() => {
+            requestAnimationFrame(() => list.removeAttribute('data-strike-state'));
+          });
+          obs.unobserve(entry.target);
+        }
+      }
+    }, { threshold: 0.4 });
+
+    io.observe(list);
+  }
+
+  function initBehindAnimations() {
+    resetFanoutPromise();
+    initTravelFanOut();
+    initBooksStrike();
+  }
+
+  // Initial page load.
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initBehindAnimations);
+  } else {
+    initBehindAnimations();
+  }
+  // Astro View Transitions: re-init on each client-side navigation.
+  document.addEventListener('astro:page-load', initBehindAnimations);
+</script>
