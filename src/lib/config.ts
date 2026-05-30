@@ -1,7 +1,8 @@
 // Single source of truth for URLs used across the site.
-// When the resume is ready, swap RESUME_URL here — it propagates to Hero, Footer, and dropdown.
 
-export const RESUME_URL = 'https://dribbble.com/shots'; // TODO: replace before final deploy (interactions.md 5.2)
+// Resume PDF lives in /public/resume.pdf — served from the deploy root.
+// Edit only the filename in public/ to update; this constant stays stable.
+export const RESUME_URL = '/resume.pdf';
 
 export const CONTACT = {
   email: 'mariannadelihioz@gmail.com',
