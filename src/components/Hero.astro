@@ -456,6 +456,40 @@ import { RESUME_URL } from '../lib/config.ts';
     .hero__icon-m--eye    { left: 147px; top: 442px; }
     .hero__icon-m--notion { left: 270px; top: 412px; }
 
+    /* Gentle bottom-up float (Marianna): each icon drifts ~6px (≈12% of
+       its 48px size) over 4s, ease-in-out. Per-icon negative delays
+       distribute the phases across the cycle so the six icons read as
+       independent floats — like bubbles on water — instead of moving
+       in lockstep. Pure CSS; cheaper than a JS RAF loop on mobile.
+       transform-only animation keeps it on the GPU. */
+    .hero__icon-m {
+      animation: hero-mobile-float 4s ease-in-out infinite;
+      will-change: transform;
+    }
+    .hero__icon-m--flower { animation-delay: 0s;    }
+    .hero__icon-m--gemini { animation-delay: -0.7s; }
+    .hero__icon-m--claude { animation-delay: -1.4s; }
+    .hero__icon-m--figma  { animation-delay: -2.0s; }
+    .hero__icon-m--eye    { animation-delay: -2.7s; }
+    .hero__icon-m--notion { animation-delay: -3.3s; }
+
+    @media (prefers-reduced-motion: reduce) {
+      .hero__icon-m { animation: none; }
+    }
+  }
+
+  /* Keyframes need to live OUTSIDE the @media block because some browsers
+     scope @keyframes by media context. Putting them in the global scope
+     guarantees the animation reference resolves on mobile. */
+  @keyframes hero-mobile-float {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-6px); }
+  }
+
+  /* (Re-open the mobile @media so the closing brace below still matches.
+     Trailing rules continue inside the same media query below.) */
+  @media (max-width: 767px) {
+
     /* Card: positioned at x=24, y=88 within card-area (Figma y=78, shifted +10
        to leave room for top icons which extended above the original Figma frame) */
     .hero__card {
