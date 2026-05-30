@@ -377,12 +377,12 @@ import { RESUME_URL } from '../lib/config.ts';
     transform: translateY(1px);
   }
 
-  /* Touch devices — 44px minimum tap target */
-  @media (pointer: coarse) {
-    .hero__resume-btn {
-      min-height: 44px;
-    }
-  }
+  /* Touch devices: intentionally NO min-height override here. WCAG 2.5.5
+     recommends 44×44 tap targets, but Marianna's call is to keep the
+     32px height on phones too — the button sits in the centre of the
+     hero card with no neighbouring clickable elements, so accidental
+     mis-taps aren't a risk and the optical mismatch between desktop
+     (32px) and Android (was 44px) goes away. */
 
   /* Caption */
   .hero__caption {

@@ -333,11 +333,15 @@ assignWave(birdDots, 0, BIRD_DURATION);
     list-style: none;
   }
 
-  /* Mobile: reduce the gap between links — both horizontal and the
-     vertical gap between wrapped rows — from 12px to 8px. */
+  /* Mobile: column-gap stays 8px between links in a row, but row-gap
+     collapses to 0 so wrapped rows touch each other — Marianna found
+     the default row-gap looked over-spaced on phone. Links still have
+     height 32px (or min 44px on touch) so they don't visually collide;
+     they just sit edge-to-edge vertically. */
   @media (max-width: 767px) {
     .footer__links {
-      gap: var(--space-inline-sm); /* 8px (both axes) */
+      column-gap: var(--space-inline-sm); /* 8px between links in a row */
+      row-gap: 0;                          /* 0 between wrapped rows */
     }
   }
 

@@ -228,7 +228,10 @@ const {
       height: 44px;
       padding: var(--space-inset-md); /* 12px */
       background-color: var(--color-bg-light-grey);
-      border: 1px solid transparent;
+      /* Light hairline border — same token as header pill on scroll, gives
+         the FAB the same "lifted card" definition against busy hero/case
+         imagery underneath. */
+      border: 1px solid var(--color-stroke-light);
       border-radius: var(--radius-pill);
       cursor: pointer;
       box-shadow: var(--shadow-fab);
@@ -270,6 +273,9 @@ const {
       overflow-y: auto;
       padding: var(--space-inset-sm) var(--space-inset-md); /* 8px 12px */
       background-color: var(--color-bg-light-grey);
+      /* Same hairline border as the FAB — keeps the two surfaces visually
+         paired when both are on screen. */
+      border: 1px solid var(--color-stroke-light);
       border-radius: var(--radius-l); /* 12px */
       box-shadow: var(--shadow-fab);
       gap: var(--space-stack-sm); /* 8px */
@@ -323,6 +329,20 @@ const {
     .case-toc__link {
       width: 100%;
       font-size: var(--font-size-body-medium); /* 16px popup */
+    }
+  }
+
+  /* Mobile-only override — Marianna wants a more thumb-friendly FAB on
+     phones (48×48 instead of 44×44). Tablet keeps 44×44 because the
+     extra size is unnecessary on a larger viewport. The popup's `right`
+     offset has to track the FAB width: 24 + 48 + 16 = 88px. */
+  @media (max-width: 767px) {
+    .case-toc__fab {
+      width: 48px;
+      height: 48px;
+    }
+    .case-toc {
+      right: calc(24px + 48px + 16px);
     }
   }
 
