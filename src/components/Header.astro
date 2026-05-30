@@ -584,19 +584,13 @@ const navPrefix = variant === 'home' ? '#' : '/#';
     flex-shrink: 0;
   }
 
-  /* ====== Accessibility — focus + touch targets ====== */
-
-  /* Visible focus ring per a11y.md 8.1 (--shadow-focus: outer black + inner white) */
-  .header__nav-link:focus-visible,
-  .header__go-home:focus-visible,
-  .header__contact-button:focus-visible,
-  .header__menu-button:focus-visible,
-  .header__contact-menu-link:focus-visible,
-  .header__menu-tab:focus-visible,
-  .header__menu-contact-link:focus-visible {
-    outline: none;
-    box-shadow: var(--shadow-focus);
-  }
+  /* ====== Accessibility — focus + touch targets ======
+     Header used to override focus with the chunky `--shadow-focus` token
+     (4px black halo + 2px white inner). Marianna found it too heavy on
+     the nav tabs and inconsistent with the rest of the site, so we just
+     let the global `:focus-visible` from global.css apply: a flat 2px
+     solid var(--color-bg-black) outline at 2px offset. a11y.md §3.1
+     prescribes exactly that. No overrides needed here. */
 
   /* Minimum 44×44 tap target on touch devices */
   @media (pointer: coarse) {
