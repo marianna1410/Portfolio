@@ -110,7 +110,7 @@ const {
   /* States per Figma 505:7536 (card / default + hover + focus):
        Default → bg light-grey, no visible border, default image
        Hover   → bg light-grey, 1px solid #E9E9E9 border, image scales 1.06
-       Focus   → bg light-grey, no border, 2px white + 4px black focus ring
+       Focus   → bg light-grey, global 2px #252525 outline (a11y.md §3.1)
      A transparent 1px border lives on the default state so toggling a coloured
      border on hover doesn't shift the card's 1px in either direction. */
   .case-next__card {
@@ -131,12 +131,10 @@ const {
     border-color: var(--color-stroke-light); /* #E9E9E9 */
   }
 
-  .case-next__card:focus-visible {
-    outline: none;
-    /* Focus shows the ring instead of the border (border stays transparent). */
-    border-color: transparent;
-    box-shadow: var(--shadow-focus);
-  }
+  /* Focus uses the global :focus-visible from global.css
+     (2px solid var(--color-bg-black) outline, 2px offset, per a11y.md §3.1).
+     The hover border (E9E9E9) and the focus outline coexist visually — outline
+     sits 2px outside the card, hover border sits on the card edge. */
 
   /* ── Image (252×162 desktop) ────────────────────────────────────── */
   .case-next__media {

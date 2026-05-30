@@ -303,10 +303,8 @@ const showResearch = !!researchIntro && Array.isArray(highlights) && highlights.
     color: var(--color-text-black); /* #252525 */
   }
 
-  .case-solution__cta:focus-visible {
-    outline: none;
-    box-shadow: var(--shadow-focus); /* 2px white + 4px #252525 ring */
-  }
+  /* Focus uses the global :focus-visible from global.css
+     (2px solid var(--color-bg-black) outline, 2px offset, per a11y.md §3.1). */
 
   .case-solution__cta-label {
     font-family: var(--font-family-body);

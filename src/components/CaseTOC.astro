@@ -198,11 +198,11 @@ const {
     .case-toc__link:hover:not(.case-toc__link--active) .case-toc__icon-img--hover { opacity: 1; }
   }
 
-  .case-toc__link:focus-visible {
-    outline: none;
-    background-color: var(--color-bg-white);
-    box-shadow: var(--shadow-focus);
-  }
+  /* Focus uses the global :focus-visible from global.css
+     (2px solid var(--color-bg-black) outline, 2px offset, per a11y.md §3.1).
+     Dropped the local --shadow-focus override — that ring was 4px black
+     halo + 2px white inner, visually heavy and out of sync with the rest
+     of the site. Same fix as Header (commit 92c463b). */
 
   /* FAB — hidden on desktop. */
   .case-toc__fab { display: none; }
@@ -240,10 +240,7 @@ const {
       z-index: 50;
     }
 
-    .case-toc__fab:focus-visible {
-      outline: none;
-      box-shadow: var(--shadow-focus);
-    }
+    /* Focus uses the global :focus-visible (2px solid #252525 outline). */
 
     .case-toc__fab-icons {
       position: relative;
