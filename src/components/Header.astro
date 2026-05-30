@@ -643,6 +643,15 @@ const navPrefix = variant === 'home' ? '#' : '/#';
     const menu = document.querySelector<HTMLUListElement>(menuSelector);
     if (!trigger || !menu) return;
 
+    // Guard against double-binding. initHeader runs from BOTH paths below on
+    // initial page load — the readyState fallback AND astro:page-load (which
+    // ClientRouter fires even for the very first paint). Without this guard,
+    // the trigger ends up with TWO click listeners: the first toggles open,
+    // the second immediately reads the new "open" state and toggles closed,
+    // so every click is a no-op and the dropdown never appears.
+    if ((trigger as any).__dropdownBound) return;
+    (trigger as any).__dropdownBound = true;
+
     const menuItems = () =>
       Array.from(menu.querySelectorAll<HTMLAnchorElement>('a[role="menuitem"]'));
 
