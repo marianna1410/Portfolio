@@ -92,6 +92,14 @@ import { RESUME_URL } from '../lib/config.ts';
              box-shadow is on the IMG (filter: drop-shadow) so the shadow follows
              the SVG silhouette including the punched circle holes — per Figma. -->
         <div class="hero__paper-wrap">
+          {/* White fill behind the two punched circles in the paper SVG.
+              Sky-wrap starts at x=39 within the card, but the punches are at
+              x=26 → without these, orbiting icons (which sit behind the card)
+              show through the holes. Painted BEFORE the paper image so they
+              live behind it; the paper SVG's own drop-shadow still renders
+              into the hole rims so they keep their "punched" look. */}
+          <span class="hero__paper-hole hero__paper-hole--top" aria-hidden="true"></span>
+          <span class="hero__paper-hole hero__paper-hole--bottom" aria-hidden="true"></span>
           <Image
             src={heroPaper}
             alt=""
@@ -213,6 +221,11 @@ import { RESUME_URL } from '../lib/config.ts';
     width: 64px;
     height: 64px;
     display: block;
+    /* Parent .hero__icons has pointer-events:none so clicks pass through to
+       the resume card. Icons themselves opt back in so the orbit-pause +
+       scale-up hover (animations.md §4.2) can fire. */
+    pointer-events: auto;
+    will-change: transform;
   }
 
   /* Absolute positions per Figma node 472:16030 */
@@ -267,6 +280,22 @@ import { RESUME_URL } from '../lib/config.ts';
     width: 338px;
     height: 330px;
   }
+
+  /* Hole-fillers. Coords come straight from the SVG (viewBox 338×330):
+     centers at (26, 26) and (26, 62), each with radius 10. The 20×20
+     square is offset 10px back from the center → top-left at (16, 16)
+     and (16, 52). Mobile paper-wrap is 292×289 (≈0.864× scale), so
+     mobile values are scaled proportionally below. */
+  .hero__paper-hole {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background-color: var(--color-bg-white);
+    pointer-events: none;
+  }
+  .hero__paper-hole--top    { left: 16px; top: 16px; }
+  .hero__paper-hole--bottom { left: 16px; top: 52px; }
 
   .hero__paper-img {
     position: absolute;
@@ -399,6 +428,11 @@ import { RESUME_URL } from '../lib/config.ts';
 
     /* Swap icon sets: hide desktop 10-icon set, show mobile 6-icon set */
     .hero__icons--desktop { display: none; }
+
+    /* Mobile icons skip the orbital wobble — desktop-only animation. */
+    .hero__icon-m {
+      pointer-events: auto;
+    }
     .hero__icons--mobile  { display: block; }
 
     /* Mobile icons base: 48px (sourced from 192px PNG for 4x retina) */
@@ -451,6 +485,15 @@ import { RESUME_URL } from '../lib/config.ts';
       height: 289px;
     }
 
+    /* Hole-fillers scale to paper (0.864× of desktop SVG): 17px ⌀,
+       centers at (22.5, 22.5) and (22.5, 54.3) → top-left rounded. */
+    .hero__paper-hole {
+      width: 17px;
+      height: 17px;
+    }
+    .hero__paper-hole--top    { left: 14px; top: 14px; }
+    .hero__paper-hole--bottom { left: 14px; top: 46px; }
+
     /* Avatar: 92×92 at x=100, y=28 within paper (centered: 100+46=146=292/2) */
     .hero__avatar {
       top: 28px;
@@ -488,3 +531,192 @@ import { RESUME_URL } from '../lib/config.ts';
     }
   }
 </style>
+
+<script>
+  /* Hero icon orbit (animations.md §4.1 + §4.2).
+     All 10 desktop icons share ONE elliptical orbit (rx=290, ry=145)
+     around the resume card's center. Two non-obvious things in here:
+
+     1) ARC-LENGTH parameterization. A naïve (rx·cos t, ry·sin t) at
+        constant dt/dt moves the icon FASTER near the short-axis ends and
+        SLOWER near the long-axis ends (because the ellipse stretches the
+        parameter space). Visually adjacent icons appeared to "breathe"
+        — distance swelling and shrinking each lap, sometimes overlapping.
+        Fix: pre-compute an arc-length table and step every icon by equal
+        ARC LENGTH per frame. Then the chord between adjacent icons
+        stays roughly constant (~140px for 10 slots on this ellipse).
+
+     2) Even arc-length slots, NOT even angles. Icons are sorted by their
+        Figma angular position and assigned slots 0..9 in that order; each
+        slot lives at slot/N of the total perimeter. Preserves rough order
+        so the initial snap-in is minimal.
+
+     Hover: pause the master tween (one tween drives all icons), scale
+     the hovered icon 1.15× (250ms ease-out). Leave: reverse + resume.
+     Mobile icons stay static. Reduced motion: no snap-in, no orbit, no
+     hover scale — icons stay at Figma positions per accessibility.md. */
+  import { gsap } from 'gsap';
+
+  type OrbitTween = ReturnType<typeof gsap.to>;
+  let orbitTweens: OrbitTween[] = [];
+
+  const RX = 290;             // px — horizontal semi-axis
+  const RY = 145;             // px — vertical semi-axis
+  const BASE_PERIOD = 22;     // s — full revolution (meditative pace)
+  const SNAP_DURATION = 0.8;  // s — initial slide from Figma → orbit
+  const HOVER_SCALE = 1.15;
+  const HOVER_DURATION = 0.25;
+  const ARC_SAMPLES = 360;    // resolution of arc-length lookup table
+
+  function killOrbit() {
+    orbitTweens.forEach((t) => t.kill());
+    orbitTweens = [];
+  }
+
+  type ArcSample = { t: number; s: number };
+  function buildArcTable(rx: number, ry: number, samples: number): { table: ArcSample[]; total: number } {
+    const dt = (2 * Math.PI) / samples;
+    const table: ArcSample[] = [{ t: 0, s: 0 }];
+    let s = 0;
+    let prevX = rx;
+    let prevY = 0;
+    for (let i = 1; i <= samples; i++) {
+      const t = i * dt;
+      const x = rx * Math.cos(t);
+      const y = ry * Math.sin(t);
+      s += Math.hypot(x - prevX, y - prevY);
+      table.push({ t, s });
+      prevX = x;
+      prevY = y;
+    }
+    return { table, total: s };
+  }
+
+  // Binary-search the arc table for parameter t at a given arc length s.
+  function paramAtArcLength(table: ArcSample[], total: number, targetS: number): number {
+    let s = targetS % total;
+    if (s < 0) s += total;
+    let lo = 0;
+    let hi = table.length - 1;
+    while (lo < hi) {
+      const mid = (lo + hi) >> 1;
+      if (table[mid].s < s) lo = mid + 1;
+      else hi = mid;
+    }
+    if (lo === 0) return 0;
+    const a = table[lo - 1];
+    const b = table[lo];
+    const frac = (s - a.s) / (b.s - a.s || 1);
+    return a.t + frac * (b.t - a.t);
+  }
+
+  function initHeroOrbit() {
+    const cardArea = document.querySelector<HTMLElement>('.hero__card-area');
+    const icons = Array.from(
+      document.querySelectorAll<HTMLElement>('.hero__icons--desktop .hero__icon'),
+    );
+    if (!cardArea || icons.length === 0) return;
+
+    killOrbit();
+    icons.forEach((el) => gsap.set(el, { clearProps: 'transform' }));
+
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    const rect = cardArea.getBoundingClientRect();
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+
+    const { table: arcTable, total: arcLength } = buildArcTable(RX, RY, ARC_SAMPLES);
+
+    type IconInfo = {
+      el: HTMLElement;
+      cssX: number;
+      cssY: number;
+      originalAngle: number;
+      offsetS: number;          // arc-length offset = this icon's slot * (arcLength / N)
+      targetX: number;
+      targetY: number;
+    };
+    const data: IconInfo[] = icons.map((el) => {
+      const cssX = el.offsetLeft + el.offsetWidth / 2 - centerX;
+      const cssY = el.offsetTop + el.offsetHeight / 2 - centerY;
+      let angle = Math.atan2(cssY, cssX);
+      if (angle < 0) angle += Math.PI * 2;
+      return { el, cssX, cssY, originalAngle: angle, offsetS: 0, targetX: 0, targetY: 0 };
+    });
+
+    // Assign arc-length slots in original-angle order so each icon barely shifts.
+    [...data]
+      .sort((a, b) => a.originalAngle - b.originalAngle)
+      .forEach((item, slot) => {
+        item.offsetS = (slot / icons.length) * arcLength;
+        const t = paramAtArcLength(arcTable, arcLength, item.offsetS);
+        item.targetX = RX * Math.cos(t);
+        item.targetY = RY * Math.sin(t);
+      });
+
+    // Phase 1: per-icon snap-in from Figma → orbit slot.
+    data.forEach((info) => {
+      gsap.fromTo(
+        info.el,
+        { x: 0, y: 0 },
+        {
+          x: info.targetX - info.cssX,
+          y: info.targetY - info.cssY,
+          duration: SNAP_DURATION,
+          ease: 'power2.out',
+        },
+      );
+    });
+
+    // Phase 2: ONE master tween advances arc-length progress; onUpdate
+    // positions every icon. Single tween = clean pause/resume on hover.
+    const state = { progress: 0 };
+    const masterTween = gsap.to(state, {
+      progress: 1,
+      duration: BASE_PERIOD,
+      ease: 'none',           // linear — ease-in-out hitches at the loop seam
+      repeat: -1,
+      delay: SNAP_DURATION,
+      onUpdate: () => {
+        const advance = state.progress * arcLength;
+        for (const info of data) {
+          const s = info.offsetS + advance;
+          const t = paramAtArcLength(arcTable, arcLength, s);
+          const x = RX * Math.cos(t);
+          const y = RY * Math.sin(t);
+          gsap.set(info.el, { x: x - info.cssX, y: y - info.cssY });
+        }
+      },
+    });
+    orbitTweens.push(masterTween);
+
+    data.forEach(({ el }) => {
+      el.addEventListener('mouseenter', () => {
+        masterTween.pause();
+        gsap.to(el, {
+          scale: HOVER_SCALE,
+          duration: HOVER_DURATION,
+          ease: 'power2.out',
+          overwrite: 'auto',
+        });
+      });
+      el.addEventListener('mouseleave', () => {
+        gsap.to(el, {
+          scale: 1,
+          duration: HOVER_DURATION,
+          ease: 'power2.out',
+          overwrite: 'auto',
+        });
+        masterTween.resume();
+      });
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initHeroOrbit);
+  } else {
+    initHeroOrbit();
+  }
+  document.addEventListener('astro:page-load', initHeroOrbit);
+</script>
