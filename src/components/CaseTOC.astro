@@ -347,19 +347,25 @@ const {
    *   2. FAB popup behaviour at ≤1279px: open on FAB-click, close on
    *      FAB-click / outside-click / Esc / link-click. Selecting a link
    *      navigates to its anchor — the close happens BEFORE the scroll.
+   *
+   * Lifecycle: Astro View Transitions (<ClientRouter />) swaps the page
+   * DOM without a full reload. DOMContentLoaded only fires on the very
+   * first paint, so we ALSO listen on `astro:page-load` (which fires on
+   * every navigation, including the first paint). To avoid leaking
+   * document-level listeners across navigations, each init wraps all
+   * handlers in an AbortController and aborts the previous one.
    */
-  function initTocScrollSpy() {
+  let currentAbort: AbortController | null = null;
+  let currentObserver: IntersectionObserver | null = null;
+
+  function initTocScrollSpy(signal: AbortSignal) {
     const tocLinks = Array.from(document.querySelectorAll<HTMLAnchorElement>('[data-toc-link]'));
     if (tocLinks.length === 0) return;
 
-    const linkByTarget = new Map<string, HTMLAnchorElement>();
     const targetIds: string[] = [];
     tocLinks.forEach((link) => {
       const target = link.dataset.target;
-      if (target) {
-        linkByTarget.set(target, link);
-        targetIds.push(target);
-      }
+      if (target) targetIds.push(target);
     });
 
     const sections = targetIds
@@ -419,9 +425,13 @@ const {
     );
 
     sections.forEach((s) => observer.observe(s));
+    currentObserver = observer;
+
+    // Disconnect when the controller fires abort (i.e. next page load).
+    signal.addEventListener('abort', () => observer.disconnect());
   }
 
-  function initTocFab() {
+  function initTocFab(signal: AbortSignal) {
     const wrapper = document.querySelector<HTMLElement>('[data-toc-wrapper]');
     const fab = document.querySelector<HTMLButtonElement>('[data-toc-fab]');
     if (!wrapper || !fab) return;
@@ -444,7 +454,7 @@ const {
     fab.addEventListener('click', (e) => {
       e.stopPropagation();
       toggle();
-    });
+    }, { signal });
 
     // Outside-click closes the popup. Clicks on the FAB itself are stopped
     // above so they don't double-toggle here.
@@ -455,7 +465,7 @@ const {
       const nav = wrapper.querySelector('.case-toc');
       if (nav && nav.contains(target)) return;
       close();
-    });
+    }, { signal });
 
     // Esc closes.
     document.addEventListener('keydown', (e) => {
@@ -463,30 +473,40 @@ const {
         close();
         fab.focus();
       }
-    });
+    }, { signal });
 
     // Click on any link inside the TOC closes the popup, then native anchor
     // navigation runs.
     wrapper.querySelectorAll<HTMLAnchorElement>('[data-toc-link]').forEach((link) => {
-      link.addEventListener('click', () => close());
+      link.addEventListener('click', () => close(), { signal });
     });
 
     // If user crosses the breakpoint back to desktop, force-close to avoid
     // leaving stale state lying around.
     const mq = window.matchMedia('(min-width: 1280px)');
     const handleBp = () => { if (mq.matches) close(); };
-    if (mq.addEventListener) mq.addEventListener('change', handleBp);
-    else mq.addListener(handleBp); // Safari < 14 fallback
+    if (mq.addEventListener) mq.addEventListener('change', handleBp, { signal });
+    else mq.addListener(handleBp); // Safari < 14 fallback (no AbortController support)
   }
 
   function init() {
-    initTocScrollSpy();
-    initTocFab();
+    // Abort any listeners + observer from the previous page so they don't
+    // pile up across View Transitions navigations.
+    currentAbort?.abort();
+    currentObserver?.disconnect();
+    currentAbort = new AbortController();
+    initTocScrollSpy(currentAbort.signal);
+    initTocFab(currentAbort.signal);
   }
 
+  // First paint (no view transitions yet, or hard refresh on a case page).
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
   } else {
     init();
   }
+  // Astro View Transitions: fires on every page swap, including the first
+  // paint when ClientRouter is mounted. The AbortController guard above
+  // makes the double-call on first paint safe.
+  document.addEventListener('astro:page-load', init);
 </script>
