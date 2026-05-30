@@ -25,10 +25,13 @@ const { variant = 'default' } = Astro.props;
  * darkening wave (grey → text/black) travels along the line and into the
  * bird, looping. Pure CSS — see .footer__dot below.
  */
-// Wave timing — line and bird sweep at DIFFERENT paces (decoupled):
-const LINE_DURATION = 4.5; // s — wave crossing the dotted line (the brisk "as-before" pace)
-const BIRD_DURATION = 0.9; // s — wave crossing the bird (kept slow on purpose)
-const WAVE_CYCLE = LINE_DURATION + BIRD_DURATION; // total loop; pushed to CSS via --wave-cycle
+// Wave timing — line stays grey (no animation, see CSS below); only the bird
+// pulses in a left→right sweep, with a 2s quiet gap between sweeps so the
+// effect reads as a periodic shimmer rather than a constant pulse.
+const LINE_DURATION = 4.5; // s — kept for historical reference; line dots have animation: none
+const BIRD_DURATION = 0.9; // s — wave crossing the bird
+const BIRD_PAUSE   = 2;    // s — silent gap between bird sweeps
+const WAVE_CYCLE = BIRD_DURATION + BIRD_PAUSE; // total loop; pushed to CSS via --wave-cycle
 
 // Line dots: evenly spaced along the 273px line (viewBox 0 0 275 2).
 const lineDots: { cx: number; absX: number; delay: number }[] = [];
@@ -61,8 +64,11 @@ const assignWave = (dots: { absX: number; delay: number }[], tStart: number, dur
     d.delay = tStart + u * duration - WAVE_CYCLE;
   });
 };
+// Line dots: delays are computed but unused (CSS sets animation:none on them).
 assignWave(lineDots, 0, LINE_DURATION);
-assignWave(birdDots, LINE_DURATION, BIRD_DURATION);
+// Bird dots anchored at t=0 so the sweep starts at the top of the WAVE_CYCLE
+// and the remaining BIRD_PAUSE seconds are silent.
+assignWave(birdDots, 0, BIRD_DURATION);
 ---
 
 <footer class:list={['footer', `footer--${variant}`]} aria-label="Site footer">
@@ -76,12 +82,12 @@ assignWave(birdDots, LINE_DURATION, BIRD_DURATION);
       <div class="footer__illustration" aria-hidden="true" style={`--wave-cycle:${WAVE_CYCLE}s`}>
         <svg
           class="footer__illustration-line"
-          viewBox="0 0 275 2"
+          viewBox="0 0 275 8"
           preserveAspectRatio="none"
           xmlns="http://www.w3.org/2000/svg"
         >
           {lineDots.map((d) => (
-            <circle class="footer__dot" cx={d.cx} cy="1" r="1" style={`animation-delay:${d.delay}s`} />
+            <circle class="footer__dot" cx={d.cx} cy="4" r="1" style={`animation-delay:${d.delay}s`} />
           ))}
         </svg>
         <svg
@@ -246,7 +252,10 @@ assignWave(birdDots, LINE_DURATION, BIRD_DURATION);
     top: 50%;
     transform: translateY(-50%);
     width: 273px;
-    height: 2px;
+    /* 8px tall (not 2) leaves vertical headroom around the cy=4 dots — kept
+       as a safety margin in case dot sizing changes again. Visual baseline
+       stays at the row's vertical center via translateY(-50%). */
+    height: 8px;
     display: block;
   }
 
@@ -266,12 +275,22 @@ assignWave(birdDots, LINE_DURATION, BIRD_DURATION);
      looping seamlessly. */
   .footer__dot {
     fill: var(--color-stroke-medium-grey); /* #BBBBBB base */
-    animation: footer-dot-wave var(--wave-cycle, 5.4s) ease-in-out infinite; /* duration fed from frontmatter */
+    animation: footer-dot-wave var(--wave-cycle, 2.9s) ease-in-out infinite; /* duration fed from frontmatter */
   }
 
+  /* Line dots stay statically grey — only the bird shimmers (per Marianna).
+     We could drop the inline animation-delay on line dots but leaving them
+     wired keeps the markup symmetrical with the bird and costs nothing. */
+  .footer__illustration-line .footer__dot {
+    animation: none;
+  }
+
+  /* Keyframes now scaled to the shorter cycle. With WAVE_CYCLE = 2.9s the peak
+     window (12%) ≈ 0.35s, so each bird dot lights briefly. The wave sweeps the
+     bird in BIRD_DURATION (0.9s), then BIRD_PAUSE (2s) of silence. */
   @keyframes footer-dot-wave {
     0%   { fill: var(--color-stroke-medium-grey); }
-    6%   { fill: var(--color-text-black); }   /* #252525 peak */
+    6%   { fill: var(--color-neutral-grey-200); }  /* #9B9B9B peak — ~17% darker than #BBBBBB base (animations.md §11.1, softer than the previous #252525) */
     12%  { fill: var(--color-stroke-medium-grey); }
     100% { fill: var(--color-stroke-medium-grey); }
   }
