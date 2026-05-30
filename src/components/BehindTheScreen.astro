@@ -69,13 +69,13 @@ const bioParagraphs = [
         </div>
         <div class="behind__travel-photos" data-fan-photos aria-hidden="true">
           <div class="behind__photo behind__photo--river">
-            <Image src={riverImg} alt="" width={296} height={368} quality={90} />
+            <Image src={riverImg} alt="" width={296} height={368} quality={95} />
           </div>
           <div class="behind__photo behind__photo--fontan">
-            <Image src={fontanImg} alt="" width={296} height={368} quality={90} />
+            <Image src={fontanImg} alt="" width={296} height={368} quality={95} />
           </div>
           <div class="behind__photo behind__photo--building">
-            <Image src={buildingImg} alt="" width={404} height={466} quality={90} />
+            <Image src={buildingImg} alt="" width={404} height={466} quality={95} />
           </div>
         </div>
       </article>
@@ -592,15 +592,39 @@ const bioParagraphs = [
     }
 
     .behind__travel-photos {
-      /* Photos frame is fixed 432×232 (absolute children rely on those
-         coords). Mobile card content is narrower than 432, so scale the
-         whole frame down. Layout height collapsed to match visual height
-         so no extra whitespace below. */
+      /* Was `transform: scale(0.68)` on a 432×232 frame, but that doubled
+         the rasterization for the rotated photos inside — source 296px →
+         148 CSS box → scaled to 100 visual via transform → upsampled back
+         to ~300 device px on retina mobile. The double sampling softened
+         every photo even though the source was 1:1 sufficient at DPR 3.
+         Now we size the frame directly at the visual mobile dimensions
+         (0.68× of desktop) and shrink each photo's CSS box to match,
+         leaving rotation as the only transform → single-sample chain →
+         retina-sharp on the same source files. */
       align-self: center;
-      transform: scale(0.68);
-      transform-origin: top center;
-      height: calc(232px * 0.68); /* ~158px laid-out height */
+      width: 294px;   /* 432 × 0.68 */
+      height: 158px;  /* 232 × 0.68 */
     }
+
+    /* Photo positions/sizes recomputed at 0.68× of desktop. The math is
+       just (desktop value × 0.68) rounded — kept in comments so a future
+       designer tweak can revert by ratio. */
+    .behind__photo--river {
+      width: 101px;  height: 125px;
+      left: 52px;    top: 13px;
+    }
+    .behind__photo--fontan {
+      width: 101px;  height: 125px;
+      left: 140px;   top: 13px;
+    }
+    .behind__photo--building {
+      width: 137px;  height: 158px;
+      left: 78px;    top: -1px;
+    }
+
+    /* Fan-out reveal mobile override lives at the END of the stylesheet
+       (after the desktop [data-fan-state="initial"] rule) so it wins by
+       cascade-order. See block near the end of this style. */
 
     /* Books — heading 18px on mobile per spec (overrides H4 token 20px) */
     .behind__books-title {
@@ -665,6 +689,24 @@ const bioParagraphs = [
     .behind__photo--river,
     .behind__photo--fontan {
       transition: none;
+    }
+  }
+
+  /* Fan-out stacked-state offsets — mobile override.
+     Lives down here (not in the .behind__travel-photos mobile @media block
+     above) so it wins by cascade order against the desktop initial-state
+     rules earlier in the file. Mobile photos are at 0.68× of desktop, so
+     the desktop translate(±65, 4.5) → translate(±44, 2.5) puts each
+     river/fontan center on the building center.
+       river center mobile:    (52+50.5, 13+62.5) = (102, 75.5)
+       fontan center mobile:   (140+50.5, 13+62.5) = (190, 75.5)
+       building center mobile: (78+68.5, -1+79)   = (146, 78) */
+  @media (max-width: 1279px) {
+    .behind__travel-photos[data-fan-state="initial"] .behind__photo--river {
+      transform: translate(44px, 2.5px) rotate(0deg);
+    }
+    .behind__travel-photos[data-fan-state="initial"] .behind__photo--fontan {
+      transform: translate(-44px, 2.5px) rotate(0deg);
     }
   }
 </style>
