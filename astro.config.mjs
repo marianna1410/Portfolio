@@ -5,5 +5,5 @@ import mdx from '@astrojs/mdx';
 // https://astro.build/config
 export default defineConfig({
   integrations: [mdx()],
-  site: 'https://marianna-delihioz.vercel.app',
+  site: 'https://marianna-delihioz-portfolio.vercel.app',
 });
