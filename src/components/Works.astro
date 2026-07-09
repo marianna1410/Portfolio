@@ -10,15 +10,13 @@ import vaiaDefault   from '../assets/projects/vaia-default.png';
 const works = [
   {
     slug: 'lucida',
-    number: '01',
-    tags: ['Language Learning', 'Redesign Concept'],
+    tags: ['Mobile App', 'Language Learning', 'Redesign Concept'],
     title: 'Bringing structure and confidence to speaking practice through proven learning patterns',
     defaultImg: lucidaDefault,
   },
   {
     slug: 'vaia',
-    number: '02',
-    tags: ['EdTech', 'Redesign Concept'],
+    tags: ['Mobile App', 'EdTech', 'Redesign Concept'],
     title: "Restoring students' control and transparency over automated exam preparation",
     defaultImg: vaiaDefault,
   },
@@ -36,7 +34,6 @@ const works = [
             <div class="works__card-inner">
               <div class="works__tags-title">
                 <ul class="works__tags" aria-label="Project metadata">
-                  <li class="works__tag works__tag--number text-caption-mono">{work.number}</li>
                   {work.tags.map((tag) => <li class="works__tag text-caption-mono">{tag}</li>)}
                 </ul>
                 <h3 class="works__card-title text-h4-medium">{work.title}</h3>
@@ -175,13 +172,6 @@ const works = [
     border-radius: var(--radius-l); /* 12px */
     color: var(--color-text-grey-muted);
     white-space: nowrap;
-  }
-
-  .works__tag--number {
-    /* Square-ish tag for the project number */
-    width: 40px;
-    padding-inline: 0;
-    justify-content: center;
   }
 
   .works__card-title {

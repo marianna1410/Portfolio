@@ -3,7 +3,7 @@
  * CaseHero.astro — title block + hero image at top of case study.
  * Figma node 472:17113 (Lucida hero) / 472:20856 (Vaia hero) — same structure.
  *
- * Tag rail: first chip is the case number ("01", "02"), then two text tags.
+ * Tag rail: text tags (first is the project type, e.g. "Mobile App").
  * Title: h2 (Figma uses 40px Inter Tight Medium for case-page hero, NOT 48px h1).
  * Image: 868×562, radius 20px.
  */
@@ -11,9 +11,7 @@ import { Image } from 'astro:assets';
 import type { ImageMetadata } from 'astro';
 
 interface Props {
-  /** "01", "02" — first chip on the tag rail */
-  number: string;
-  /** Remaining tag labels rendered after the number chip */
+  /** Tag labels rendered on the rail (first is the project type) */
   tags: string[];
   /** Hero title (rendered as <h1> for SEO/a11y, styled like h2) */
   title: string;
@@ -23,13 +21,12 @@ interface Props {
   imageAlt: string;
 }
 
-const { number, tags, title, image, imageAlt } = Astro.props;
+const { tags, title, image, imageAlt } = Astro.props;
 ---
 
 <header class="case-hero" id="top">
   <div class="case-hero__title-block">
     <div class="case-hero__tag-rail" aria-label="Case study tags">
-      <span class="case-hero__tag case-hero__tag--number">{number}</span>
       {tags.map((tag) => (
         <span class="case-hero__tag">{tag}</span>
       ))}
@@ -88,12 +85,6 @@ const { number, tags, title, image, imageAlt } = Astro.props;
     line-height: var(--line-height-loose);
     letter-spacing: var(--letter-spacing-normal);
     white-space: nowrap;
-  }
-
-  .case-hero__tag--number {
-    /* "01" chip: Figma sets fixed width 40, centered text */
-    width: 40px;
-    padding-inline: 0;
   }
 
   .case-hero__title {

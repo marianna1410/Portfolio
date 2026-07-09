@@ -28,8 +28,7 @@ const vaia: CaseData = {
     'Case study: redesigning Vaia to restore student control over the AI-driven exam-prep flow — uploads, generation depth, and study-plan scheduling.',
 
   hero: {
-    number: '02',
-    tags: ['EdTech', 'Redesign Concept'],
+    tags: ['Mobile App', 'EdTech', 'Redesign Concept'],
     title:
       "Restoring students' control and transparency over automated exam preparation",
     image: heroImage,
@@ -275,8 +274,7 @@ const vaia: CaseData = {
 
   nextCard: {
     slug: 'lucida',
-    number: '01',
-    tags: ['Language Learning', 'Redesign Concept'],
+    tags: ['Mobile App', 'Language Learning', 'Redesign Concept'],
     headline:
       'Bringing structure and confidence to speaking practice through proven learning patterns',
     image: lucidaPreview,

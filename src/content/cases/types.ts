@@ -87,7 +87,6 @@ export interface SolutionBlock {
 }
 
 export interface CaseHero {
-  number: string;
   tags: string[];
   title: string;
   image: ImageMetadata;
@@ -141,7 +140,6 @@ export interface CaseSummary {
 export interface CaseNextCardMeta {
   /** Slug of the next case — drives the card href (/cases/{slug}). */
   slug: CaseSlug;
-  number: string;
   tags: string[];
   headline: string;
   image: ImageMetadata;

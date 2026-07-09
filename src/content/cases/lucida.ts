@@ -33,8 +33,7 @@ const lucida: CaseData = {
     'Case study: redesigning Lucida AI to turn one-time lesson content into practiced, retained vocabulary and corrections.',
 
   hero: {
-    number: '01',
-    tags: ['Language Learning', 'Redesign Concept'],
+    tags: ['Mobile App', 'Language Learning', 'Redesign Concept'],
     title:
       'Bringing structure and confidence to speaking practice through proven learning patterns',
     image: heroImage,
@@ -309,8 +308,7 @@ const lucida: CaseData = {
 
   nextCard: {
     slug: 'vaia',
-    number: '02',
-    tags: ['EdTech', 'Redesign Concept'],
+    tags: ['Mobile App', 'EdTech', 'Redesign Concept'],
     headline:
       "Restoring students' control and transparency over automated exam preparation",
     image: vaiaPreview,

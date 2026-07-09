@@ -24,9 +24,7 @@ import ArrowSwap from '../ArrowSwap.astro';
 interface Props {
   /** Section heading, default "Keep reading". */
   heading?: string;
-  /** Project case number, e.g. "02" — shown in the first tag pill. */
-  number: string;
-  /** Additional tags shown to the right of the number pill (e.g. ["EdTech", "Redesign Concept"]). */
+  /** Tags shown on the rail (first is the project type, e.g. "Mobile App"). */
   tags: string[];
   /** Card headline — the short project descriptor. */
   headline: string;
@@ -43,7 +41,6 @@ interface Props {
 
 const {
   heading = 'Keep reading',
-  number,
   tags,
   headline,
   href,
@@ -72,7 +69,6 @@ const {
     <div class="case-next__body">
       <div class="case-next__top">
         <ul class="case-next__tags" aria-hidden="true">
-          <li class="case-next__tag case-next__tag--number">{number}</li>
           {tags.map((t) => (
             <li class="case-next__tag">{t}</li>
           ))}
@@ -201,13 +197,6 @@ const {
     letter-spacing: var(--letter-spacing-wide);
     color: var(--color-text-grey-muted);
     white-space: nowrap;
-  }
-
-  .case-next__tag--number {
-    /* "02" pill keeps a fixed 40px width per Figma to look uniform with future
-       numbers ("03", "04"…) without growing/shrinking on different digits. */
-    width: 40px;
-    padding-inline: 0;
   }
 
   .case-next__headline {

@@ -42,7 +42,6 @@ const { hero, overview, research, problems, solutions, summary, nextCard } = dat
 
 <CaseLayout title={data.title} description={data.description}>
   <CaseHero
-    number={hero.number}
     tags={hero.tags}
     title={hero.title}
     image={hero.image}
@@ -134,7 +133,6 @@ const { hero, overview, research, problems, solutions, summary, nextCard } = dat
   <CaseDivider />
 
   <CaseNextProject
-    number={nextCard.number}
     tags={nextCard.tags}
     headline={nextCard.headline}
     href={`/cases/${nextCard.slug}`}
