@@ -373,22 +373,42 @@ const bioParagraphs = [
     user-select: none;
   }
 
-  /* ====== Fan slots (desktop) ======
-     Three fixed positions the three photos rotate through when the deck is
-     swiped. Geometry is identical to the original per-photo values — only the
-     ownership is now dynamic. Each photo covers its slot (object-fit: cover),
-     so moving a photo into a bigger/smaller slot just re-crops it, no distortion.
+  /* ====== Photo aspect ratios ======
+     Each photo always keeps its own aspect ratio, so its baked-in rounded frame
+     is never cropped or stretched — no matter which slot it lands in after a
+     shuffle. Slots below fix only the HEIGHT; width follows from these ratios. */
+  .behind__photo--building { aspect-ratio: 404 / 466; }
+  .behind__photo--river,
+  .behind__photo--fontan   { aspect-ratio: 296 / 368; }
 
-       slot-front → center, upright, largest, on top   (was building)
-       slot-bl    → back-left, tilted -30°             (was river)
-       slot-br    → back-right, tilted +30°            (was fontan)  */
+  /* ====== Fan slots (desktop) ======
+     Positions the photos rotate through when the deck is swiped. A slot sets a
+     fixed HEIGHT (front tier is taller), a CENTRE x (left = centre point;
+     translateX(-50%) keeps the card centred whatever its width), a tilt, a depth
+     and a shadow. Because only height is fixed and width comes from each photo's
+     aspect-ratio, a photo moving between slots is never stretched or cropped.
+
+       slot-front → centre, upright, tallest, on top
+       slot-bl    → back-left, tilted -30°
+       slot-br    → back-right, tilted +30°  */
+  .slot-front {
+    height: 233px;
+    left: 216px;               /* centre x (Figma building centre 115 + 202/2) */
+    top: -1px;
+    border-radius: 14px;
+    transform: translateX(-50%) rotate(0deg);
+    z-index: 3;
+    box-shadow:
+      -8px 132px 37px 0 rgba(102, 102, 102, 0),
+      -5px 84px 34px 0 rgba(102, 102, 102, 0.01),
+      -3px 47px 28px 0 rgba(102, 102, 102, 0.05);
+  }
+
   .slot-bl {
-    width: 148px;
     height: 184px;
-    /* Figma rotation-wrapper center (left=41, w=220 → cx=151; 151-74=77). */
-    left: 77px;
+    left: 151px;               /* centre x (Figma 77 + 148/2) */
     top: 19px;
-    transform: rotate(-30deg);
+    transform: translateX(-50%) rotate(-30deg);
     z-index: 1;
     box-shadow:
       -6.667px 110px 30.833px 0 rgba(102, 102, 102, 0),
@@ -397,12 +417,10 @@ const bioParagraphs = [
   }
 
   .slot-br {
-    width: 148px;
     height: 184px;
-    /* Center x = 280 (wrapper left=170 + w=220/2); 280-74=206. */
-    left: 206px;
+    left: 280px;               /* centre x (Figma 206 + 148/2) */
     top: 19px;
-    transform: rotate(30deg);
+    transform: translateX(-50%) rotate(30deg);
     z-index: 2;
     /* Fan-out reveal stagger: the back-right card (fontan on first reveal)
        fans out 120ms after the back-left one. transition-delay is a separate
@@ -415,20 +433,6 @@ const bioParagraphs = [
       -5px 84px 34px 0 rgba(102, 102, 102, 0.01),
       -3px 47px 28px 0 rgba(102, 102, 102, 0.05),
       -1px 21px 21px 0 rgba(102, 102, 102, 0.09);
-  }
-
-  .slot-front {
-    width: 202px;
-    height: 233px;
-    left: 115px;
-    top: -1px;
-    border-radius: 14px;
-    transform: rotate(0deg);
-    z-index: 3;
-    box-shadow:
-      -8px 132px 37px 0 rgba(102, 102, 102, 0),
-      -5px 84px 34px 0 rgba(102, 102, 102, 0.01),
-      -3px 47px 28px 0 rgba(102, 102, 102, 0.05);
   }
 
   /* ====== Latest books (col 2, row 2) ====== */
@@ -652,17 +656,15 @@ const bioParagraphs = [
     /* Photo positions/sizes recomputed at 0.68× of desktop. The math is
        just (desktop value × 0.68) rounded — kept in comments so a future
        designer tweak can revert by ratio. */
+    /* Mobile: same centre-based system, 0.68× tier heights. left = centre x. */
+    .slot-front {
+      height: 158px;  left: 146.5px;  top: -1px;   /* centre 78 + 137/2 */
+    }
     .slot-bl {
-      width: 101px;  height: 125px;
-      left: 52px;    top: 13px;
+      height: 125px;  left: 102.5px;  top: 13px;   /* centre 52 + 101/2 */
     }
     .slot-br {
-      width: 101px;  height: 125px;
-      left: 140px;   top: 13px;
-    }
-    .slot-front {
-      width: 137px;  height: 158px;
-      left: 78px;    top: -1px;
+      height: 125px;  left: 190.5px;  top: 13px;   /* centre 140 + 101/2 */
     }
 
     /* Fan-out reveal mobile override lives at the END of the stylesheet
@@ -716,12 +718,12 @@ const bioParagraphs = [
        river  center 151,111  → dx +65,  dy +4.5
        fontan center 280,111  → dx -64,  dy +4.5 */
   .behind__travel-photos[data-fan-state="initial"] .slot-bl {
-    transform: translate(65px, 4.5px) rotate(0deg);
+    transform: translateX(-50%) translate(65px, 4.5px) rotate(0deg);
     transition: none;
   }
 
   .behind__travel-photos[data-fan-state="initial"] .slot-br {
-    transform: translate(-64px, 4.5px) rotate(0deg);
+    transform: translateX(-50%) translate(-64px, 4.5px) rotate(0deg);
     transition: none;
   }
 
@@ -747,10 +749,10 @@ const bioParagraphs = [
        building center mobile: (78+68.5, -1+79)   = (146, 78) */
   @media (max-width: 1279px) {
     .behind__travel-photos[data-fan-state="initial"] .slot-bl {
-      transform: translate(44px, 2.5px) rotate(0deg);
+      transform: translateX(-50%) translate(44px, 2.5px) rotate(0deg);
     }
     .behind__travel-photos[data-fan-state="initial"] .slot-br {
-      transform: translate(-44px, 2.5px) rotate(0deg);
+      transform: translateX(-50%) translate(-44px, 2.5px) rotate(0deg);
     }
   }
 </style>
@@ -876,8 +878,7 @@ const bioParagraphs = [
     const SHUFFLE_MS = 450;
     const SHUFFLE_TRANSITION =
       `transform ${SHUFFLE_MS}ms var(--ease-out), left ${SHUFFLE_MS}ms var(--ease-out),` +
-      ` top ${SHUFFLE_MS}ms var(--ease-out), width ${SHUFFLE_MS}ms var(--ease-out),` +
-      ` height ${SHUFFLE_MS}ms var(--ease-out)`;
+      ` top ${SHUFFLE_MS}ms var(--ease-out), height ${SHUFFLE_MS}ms var(--ease-out)`;
 
     let enabled = false;
     let dragging = false;
@@ -929,7 +930,8 @@ const bioParagraphs = [
         try { container.setPointerCapture(e.pointerId); captured = true; } catch {}
       }
       // Front card tracks the pointer with a slight tilt for tactile feedback.
-      dragEl.style.transform = `translate(${dx}px, 0) rotate(${dx * 0.03}deg)`;
+      // translateX(-50%) preserves the slot's horizontal centring while dragging.
+      dragEl.style.transform = `translate(calc(-50% + ${dx}px), 0) rotate(${dx * 0.03}deg)`;
     };
 
     const endDrag = (e: PointerEvent, cancel = false) => {
