@@ -67,15 +67,21 @@ const bioParagraphs = [
           </div>
           <span class="behind__travel-tag text-caption-mono">44° 25′ 55″ N</span>
         </div>
+        {/* Deck of travel photos. Three fixed fan "slots" (front / back-left /
+            back-right) carry the geometry; each photo is assigned to a slot.
+            After the fan-out reveal settles, JS lets the user swipe (touch) or
+            drag (mouse) to rotate the three photos through the slots — like
+            shuffling a fan of cards. slot-* classes are set statically here so
+            the fan renders correctly with no JS; JS only reassigns them. */}
         <div class="behind__travel-photos" data-fan-photos aria-hidden="true">
-          <div class="behind__photo behind__photo--river">
-            <Image src={riverImg} alt="" width={296} height={368} quality={95} />
+          <div class="behind__photo behind__photo--river slot-bl">
+            <Image src={riverImg} alt="" width={296} height={368} quality={95} draggable={false} />
           </div>
-          <div class="behind__photo behind__photo--fontan">
-            <Image src={fontanImg} alt="" width={296} height={368} quality={95} />
+          <div class="behind__photo behind__photo--fontan slot-br">
+            <Image src={fontanImg} alt="" width={296} height={368} quality={95} draggable={false} />
           </div>
-          <div class="behind__photo behind__photo--building">
-            <Image src={buildingImg} alt="" width={404} height={466} quality={95} />
+          <div class="behind__photo behind__photo--building slot-front">
+            <Image src={buildingImg} alt="" width={404} height={466} quality={95} draggable={false} />
           </div>
         </div>
       </article>
@@ -323,6 +329,19 @@ const bioParagraphs = [
     flex-shrink: 0;
   }
 
+  /* Once the fan-out reveal has settled, JS adds .is-draggable → the deck
+     becomes swipeable. touch-action: pan-y lets a vertical drag scroll the
+     page while we capture horizontal swipes. */
+  .behind__travel-photos.is-draggable {
+    touch-action: pan-y;
+  }
+
+  /* Grab affordance on pointer devices only. */
+  @media (hover: hover) and (pointer: fine) {
+    .behind__travel-photos.is-draggable { cursor: grab; }
+    .behind__travel-photos.is-dragging  { cursor: grabbing; }
+  }
+
   /* Shared photo box. Specific transforms applied below.
      The white frame is already baked into the exported PNGs, so NO CSS border
      here (a CSS border would double the frame thickness). Rounded corners +
@@ -331,6 +350,15 @@ const bioParagraphs = [
     position: absolute;
     border-radius: var(--radius-l); /* 12px */
     overflow: hidden;
+    will-change: transform;
+    /* Base transition drives BOTH the fan-out reveal (transform only) and the
+       drag snap-back. The deck-shuffle sets a snappier multi-prop transition
+       inline (see JS advance()). Geometry (left/top/width/height) is NOT in the
+       base list so the reveal animates transform only, exactly as before. */
+    transition: transform var(--duration-fan-out-card, 600ms) var(--ease-out);
+    /* Don't let the photos be text-selected or ghost-dragged during a swipe. */
+    user-select: none;
+    -webkit-user-select: none;
   }
 
   .behind__photo :global(img) {
@@ -338,37 +366,50 @@ const bioParagraphs = [
     width: 100%;
     height: 100%;
     object-fit: cover;
+    /* Pointer events pass through to the container (which owns the drag);
+       also kill the native image ghost-drag on desktop. */
+    pointer-events: none;
+    -webkit-user-drag: none;
+    user-select: none;
   }
 
-  .behind__photo--river {
+  /* ====== Fan slots (desktop) ======
+     Three fixed positions the three photos rotate through when the deck is
+     swiped. Geometry is identical to the original per-photo values — only the
+     ownership is now dynamic. Each photo covers its slot (object-fit: cover),
+     so moving a photo into a bigger/smaller slot just re-crops it, no distortion.
+
+       slot-front → center, upright, largest, on top   (was building)
+       slot-bl    → back-left, tilted -30°             (was river)
+       slot-br    → back-right, tilted +30°            (was fontan)  */
+  .slot-bl {
     width: 148px;
     height: 184px;
-    /* Position matches Figma rotation-wrapper center (left=41, w=220 →
-       center x=151; photo width 148 → left = 151-74 = 77). */
+    /* Figma rotation-wrapper center (left=41, w=220 → cx=151; 151-74=77). */
     left: 77px;
     top: 19px;
     transform: rotate(-30deg);
-    /* Fan-out reveal (animations.md §7.1): 600ms transform from stacked-
-       at-building-center → final tilted spot. Stagger handled per-card. */
-    transition: transform var(--duration-fan-out-card, 600ms) var(--ease-out);
-    will-change: transform;
+    z-index: 1;
     box-shadow:
       -6.667px 110px 30.833px 0 rgba(102, 102, 102, 0),
       -4.167px 70px 28.333px 0 rgba(102, 102, 102, 0.01),
       -2.5px 39.167px 23.333px 0 rgba(102, 102, 102, 0.05);
   }
 
-  .behind__photo--fontan {
+  .slot-br {
     width: 148px;
     height: 184px;
-    /* Center x = 280 (wrapper left=170 + w=220/2); left = 280-74 = 206. */
+    /* Center x = 280 (wrapper left=170 + w=220/2); 280-74=206. */
     left: 206px;
     top: 19px;
     transform: rotate(30deg);
-    /* Fan-out reveal (animations.md §7.1): same 600ms transform, staggered
-       120ms after river so the two sides fan out one after the other. */
-    transition: transform var(--duration-fan-out-card, 600ms) var(--ease-out) 120ms;
-    will-change: transform;
+    z-index: 2;
+    /* Fan-out reveal stagger: the back-right card (fontan on first reveal)
+       fans out 120ms after the back-left one. transition-delay is a separate
+       longhand from the base `transition`, so it layers on without disturbing
+       the property/duration. Shuffle uses an inline transition (delay 0) that
+       overrides this, so the stagger only affects the initial reveal. */
+    transition-delay: 120ms;
     box-shadow:
       -8px 132px 37px 0 rgba(102, 102, 102, 0),
       -5px 84px 34px 0 rgba(102, 102, 102, 0.01),
@@ -376,12 +417,14 @@ const bioParagraphs = [
       -1px 21px 21px 0 rgba(102, 102, 102, 0.09);
   }
 
-  .behind__photo--building {
+  .slot-front {
     width: 202px;
     height: 233px;
     left: 115px;
     top: -1px;
     border-radius: 14px;
+    transform: rotate(0deg);
+    z-index: 3;
     box-shadow:
       -8px 132px 37px 0 rgba(102, 102, 102, 0),
       -5px 84px 34px 0 rgba(102, 102, 102, 0.01),
@@ -609,15 +652,15 @@ const bioParagraphs = [
     /* Photo positions/sizes recomputed at 0.68× of desktop. The math is
        just (desktop value × 0.68) rounded — kept in comments so a future
        designer tweak can revert by ratio. */
-    .behind__photo--river {
+    .slot-bl {
       width: 101px;  height: 125px;
       left: 52px;    top: 13px;
     }
-    .behind__photo--fontan {
+    .slot-br {
       width: 101px;  height: 125px;
       left: 140px;   top: 13px;
     }
-    .behind__photo--building {
+    .slot-front {
       width: 137px;  height: 158px;
       left: 78px;    top: -1px;
     }
@@ -672,12 +715,12 @@ const bioParagraphs = [
      center (frame 432×232, building center ≈ 216, 115.5):
        river  center 151,111  → dx +65,  dy +4.5
        fontan center 280,111  → dx -64,  dy +4.5 */
-  .behind__travel-photos[data-fan-state="initial"] .behind__photo--river {
+  .behind__travel-photos[data-fan-state="initial"] .slot-bl {
     transform: translate(65px, 4.5px) rotate(0deg);
     transition: none;
   }
 
-  .behind__travel-photos[data-fan-state="initial"] .behind__photo--fontan {
+  .behind__travel-photos[data-fan-state="initial"] .slot-br {
     transform: translate(-64px, 4.5px) rotate(0deg);
     transition: none;
   }
@@ -686,8 +729,9 @@ const bioParagraphs = [
      JS already short-circuits (doesn't set the initial attribute), but
      belt-and-braces: kill the transition so any forced toggle is instant. */
   @media (prefers-reduced-motion: reduce) {
-    .behind__photo--river,
-    .behind__photo--fontan {
+    /* No fan-out and no animated shuffle — the deck still reorders on swipe,
+       but instantly (no motion). */
+    .behind__photo {
       transition: none;
     }
   }
@@ -702,10 +746,10 @@ const bioParagraphs = [
        fontan center mobile:   (140+50.5, 13+62.5) = (190, 75.5)
        building center mobile: (78+68.5, -1+79)   = (146, 78) */
   @media (max-width: 1279px) {
-    .behind__travel-photos[data-fan-state="initial"] .behind__photo--river {
+    .behind__travel-photos[data-fan-state="initial"] .slot-bl {
       transform: translate(44px, 2.5px) rotate(0deg);
     }
-    .behind__travel-photos[data-fan-state="initial"] .behind__photo--fontan {
+    .behind__travel-photos[data-fan-state="initial"] .slot-br {
       transform: translate(-44px, 2.5px) rotate(0deg);
     }
   }
@@ -725,8 +769,15 @@ const bioParagraphs = [
   // immediately, skipping the wait.
   let fanoutDoneResolve: (() => void) | undefined;
   let fanoutDone: Promise<void>;
+  // Set by initTravelDeck. Attached to every fresh promise below so that
+  // whichever promise the reveal actually resolves (initBehindAnimations can
+  // run twice — once on load, once on astro:page-load — recreating it) still
+  // enables the deck. Reading the module var at resolve time avoids capturing
+  // a stale promise/closure.
+  let enableDeck: (() => void) | undefined;
   function resetFanoutPromise() {
     fanoutDone = new Promise<void>((r) => { fanoutDoneResolve = r; });
+    fanoutDone.then(() => enableDeck?.());
   }
   resetFanoutPromise();
 
@@ -786,10 +837,134 @@ const bioParagraphs = [
     io.observe(list);
   }
 
+  /* Travelling deck — swipe (touch) / drag (mouse) to rotate the three photos
+     through the three fan slots, like shuffling a fan of cards. The three
+     .slot-* classes carry the geometry; we just reassign which photo has which.
+     Enabled only after the fan-out reveal settles (fanoutDone), so a swipe
+     can't collide with the intro animation. Decorative (container is
+     aria-hidden) → pointer/touch only, no keyboard affordance needed. */
+  function initTravelDeck() {
+    const container = document.querySelector<HTMLElement>('[data-fan-photos]');
+    if (!container || container.dataset.deckInit === '1') return;
+    container.dataset.deckInit = '1';
+
+    const river    = container.querySelector<HTMLElement>('.behind__photo--river');
+    const fontan   = container.querySelector<HTMLElement>('.behind__photo--fontan');
+    const building = container.querySelector<HTMLElement>('.behind__photo--building');
+    if (!river || !fontan || !building) return;
+    const photos = [river, fontan, building];
+
+    // Ring positions map to slot classes. Rotating ringPos by ±1 cycles the
+    // three photos through the fan. Order chosen so the front card, when tossed,
+    // travels toward the side it was dragged: drag-left → back-left, etc.
+    const RING = ['slot-front', 'slot-bl', 'slot-br'];
+    const ringPos = new Map<HTMLElement, number>([
+      [building, 0], // front
+      [river, 1],    // back-left
+      [fontan, 2],   // back-right
+    ]);
+
+    const applySlots = () => {
+      for (const el of photos) {
+        el.classList.remove('slot-front', 'slot-bl', 'slot-br');
+        el.classList.add(RING[ringPos.get(el)!]);
+      }
+    };
+    const frontEl = () => photos.find((el) => ringPos.get(el) === 0)!;
+
+    const THRESHOLD = 48; // px of horizontal travel to commit a shuffle
+    const SHUFFLE_MS = 450;
+    const SHUFFLE_TRANSITION =
+      `transform ${SHUFFLE_MS}ms var(--ease-out), left ${SHUFFLE_MS}ms var(--ease-out),` +
+      ` top ${SHUFFLE_MS}ms var(--ease-out), width ${SHUFFLE_MS}ms var(--ease-out),` +
+      ` height ${SHUFFLE_MS}ms var(--ease-out)`;
+
+    let enabled = false;
+    let dragging = false;
+    let decided = false;   // have we locked horizontal-vs-vertical intent yet?
+    let horiz = false;
+    let captured = false;
+    let pointerId = -1;
+    let startX = 0, startY = 0;
+    let dragEl: HTMLElement | null = null;
+
+    const snapBack = () => {
+      if (!dragEl) return;
+      dragEl.style.transition = `transform 300ms var(--ease-out)`;
+      dragEl.style.transform = '';
+      const el = dragEl;
+      window.setTimeout(() => { el.style.transition = ''; }, 320);
+    };
+
+    const advance = (dir: number) => {
+      for (const el of photos) el.style.transition = SHUFFLE_TRANSITION;
+      if (dragEl) dragEl.style.transform = ''; // animate from dragged pos → new slot
+      for (const el of photos) ringPos.set(el, (ringPos.get(el)! + dir + 3) % 3);
+      applySlots();
+      window.setTimeout(() => { for (const el of photos) el.style.transition = ''; }, SHUFFLE_MS + 30);
+    };
+
+    const onDown = (e: PointerEvent) => {
+      if (!enabled || dragging) return;
+      if (e.pointerType === 'mouse' && e.button !== 0) return;
+      dragging = true; decided = false; horiz = false; captured = false;
+      pointerId = e.pointerId;
+      startX = e.clientX; startY = e.clientY;
+      dragEl = frontEl();
+      dragEl.style.transition = 'none';
+    };
+
+    const onMove = (e: PointerEvent) => {
+      if (!dragging || !dragEl) return;
+      const dx = e.clientX - startX;
+      const dy = e.clientY - startY;
+      if (!decided) {
+        if (Math.abs(dx) < 6 && Math.abs(dy) < 6) return;
+        decided = true;
+        horiz = Math.abs(dx) > Math.abs(dy);
+        if (!horiz) { endDrag(e, /*cancel*/ true); return; } // vertical → let page scroll
+        // Only now capture the pointer — capturing on pointerdown would let a
+        // vertical touch get swallowed instead of scrolling the page.
+        container.classList.add('is-dragging');
+        try { container.setPointerCapture(e.pointerId); captured = true; } catch {}
+      }
+      // Front card tracks the pointer with a slight tilt for tactile feedback.
+      dragEl.style.transform = `translate(${dx}px, 0) rotate(${dx * 0.03}deg)`;
+    };
+
+    const endDrag = (e: PointerEvent, cancel = false) => {
+      if (!dragging) return;
+      dragging = false;
+      container.classList.remove('is-dragging');
+      if (captured) { try { container.releasePointerCapture(pointerId); } catch {} captured = false; }
+      const dx = e.clientX - startX;
+      if (!cancel && horiz && Math.abs(dx) > THRESHOLD) {
+        advance(dx < 0 ? 1 : -1); // drag left → next; drag right → previous
+      } else {
+        snapBack();
+      }
+      dragEl = null;
+    };
+
+    container.addEventListener('pointerdown', onDown);
+    container.addEventListener('pointermove', onMove);
+    container.addEventListener('pointerup', (e) => endDrag(e));
+    container.addEventListener('pointercancel', (e) => endDrag(e, true));
+
+    const enable = () => { enabled = true; container.classList.add('is-draggable'); };
+    // Enable once the fan-out reveal settles. resetFanoutPromise wires the
+    // current promise's resolution to this via the module-level enableDeck, so
+    // the double-init (load + astro:page-load) can't leave us gated on a stale
+    // promise. Reduced-motion resolves the promise immediately in
+    // initTravelFanOut, so this fires right away in that case too.
+    enableDeck = enable;
+  }
+
   function initBehindAnimations() {
     resetFanoutPromise();
     initTravelFanOut();
     initBooksStrike();
+    initTravelDeck();
   }
 
   // Initial page load.
