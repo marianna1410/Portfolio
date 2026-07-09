@@ -667,6 +667,17 @@ const bioParagraphs = [
       height: 125px;  left: 190.5px;  top: 13px;   /* centre 140 + 101/2 */
     }
 
+    /* Mobile corner rounding — draw it in CSS instead of relying on the rounding
+       baked into the PNGs. Those baked corners scale down with the (smaller)
+       mobile photos, so they read as ~6px and look too sharp. A white fill
+       behind each photo covers the baked transparent corners, then a fixed 8px
+       radius clips the box — so every card shows an identical, size-independent
+       8px corner. Desktop keeps the baked rounding, which reads fine there. */
+    .behind__photo {
+      background: var(--color-bg-white);
+      border-radius: 8px;
+    }
+
     /* Fan-out reveal mobile override lives at the END of the stylesheet
        (after the desktop [data-fan-state="initial"] rule) so it wins by
        cascade-order. See block near the end of this style. */
