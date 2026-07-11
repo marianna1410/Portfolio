@@ -1,6 +1,7 @@
 ---
 import '../styles/global.css';
 import { ClientRouter } from 'astro:transitions';
+import Analytics from '@vercel/analytics/astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 
@@ -40,5 +41,9 @@ const {
       <slot />
     </main>
     <Footer variant={footerVariant} />
+    {/* Vercel Web Analytics — cookieless page-view + visitor counting.
+        No-ops in dev; sends to /_vercel/insights only on the Vercel deploy
+        (Web Analytics must be enabled for the project in the Vercel dashboard). */}
+    <Analytics />
   </body>
 </html>

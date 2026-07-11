@@ -9,7 +9,9 @@ If you (Claude) are reading this, **also read the 5 spec files in `Portfolio dev
 
 ## Project
 
-Marianna Delihioz designer portfolio. 3 pages (Home `/`, two case studies `/cases/lucida` and `/cases/vaia`), hosted on Vercel, English only, no dark mode, no analytics. Custom domain not yet (`*.vercel.app`).
+Marianna Delihioz designer portfolio. 3 pages (Home `/`, two case studies `/cases/lucida` and `/cases/vaia`), hosted on Vercel, English only, no dark mode. Custom domain not yet (`*.vercel.app`).
+
+**Analytics:** Vercel Web Analytics (cookieless) is enabled — `@vercel/analytics` `<Analytics />` in `BaseLayout.astro`. (Supersedes the original "no analytics" decision, per Marianna, 2026.) Must also be enabled for the project in the Vercel dashboard for data to flow.
 
 The owner — Marianna — is **not a developer**. She makes creative and product calls; you make code decisions and explain trade-offs in plain language. Default to Ukrainian when she writes in Ukrainian, English when she writes in English. The site itself is English-only.
 
