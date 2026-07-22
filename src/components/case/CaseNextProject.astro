@@ -54,7 +54,10 @@ const {
 <section class="case-next" id={id}>
   <h2 class="case-next__heading">{heading}</h2>
 
-  <a class="case-next__card" href={href} aria-label={`${ctaLabel}: ${headline}`}>
+  {/* data-astro-reload: full page load into the next case so its after-videos
+      autoplay (a client-side View Transition leaves the swapped-in <video>
+      paused/blank in some browsers). */}
+  <a class="case-next__card" href={href} data-astro-reload aria-label={`${ctaLabel}: ${headline}`}>
     <div class="case-next__media">
       <Image
         src={image}
