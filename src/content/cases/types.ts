@@ -71,9 +71,6 @@ export interface SolutionBlock {
   beforeImageAlt: string;
   beforeCaption: string;
   videoSrc: string;
-  /** Poster still (after-state screenshot) shown before the video plays and
-   *  whenever autoplay is blocked — so the panel is never blank. */
-  afterPoster: ImageMetadata;
   videoLabel: string;
   afterCaption: string;
   prototypeUrl: string;

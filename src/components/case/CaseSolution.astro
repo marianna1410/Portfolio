@@ -19,7 +19,7 @@
  *   ↕ 32px
  *   {HYPOTHESIS N} caption + paragraph (12px stack inside .__hypothesis)
  */
-import { Image, getImage } from 'astro:assets';
+import { Image } from 'astro:assets';
 import type { ImageMetadata } from 'astro';
 import CaseSectionHeader from './CaseSectionHeader.astro';
 import ArrowSwap from '../ArrowSwap.astro';
@@ -47,8 +47,6 @@ interface Props {
   beforeCaption: string;
   /** Public path to the after-video MP4, e.g. '/videos/case-lucida/solution-1.mp4' */
   videoSrc: string;
-  /** After-state still used as the video poster (shown until/if the video plays). */
-  afterPoster: ImageMetadata;
   /** Aria-label for the silent video (describes what it shows). */
   videoLabel: string;
   afterCaption: string;
@@ -76,7 +74,6 @@ const {
   beforeImageAlt,
   beforeCaption,
   videoSrc,
-  afterPoster,
   videoLabel,
   afterCaption,
   prototypeUrl,
@@ -88,11 +85,6 @@ const {
 } = Astro.props;
 
 const showResearch = !!researchIntro && Array.isArray(highlights) && highlights.length > 0;
-
-// Optimise the after-state still to a webp for the <video poster>, using the
-// SAME params as the Before image (<Image> width 848 height 1040 quality 90),
-// so the poster reads at the same high quality as the before card.
-const posterImg = await getImage({ src: afterPoster, width: 848, height: 1040, format: 'webp', quality: 90 });
 ---
 
 <article class="case-solution" id={id}>
@@ -140,7 +132,6 @@ const posterImg = await getImage({ src: afterPoster, width: 848, height: 1040, f
         <video
           class="case-solution__video"
           src={videoSrc}
-          poster={posterImg.src}
           aria-label={videoLabel}
           autoplay
           loop
@@ -431,21 +422,3 @@ const posterImg = await getImage({ src: afterPoster, width: 848, height: 1040, f
     }
   }
 </style>
-
-<script>
-  /* Nudge the muted after-videos to play. The `autoplay` attribute covers a
-     normal page load, but after an Astro View Transition (client-side nav,
-     e.g. Home → case in Safari) the swapped-in <video> doesn't always
-     re-fire autoplay. On each page load we re-trigger play for any that are
-     still paused. If autoplay is genuinely blocked, play() rejects and we
-     leave the poster showing — never a blank panel. Bundled once even though
-     the component renders 3× per page. */
-  function playCaseVideos() {
-    document
-      .querySelectorAll<HTMLVideoElement>('video.case-solution__video')
-      .forEach((v) => {
-        if (v.paused) v.play().catch(() => {});
-      });
-  }
-  document.addEventListener('astro:page-load', playCaseVideos);
-</script>
