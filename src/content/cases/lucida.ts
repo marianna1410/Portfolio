@@ -10,6 +10,9 @@ import problem3Image from '../../assets/projects/cases/lucida/Problem 3.png';
 import before1Image from '../../assets/projects/cases/lucida/before/before-1.png';
 import before2Image from '../../assets/projects/cases/lucida/before/before-2.png';
 import before3Image from '../../assets/projects/cases/lucida/before/before-3.png';
+import after1Image from '../../assets/projects/cases/lucida/after/after-1.png';
+import after2Image from '../../assets/projects/cases/lucida/after/after-2.png';
+import after3Image from '../../assets/projects/cases/lucida/after/after-3.png';
 
 // Platform icons used inside the Research methodology callout
 import iconLucida from '../../assets/projects/cases/lucida/platforms/lucida.png';
@@ -196,6 +199,7 @@ const lucida: CaseData = {
         'Before: Lucida dictionary — a static list of saved words with no practice or recall exercises.',
       beforeCaption: 'Users can only view new words in a static list.',
       videoSrc: '/videos/case-lucida/learn-new-words.mp4',
+      afterPoster: after1Image,
       videoLabel:
         'After: redesigned dictionary turns saved words into a 4-task practice session with progressive difficulty and hints.',
       afterCaption:
@@ -233,6 +237,7 @@ const lucida: CaseData = {
         'Before: newly saved words sit in the list without any scheduled review.',
       beforeCaption: 'New words are saved in the list but are not remembered by users.',
       videoSrc: '/videos/case-lucida/spaced-repetition.mp4',
+      afterPoster: after2Image,
       videoLabel:
         'After: a spaced repetition system schedules each word to return at expanding intervals.',
       afterCaption:
@@ -268,6 +273,7 @@ const lucida: CaseData = {
       beforeCaption:
         'The user sees their mistakes only during the lesson with the tutor, but after finishing, they are immediately prompted to start the next lesson.',
       videoSrc: '/videos/case-lucida/review-mistakes.mp4',
+      afterPoster: after3Image,
       videoLabel:
         'After: an end-of-lesson review walks the user through each mistake with grammar context and practice tasks.',
       afterCaption: `After finishing the lesson, it's recommended to review mistakes and complete exercises to reinforce the correct answers. You can always come back to them later.`,

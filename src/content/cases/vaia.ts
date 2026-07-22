@@ -10,6 +10,9 @@ import problem3Image from '../../assets/projects/cases/vaia/Problem 3.png';
 import before1Image from '../../assets/projects/cases/vaia/before/before-1.png';
 import before2Image from '../../assets/projects/cases/vaia/before/before-2.png';
 import before3Image from '../../assets/projects/cases/vaia/before/before-3.png';
+import after1Image from '../../assets/projects/cases/vaia/after/after-1.png';
+import after2Image from '../../assets/projects/cases/vaia/after/after-2.png';
+import after3Image from '../../assets/projects/cases/vaia/after/after-3.png';
 
 // Platform icons used inside the Research methodology callout
 import iconAppStore from '../../assets/projects/cases/vaia/platforms/app store.png';
@@ -183,6 +186,7 @@ const vaia: CaseData = {
         'Before: Vaia upload screen with the 10-page selection cap forcing the student to repeat uploads.',
       beforeCaption: 'Only 10 pages at a time allowed.',
       videoSrc: '/videos/case-vaia/progressive-load.mp4',
+      afterPoster: after1Image,
       videoLabel:
         'After: students select all pages at once and the generation process is split into per-subtopic chunks with visible progress.',
       afterCaption: 'Users can now select all pages at once; the generation process will be split into chunks.',
@@ -207,6 +211,7 @@ const vaia: CaseData = {
         'Before: Vaia pre-generation screen offers format choices but no quantity or depth control.',
       beforeCaption: 'No control over card amount and depth.',
       videoSrc: '/videos/case-vaia/focus-level.mp4',
+      afterPoster: after2Image,
       videoLabel:
         'After: three focus levels (Quick overview / Standard depth / Deep dive) let the student dial both the card count and how deeply the material is covered.',
       afterCaption: '3 levels of focus that allow the user to control the quantity and depth of flashcards.',
@@ -237,6 +242,7 @@ const vaia: CaseData = {
         `Before: Vaia silently pushed every newly added topic's cards onto today's study plan.`,
       beforeCaption: `The app decided to add all the cards from the added topic to today's study plan, with no warning.`,
       videoSrc: '/videos/case-vaia/study-plan.mp4',
+      afterPoster: after3Image,
       videoLabel:
         "After: a scheduling preview lets the student adjust start date and daily pace before saving, with smart defaults based on the current plan's load.",
       afterCaption: 'Planning with smart default based on current load.',
