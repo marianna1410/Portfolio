@@ -1,8 +1,10 @@
 // Single source of truth for URLs used across the site.
 
-// Resume PDF lives in /public/resume.pdf — served from the deploy root.
-// Edit only the filename in public/ to update; this constant stays stable.
-export const RESUME_URL = '/resume.pdf';
+// Resume PDF lives in /public/ — served from the deploy root.
+// Filename has spaces, so the URL keeps them percent-encoded (%20); the
+// browser shows the real name (with spaces) when opening/downloading.
+// To swap the file: replace it in public/ and update this constant to match.
+export const RESUME_URL = '/CV_Marianna%20Delihioz_UXUI%20Designer.pdf';
 
 export const CONTACT = {
   email: 'mariannadelihioz@gmail.com',
