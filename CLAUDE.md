@@ -262,15 +262,15 @@ Always `npm run build` after structural changes. Catches Astro/TS errors HMR mis
 
 ## Single sources of truth (don't duplicate URLs)
 
-- `RESUME_URL` (currently placeholder `https://dribbble.com/shots`) — `src/lib/config.ts`
+- `RESUME_URL` (real resume — `/CV_Marianna%20Delihioz_UXUI%20Designer.pdf`, file lives in `public/`) — `src/lib/config.ts`
 - `CONTACT.email / .telegram / .linkedin` — `src/lib/config.ts`
 - `PROTOTYPES.lucida.problem1/2/3` and `PROTOTYPES.vaia.shared` — `src/lib/config.ts`
 
-When the resume URL changes, edit `src/lib/config.ts` only — it's wired into Hero, Footer, and the dropdown via import.
+When the resume changes, replace the PDF in `public/` and update `RESUME_URL` in `src/lib/config.ts` to match (filename has spaces → keep them `%20`-encoded in the URL). It's wired into Hero, Footer, and the dropdown via import.
 
 ## Open TODOs (track these — don't forget)
 
-- [ ] Real `RESUME_URL` (replace placeholder before final deploy) — `interactions.md` 5.2
+- [x] Real `RESUME_URL` — done (real CV PDF in `public/`, replaced placeholder) — `interactions.md` 5.2
 - [ ] Verify on real iPhone Safari, iPad Safari, Chrome desktop in Phase 4
 - [ ] Setup custom domain (decision pending)
 - [ ] 404 page (low priority, after main 3 pages are deployed)
