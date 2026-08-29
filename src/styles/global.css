@@ -96,6 +96,22 @@ body {
   }
 }
 
+/* Dot pattern utility (redesign brief §9.1) — dark-surface ready.
+   Drawn in CSS (radial-gradient + background-size), no PNG. Values sourced
+   from Figma node 1117-44596 via the --dot-pattern-* tokens (tokens.css §10).
+   Apply on an element sitting over a dark background; override
+   --dot-pattern-color / --dot-pattern-bg per surface as needed.
+   Not yet applied to any page (scaffold for Hero + Footer). */
+.dot-pattern {
+  background-color: var(--dot-pattern-bg);
+  background-image: radial-gradient(
+    circle at center,
+    var(--dot-pattern-color) var(--dot-pattern-dot-radius),
+    transparent var(--dot-pattern-dot-radius)
+  );
+  background-size: var(--dot-pattern-step) var(--dot-pattern-step);
+}
+
 /* Reduced motion baseline (a11y.md 6.12) */
 @media (prefers-reduced-motion: reduce) {
   *,
