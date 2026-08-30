@@ -1,347 +1,208 @@
 ---
 /**
- * Footer.astro — global site footer. Two variants:
- *   'default' (home pages) — outer light-grey background, inner WHITE card.
- *   'case'    (case study pages, Figma 472:17361) — colors INVERTED:
- *                outer WHITE background, inner LIGHT-GREY card.
- * Everything else (typography, links, illustration) is identical.
+ * Footer.astro — global dark site footer (redesign brief §6.6, Figma
+ * 1126:52940). Identical on home + case pages, so the old light/inverted
+ * `variant` prop is gone — it's dark everywhere now.
+ *
+ * Layout: a 3-column top row (logo | Explore links | "Let's get in touch"
+ * email), a full-width dotted divider, then a 3-column info row
+ * (Ukraine | live Kyiv time | © All rights reserved). Top + info share the
+ * same 3-column grid so the info items sit under their columns.
+ *
+ * - Explore links: LinkedIn, Telegram, Dribbble, Download CV (2×2 grid).
+ * - Email: click-to-copy (CopyEmail.astro, brief §8.4), underlined address.
+ * - Kyiv time: Intl.DateTimeFormat Europe/Kyiv 12h, refreshed each minute
+ *   client-side (brief §9.2). A build-time value is rendered as the initial
+ *   paint so there's no empty flash; the script corrects it on load.
+ * - Divider + bird: per Figma the divider is a plain full-width dotted line
+ *   and the bird lives inside the logo tile (Logo in footer.svg). No animation.
  */
+import { Image } from 'astro:assets';
 import ArrowSwap from './ArrowSwap.astro';
-import diagonalArrow from '../assets/icons/diagonal-arrow-dark-grey.svg';
-import birdRaw from '../assets/icons/footer-bird.svg?raw';
+import CopyEmail from './CopyEmail.astro';
+import logoFooter from '../assets/icons/logo-footer.svg';
+import diagonalArrow from '../assets/icons/diagonal-arrow-light.svg';
 import { CONTACT, RESUME_URL } from '../lib/config.ts';
 
-interface Props {
-  variant?: 'default' | 'case';
-}
+// Build-time Kyiv time for the initial paint (client script keeps it live).
+const kyivTimeInitial = new Intl.DateTimeFormat('en-US', {
+  timeZone: 'Europe/Kyiv',
+  hour: 'numeric',
+  minute: '2-digit',
+  hour12: true,
+}).format(new Date());
 
-const { variant = 'default' } = Astro.props;
-
-/**
- * Dotted line + bird "highlight wave" (animations.md §11.1).
- * The line is rebuilt as discrete dots (the source SVG is one dashed path),
- * the bird already ships as 99 individual <circle>s. Every dot gets an
- * animation-delay proportional to its left-to-right position, so a soft
- * darkening wave (grey → text/black) travels along the line and into the
- * bird, looping. Pure CSS — see .footer__dot below.
- */
-// Wave timing — line stays grey (no animation, see CSS below); only the bird
-// pulses in a left→right sweep, with a 2s quiet gap between sweeps so the
-// effect reads as a periodic shimmer rather than a constant pulse.
-const LINE_DURATION = 4.5; // s — kept for historical reference; line dots have animation: none
-const BIRD_DURATION = 0.9; // s — wave crossing the bird
-const BIRD_PAUSE   = 2;    // s — silent gap between bird sweeps
-const WAVE_CYCLE = BIRD_DURATION + BIRD_PAUSE; // total loop; pushed to CSS via --wave-cycle
-
-// Line dots: evenly spaced along the 273px line (viewBox 0 0 275 2).
-const lineDots: { cx: number; absX: number; delay: number }[] = [];
-for (let x = 1; x <= 273; x += 8) lineDots.push({ cx: x, absX: x, delay: 0 });
-
-// Bird dots: parsed from the source SVG; absolute x offset by the bird's
-// left position (278px) so it orders after the line.
-const birdDots = [...birdRaw.matchAll(/cx="([\d.]+)"\s+cy="([\d.]+)"/g)].map((m) => ({
-  cx: Number(m[1]),
-  cy: Number(m[2]),
-  absX: 278 + Number(m[1]),
-  delay: 0,
-}));
-
-// Delay is keyed to each dot's HORIZONTAL position (not its index) and
-// quantized into vertical columns, so dots sharing an x-band light up together
-// — the wave sweeps left → right covering several rows at once (rather than
-// crawling dot-by-dot, which read as a diagonal bottom-up climb in the bird).
-// The line and the bird run at their own even paces, joined at the seam.
-const WAVE_BIN = 2; // px — width of one wavefront column
-
-// delay = (when the band reaches this dot) − cycle → negative, seamless, L→R.
-const assignWave = (dots: { absX: number; delay: number }[], tStart: number, duration: number) => {
-  const xs = dots.map((d) => d.absX);
-  const min = Math.min(...xs);
-  const span = (Math.max(...xs) - min) || 1;
-  dots.forEach((d) => {
-    const colX = Math.round(d.absX / WAVE_BIN) * WAVE_BIN; // snap to column
-    const u = (colX - min) / span;                          // 0 … 1 within this segment
-    d.delay = tStart + u * duration - WAVE_CYCLE;
-  });
-};
-// Line dots: delays are computed but unused (CSS sets animation:none on them).
-assignWave(lineDots, 0, LINE_DURATION);
-// Bird dots anchored at t=0 so the sweep starts at the top of the WAVE_CYCLE
-// and the remaining BIRD_PAUSE seconds are silent.
-assignWave(birdDots, 0, BIRD_DURATION);
+const exploreLinks = [
+  { label: 'LinkedIn',    href: CONTACT.linkedin, external: true },
+  { label: 'Telegram',    href: CONTACT.telegram, external: true },
+  { label: 'Dribbble',    href: CONTACT.dribbble, external: true },
+  { label: 'Download CV', href: RESUME_URL,       external: true },
+];
 ---
 
-<footer class:list={['footer', `footer--${variant}`]} aria-label="Site footer">
+<footer class="footer" aria-label="Site footer">
   <div class="footer__card">
-    <div class="footer__row">
+  <div class="footer__body">
 
-      <div class="footer__cta-title">
-        <p class="text-h4-medium">Ready to start building?</p>
+    <div class="footer__top">
+      <div class="footer__logo" aria-hidden="true">
+        <Image src={logoFooter} alt="" width={60} height={60} class="footer__logo-img" />
       </div>
 
-      <div class="footer__illustration" aria-hidden="true" style={`--wave-cycle:${WAVE_CYCLE}s`}>
-        <svg
-          class="footer__illustration-line"
-          viewBox="0 0 275 8"
-          preserveAspectRatio="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          {lineDots.map((d) => (
-            <circle class="footer__dot" cx={d.cx} cy="4" r="1" style={`animation-delay:${d.delay}s`} />
-          ))}
-        </svg>
-        <svg
-          class="footer__illustration-bird"
-          viewBox="0 0 27.1529 34.3031"
-          preserveAspectRatio="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          {birdDots.map((d) => (
-            <circle class="footer__dot" cx={d.cx} cy={d.cy} r="0.75" style={`animation-delay:${d.delay}s`} />
-          ))}
-        </svg>
-      </div>
-
-      <div class="footer__links-group">
-        <p class="footer__links-heading text-headline-medium">Let&#8217;s get in touch</p>
+      <div class="footer__col footer__col--explore">
+        <p class="footer__heading text-caption-mono">Explore</p>
         <ul class="footer__links">
-          <li>
-            <a
-              href={`mailto:${CONTACT.email}`}
-              class="footer__link text-label"
-              aria-label={`Email Marianna at ${CONTACT.email} (opens mail client)`}
-            >
-              <span>Email</span>
-              <ArrowSwap icon={diagonalArrow} class="footer__link-arrow" />
-            </a>
-          </li>
-          <li>
-            <a
-              href={CONTACT.linkedin}
-              target="_blank"
-              rel="noopener noreferrer"
-              class="footer__link text-label"
-            >
-              <span>LinkedIn</span>
-              <ArrowSwap icon={diagonalArrow} class="footer__link-arrow" />
-              <span class="sr-only">(opens in new tab)</span>
-            </a>
-          </li>
-          <li>
-            <a
-              href={CONTACT.telegram}
-              target="_blank"
-              rel="noopener noreferrer"
-              class="footer__link text-label"
-            >
-              <span>Telegram</span>
-              <ArrowSwap icon={diagonalArrow} class="footer__link-arrow" />
-              <span class="sr-only">(opens in new tab)</span>
-            </a>
-          </li>
-          <li>
-            <a
-              href={RESUME_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              class="footer__link text-label"
-            >
-              <span>Resume</span>
-              <ArrowSwap icon={diagonalArrow} class="footer__link-arrow" />
-              <span class="sr-only">(opens in new tab)</span>
-            </a>
-          </li>
+          {exploreLinks.map((link) => (
+            <li>
+              <a
+                href={link.href}
+                class="footer__link text-label"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <span>{link.label}</span>
+                <ArrowSwap icon={diagonalArrow} class="footer__link-arrow" />
+                <span class="sr-only">(opens in new tab)</span>
+              </a>
+            </li>
+          ))}
         </ul>
       </div>
 
+      <div class="footer__col footer__col--touch">
+        <p class="footer__heading text-caption-mono">Let&#8217;s get in touch</p>
+        <CopyEmail label={CONTACT.email} underline />
+      </div>
     </div>
+
+    <div class="footer__bottom">
+      <div class="footer__divider" aria-hidden="true"></div>
+      <div class="footer__info">
+        <span class="footer__info-item footer__info-loc text-caption-mono">Ukraine</span>
+        <span
+          class="footer__info-item footer__info-time text-caption-mono"
+          data-kyiv-time
+        >{kyivTimeInitial}</span>
+        <span class="footer__info-item footer__info-copy text-caption-mono">© All rights reserved</span>
+      </div>
+    </div>
+
+  </div>
   </div>
 </footer>
 
 <style>
-  /* ====== Outer footer shell ====== */
+  /* ====== Outer footer shell ======
+     Deep-black card with 40px top corners (radius-4xl). Full-bleed with the
+     container padding scale; top/bottom padding per Figma (48 / 40). */
+  /* Outer wrapper — light-grey (Figma "Footer section" #F2F2F2). It shows
+     through the deep-black card's rounded top corners (the corner notches),
+     so they read light-grey rather than the page white. */
   .footer {
-    padding-top: var(--space-stack-md);       /* 12px — matches Figma pt */
-    padding-bottom: var(--space-stack-3xl);   /* 32px — matches Figma pb */
-    padding-inline: var(--container-padding-mobile); /* 20px mobile */
+    background-color: var(--color-bg-light-grey);
   }
 
-  /* Color variants (only the bgs swap between outer + card). */
-  .footer--default { background-color: var(--color-bg-light-grey); }
-  .footer--case    { background-color: var(--color-bg-white); }
+  /* Deep-black card with rounded top corners (radius-4xl: 40 desktop / 32
+     mobile). Figma 1126-52940: pt 48 / pb 40 desktop (tokens auto-scale to
+     32/32 on mobile). px follows the container-padding scale (16/32/64). */
+  .footer__card {
+    background-color: var(--color-bg-deep-black);
+    border-top-left-radius: var(--radius-4xl);
+    border-top-right-radius: var(--radius-4xl);
+    padding-block: var(--space-stack-5xl) var(--space-stack-4xl);
+    padding-inline: var(--container-padding-mobile);
+  }
 
   @media (min-width: 768px) {
-    .footer {
-      padding-inline: var(--container-padding-tablet); /* 32px */
+    .footer__card {
+      padding-inline: var(--container-padding-tablet);
     }
   }
 
   @media (min-width: 1280px) {
-    .footer {
-      padding-inline: var(--container-padding-desktop); /* 64px */
-    }
-  }
-
-  /* ====== Inner card ====== */
-  .footer__card {
-    border-radius: var(--radius-2xl);
-    padding: var(--space-inline-3xl); /* 32px all sides */
-  }
-
-  /* Inner card color is the inverse of the outer shell. */
-  .footer--default .footer__card { background-color: var(--color-bg-white); }
-  .footer--case    .footer__card { background-color: var(--color-bg-light-grey); }
-
-  /* Desktop: fix card height to 178px, content top-aligned */
-  @media (min-width: 768px) {
     .footer__card {
-      height: 178px;
+      padding-inline: var(--container-padding-desktop); /* 64 per Figma */
     }
   }
 
-  /* ====== Inner flex row ====== */
-  .footer__row {
-    display: flex;
-    align-items: flex-start;
-    gap: var(--space-inline-2xl); /* 24px */
-  }
-
-  /* Stack vertically on mobile */
-  @media (max-width: 767px) {
-    .footer__row {
-      flex-direction: column;
-      gap: var(--space-stack-3xl); /* 32px */
-    }
-  }
-
-  /* ====== CTA title ====== */
-  .footer__cta-title {
-    display: flex;
-    align-items: center;
-    padding-top: var(--space-inset-sm); /* 8px — aligns baseline with illustration */
-    flex-shrink: 0;
-  }
-
-  .footer__cta-title p {
-    color: var(--color-text-black);
-    white-space: nowrap;
-    /* font-size uses --font-size-h4 via .text-h4-medium:
-       desktop 24px → mobile 20px handled globally in tokens.css */
-  }
-
-  /* ====== Dotted-line + bird illustration ====== */
-  .footer__illustration {
-    position: relative;
-    width: 309px;
-    height: 40px;
-    flex-shrink: 0;
-  }
-
-  /* Hidden on mobile + narrow tablet — decorative only. The 309px fixed
-     width crowds the row below ~1024px, pushing the 4 link arrows past
-     the viewport edge. Reappears at >=1024px where there's room. */
-  @media (max-width: 1023px) {
-    .footer__illustration {
-      display: none;
-    }
-  }
-
-  .footer__illustration-line {
-    position: absolute;
-    left: 0;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 273px;
-    /* 8px tall (not 2) leaves vertical headroom around the cy=4 dots — kept
-       as a safety margin in case dot sizing changes again. Visual baseline
-       stays at the row's vertical center via translateY(-50%). */
-    height: 8px;
-    display: block;
-  }
-
-  .footer__illustration-bird {
-    position: absolute;
-    left: 278px;
-    top: 3px;
-    width: 27px;
-    height: 34px;
-    display: block;
-  }
-
-  /* ── Dot highlight wave (animations.md §11.1) ──
-     Every dot (line + bird) darkens grey → text/black → grey. Each dot's
-     animation-delay is set inline (frontmatter) from its left-to-right
-     position, so the bright band sweeps along the line and into the bird,
-     looping seamlessly. */
-  .footer__dot {
-    fill: var(--color-stroke-medium-grey); /* #BBBBBB base */
-    animation: footer-dot-wave var(--wave-cycle, 2.9s) ease-in-out infinite; /* duration fed from frontmatter */
-  }
-
-  /* Line dots stay statically grey — only the bird shimmers (per Marianna).
-     We could drop the inline animation-delay on line dots but leaving them
-     wired keeps the markup symmetrical with the bird and costs nothing. */
-  .footer__illustration-line .footer__dot {
-    animation: none;
-  }
-
-  /* Keyframes now scaled to the shorter cycle. With WAVE_CYCLE = 2.9s the peak
-     window (12%) ≈ 0.35s, so each bird dot lights briefly. The wave sweeps the
-     bird in BIRD_DURATION (0.9s), then BIRD_PAUSE (2s) of silence. */
-  @keyframes footer-dot-wave {
-    0%   { fill: var(--color-stroke-medium-grey); }
-    6%   { fill: var(--color-neutral-grey-200); }  /* #9B9B9B peak — ~17% darker than #BBBBBB base (animations.md §11.1, softer than the previous #252525) */
-    12%  { fill: var(--color-stroke-medium-grey); }
-    100% { fill: var(--color-stroke-medium-grey); }
-  }
-
-  /* Reduced motion: no wave — dots stay at the base grey. */
-  @media (prefers-reduced-motion: reduce) {
-    .footer__dot {
-      animation: none;
-      fill: var(--color-stroke-medium-grey);
-    }
-  }
-
-  /* ====== Links group (right column) ====== */
-  .footer__links-group {
+  /* Inner body — justify-between pushes the divider block to the bottom with
+     the designed vertical gap (Figma con height 272 on the 360-tall footer). */
+  .footer__body {
     display: flex;
     flex-direction: column;
-    gap: var(--space-stack-lg); /* 16px */
-    padding-top: var(--space-inset-sm); /* 8px */
-    flex: 1;
-    min-width: 0;
+    justify-content: space-between;
+    gap: var(--space-stack-5xl);
+    min-height: 272px;
   }
 
-  .footer__links-heading {
+  @media (max-width: 767px) {
+    .footer__body {
+      min-height: 0;
+      gap: var(--space-stack-5xl); /* mobile 32 — links block ↔ divider */
+    }
+  }
+
+  /* ====== Top row — 3 columns (logo | Explore | touch) ====== */
+  .footer__top {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    align-items: start;
+    gap: var(--space-inline-2xl);
+  }
+
+  @media (max-width: 767px) {
+    .footer__top {
+      grid-template-columns: 1fr;
+      gap: var(--space-stack-5xl); /* mobile 32 — logo / Explore / touch stacked */
+    }
+  }
+
+  /* ====== Logo tile (bird lives inside — Logo in footer.svg) ====== */
+  .footer__logo {
+    line-height: 0;
+  }
+
+  .footer__logo-img {
+    display: block;
+    width: 60px;
+    height: 60px;
+    border-radius: var(--radius-xl);
+  }
+
+  /* Mobile logo tile 48×48 (Figma Mobile_Footer_New). The tile's rounding is
+     baked into the SVG, so it scales down with the box. */
+  @media (max-width: 767px) {
+    .footer__logo-img {
+      width: 48px;
+      height: 48px;
+    }
+  }
+
+  /* ====== Link columns ====== */
+  .footer__col {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-stack-lg); /* 16px heading → links (Figma con gap 16) */
+  }
+
+  .footer__heading {
     color: var(--color-text-grey-muted);
   }
 
-  /* Mobile: 20px → 16px (explicit design decision).
-     Uses --font-size-body-large which is 16px on mobile. */
-  @media (max-width: 767px) {
-    .footer__links-heading {
-      font-size: var(--font-size-body-large); /* mobile value: 16px */
-    }
-  }
-
+  /* Explore: 2×2 grid of links (LinkedIn Telegram / Dribbble Download CV).
+     Column gap 24 (Marianna: use the existing --space-inline-2xl token
+     instead of Figma's raw 28). Row gap 12. */
   .footer__links {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: var(--space-inline-lg); /* 16px desktop / 12px mobile between links */
+    display: grid;
+    grid-template-columns: repeat(2, max-content);
+    column-gap: var(--space-inline-2xl); /* 24 desktop / 20 mobile */
+    row-gap: var(--space-stack-md);      /* 12 desktop / 8 mobile */
     list-style: none;
   }
 
-  /* Mobile: column-gap stays 8px between links in a row, but row-gap
-     collapses to 0 so wrapped rows touch each other — Marianna found
-     the default row-gap looked over-spaced on phone. Links still have
-     height 32px (or min 44px on touch) so they don't visually collide;
-     they just sit edge-to-edge vertically. */
   @media (max-width: 767px) {
     .footer__links {
-      column-gap: var(--space-inline-sm); /* 8px between links in a row */
-      row-gap: 0;                          /* 0 between wrapped rows */
+      column-gap: var(--space-inline-xl); /* 16 on mobile (Figma Links_footer gap) */
     }
   }
 
@@ -349,11 +210,12 @@ assignWave(birdDots, 0, BIRD_DURATION);
   .footer__link {
     display: inline-flex;
     align-items: center;
-    gap: var(--space-inset-sm); /* 8px between text and icon */
+    gap: var(--space-inset-sm); /* 8px text → icon */
     height: 32px;
     padding: var(--space-inset-xs) 2px var(--space-inset-xs) var(--space-inset-xs);
     border-radius: var(--radius-l);
-    color: var(--color-text-dark-grey);
+    color: var(--color-text-light-grey-on-dark);
+    white-space: nowrap;
   }
 
   .footer__link-arrow {
@@ -363,6 +225,73 @@ assignWave(birdDots, 0, BIRD_DURATION);
     flex-shrink: 0;
   }
 
+  /* Link hover — Figma "Links" Mode=Dark hover (node 1116:43801): text
+     light-grey-on-dark → light-on-dark. Arrow swap unchanged. Pointer-only. */
+  .footer__link {
+    transition: color var(--duration-fast) var(--ease-out);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .footer__link:hover {
+      color: var(--color-text-light-on-dark);
+    }
+  }
+
+  /* The email copy button is CopyEmail.astro — it carries its own box/focus
+     styles (underline via the `underline` prop, "Copied" green flash). */
+
+  /* ====== Divider + info ====== */
+  .footer__bottom {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-stack-xl); /* 20px (Figma 21) divider → info */
+  }
+
+  /* Full-width dotted divider (Figma vector: stroke #4A4A4A, dasharray 0.1 8,
+     round cap, 2px). Inline SVG stretched with preserveAspectRatio="none" +
+     non-scaling-stroke keeps the dots uniform at any width (same technique as
+     the header menu tab border). */
+  .footer__divider {
+    height: 2px;
+    width: 100%;
+    background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1314 2' preserveAspectRatio='none' fill='none'%3E%3Cpath d='M1 1H1313' stroke='%234A4A4A' stroke-width='2' stroke-linecap='round' stroke-dasharray='0.1 8' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E");
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+  }
+
+  /* Info row — same 3 columns as the top row so items align under their
+     column (Ukraine | Kyiv time | © All rights reserved). */
+  .footer__info {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-inline-2xl);
+  }
+
+  .footer__info-item {
+    color: var(--color-text-grey-muted-on-dark);
+  }
+
+  /* Mobile (Figma Mobile_Footer_New 1176-9742): "Ukraine" and the time share
+     one row (space-between), "© All rights reserved" drops to a second row. */
+  @media (max-width: 767px) {
+    .footer__info {
+      grid-template-columns: 1fr auto;
+      grid-template-areas:
+        "loc time"
+        "copy copy";
+      gap: var(--space-stack-md) var(--space-inline-md);
+    }
+    .footer__info-loc  { grid-area: loc; }
+    .footer__info-time { grid-area: time; justify-self: end; }
+    .footer__info-copy { grid-area: copy; }
+  }
+
+  /* ====== Focus (dark surface) — light outline for on-dark links ====== */
+  .footer__link:focus-visible {
+    outline: 2px solid var(--color-text-light-on-dark);
+    outline-offset: 2px;
+  }
+
   /* Minimum 44×44 tap target on touch devices */
   @media (pointer: coarse) {
     .footer__link {
@@ -370,3 +299,46 @@ assignWave(birdDots, 0, BIRD_DURATION);
     }
   }
 </style>
+
+<script>
+  /*
+   * Live Kyiv time in the footer (brief §9.2). Formats Europe/Kyiv, 12h, and
+   * refreshes on the minute boundary so it stays accurate without a per-second
+   * timer. Re-synced on every astro:page-load (View Transitions swap the DOM).
+   */
+  const formatKyiv = () =>
+    new Intl.DateTimeFormat('en-US', {
+      timeZone: 'Europe/Kyiv',
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true,
+    }).format(new Date());
+
+  let kyivTimer: number | undefined;
+
+  const syncKyivTime = () => {
+    const els = document.querySelectorAll<HTMLElement>('[data-kyiv-time]');
+    if (!els.length) return;
+    els.forEach((el) => { el.textContent = formatKyiv(); });
+  };
+
+  const scheduleKyivTick = () => {
+    window.clearTimeout(kyivTimer);
+    const now = new Date();
+    // ms until the next minute boundary (+ tiny buffer)
+    const msToNextMinute = (60 - now.getSeconds()) * 1000 - now.getMilliseconds() + 50;
+    kyivTimer = window.setTimeout(() => {
+      syncKyivTime();
+      scheduleKyivTick();
+    }, msToNextMinute);
+  };
+
+  const initKyivTime = () => {
+    syncKyivTime();
+    scheduleKyivTick();
+  };
+
+  document.addEventListener('astro:page-load', initKyivTime);
+  if (document.readyState !== 'loading') initKyivTime();
+  else document.addEventListener('DOMContentLoaded', initKyivTime);
+</script>
