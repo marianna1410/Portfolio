@@ -53,6 +53,9 @@
   --color-accent-blue:    #93C9E2;  /* New — accent bold/accent blue */
   --color-accent-dark:    #397D9C;  /* New — accent bold/dark accent */
   --color-accent-green:   #3EDA96;  /* Changed value — accent bold/green (added; was not in CSS) */
+  /* Light accent tints (brief §2 "без змін") — Tag/on page backgrounds */
+  --color-accent-light-green:  #E6F5F0;  /* accent light/green — Solution tag bg */
+  --color-accent-light-red:    #FFEFED;  /* accent light/red — Problem tag bg */
   /* Removed (unused): --color-accent-red #E85949 (brief §2 Deleted);
      --color-accent-yellow #E39B23 + --color-accent alias (per §2 intent to drop
      colourful bold accents — Marianna approved). */

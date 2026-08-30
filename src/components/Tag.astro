@@ -1,0 +1,51 @@
+---
+/**
+ * Tag.astro — "Tag/on page" pill (Figma component set 1120-47903).
+ *
+ * Small caption-mono pill used for the case-study section labels
+ * (PROJECT OVERVIEW / RESEARCH / SUMMARY → light, PROBLEM N → red,
+ * SOLUTION N → green). Radius 8 (radius-m), padding 4/12, no status dot
+ * (the dot in the component is hidden on these section instances).
+ *
+ * Variant colours (exact from the component set):
+ *   light → bg #F2F2F2, text #737373
+ *   green → bg #E6F5F0, text #238067 (system success)
+ *   red   → bg #FFEFED, text #D0311C (system error)
+ */
+interface Props {
+  label: string;
+  variant?: 'light' | 'green' | 'red';
+  /** Optional id (e.g. for aria-labelledby on the section). */
+  id?: string;
+}
+
+const { label, variant = 'light', id } = Astro.props;
+---
+
+<span class:list={['tag', `tag--${variant}`, 'text-caption-mono']} id={id}>{label}</span>
+
+<style>
+  .tag {
+    display: inline-flex;
+    align-items: center;
+    width: max-content;
+    padding: var(--space-inset-xs) var(--space-inset-md); /* 4 / 12 */
+    border-radius: var(--radius-m); /* 8px */
+    text-transform: uppercase;
+  }
+
+  .tag--light {
+    background-color: var(--color-bg-light-grey);
+    color: var(--color-text-grey-muted);
+  }
+
+  .tag--green {
+    background-color: var(--color-accent-light-green);
+    color: var(--color-system-success);
+  }
+
+  .tag--red {
+    background-color: var(--color-accent-light-red);
+    color: var(--color-system-error);
+  }
+</style>

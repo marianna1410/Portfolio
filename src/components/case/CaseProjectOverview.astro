@@ -10,6 +10,7 @@
  *   [Role 180w] ← 73px gap → [Methods 551w]
  */
 import { Image } from 'astro:assets';
+import Tag from '../Tag.astro';
 import arrowRightBullet from '../../assets/icons/arrow-right-bullet.svg';
 
 interface Props {
@@ -26,7 +27,7 @@ const { paragraph, role, methods } = Astro.props;
 
 <section class="case-overview" id="overview" aria-labelledby="overview-label">
   <header class="case-overview__title-block">
-    <p class="case-overview__caption text-caption-mono" id="overview-label">{`{PROJECT OVERVIEW}`}</p>
+    <Tag label="PROJECT OVERVIEW" variant="light" id="overview-label" />
     <p class="case-overview__paragraph text-h4-medium">{paragraph}</p>
   </header>
 
@@ -70,11 +71,6 @@ const { paragraph, role, methods } = Astro.props;
     display: flex;
     flex-direction: column;
     gap: var(--space-stack-lg); /* 16px */
-  }
-
-  .case-overview__caption {
-    margin: 0;
-    color: var(--color-text-grey-muted);
   }
 
   .case-overview__paragraph {
