@@ -59,6 +59,11 @@ const { label = 'Email', underline = false, class: className, ...rest } = Astro.
     background: none;
     border: none;
     display: inline-flex;
+    /* Hug the label + icon — don't stretch to the parent's width when used as
+       a flex child (e.g. the footer's flex-column column). Keeps the click
+       zone the size of the content. */
+    align-self: flex-start;
+    width: fit-content;
     align-items: center;
     gap: var(--space-inset-sm);
     height: 32px;

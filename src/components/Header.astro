@@ -595,14 +595,16 @@ const navPrefix = variant === 'home' ? '#' : '/#';
      the arrow swap animation is unchanged. Pointer-only. */
   .header__contact-menu-link,
   .header__menu-contact-link,
-  .header__menu-tab {
+  .header__menu-tab,
+  .header__go-home {
     transition: color var(--duration-fast) var(--ease-out);
   }
 
   @media (hover: hover) and (pointer: fine) {
     .header__contact-menu-link:hover,
     .header__menu-contact-link:hover,
-    .header__menu-tab:hover {
+    .header__menu-tab:hover,
+    .header__go-home:hover {
       color: var(--color-text-light-on-dark);
     }
   }
