@@ -611,14 +611,17 @@ const navPrefix = variant === 'home' ? '#' : '/#';
 
   /* ====== Accessibility — focus + touch targets ======
      Global :focus-visible (2px solid --color-bg-black at 2px offset) applies.
-     On the dark pill that black outline can be low-contrast, so give the
-     on-dark interactive elements a light focus outline instead (a11y.md §3.1
-     contrast). White Contact/Menu buttons keep the default dark outline. */
+     Everything here sits on the dark pill, so a black outline is low-contrast
+     (dark-on-dark). Use a light outline instead (a11y.md §3.1 contrast) — for
+     both the on-dark links AND the white Contact/Menu buttons: their 2px-offset
+     outline lands on the dark pill, so it needs to be light to be visible. */
   .header__nav-link:focus-visible,
   .header__go-home:focus-visible,
   .header__contact-menu-link:focus-visible,
   .header__menu-tab:focus-visible,
-  .header__menu-contact-link:focus-visible {
+  .header__menu-contact-link:focus-visible,
+  .header__contact-button:focus-visible,
+  .header__menu-button:focus-visible {
     outline: 2px solid var(--color-text-light-on-dark);
     outline-offset: 2px;
   }
