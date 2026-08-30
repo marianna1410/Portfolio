@@ -10,6 +10,7 @@ export const CONTACT = {
   email: 'mariannadelihioz@gmail.com',
   telegram: 'https://t.me/MariannaDeli',
   linkedin: 'https://www.linkedin.com/in/marianna-delihioz-81b88a200/',
+  dribbble: 'https://dribbble.com/Delihioz', // redesign brief §6.6 / §9.4
 } as const;
 
 export const PROTOTYPES = {

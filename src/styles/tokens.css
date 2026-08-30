@@ -131,6 +131,7 @@
   --space-stack-xl:   20px;
   --space-stack-2xl:  24px;
   --space-stack-3xl:  32px;
+  --space-stack-4xl:  40px;  /* footer pb desktop (Figma 1126-52940); fills the scale gap */
   --space-stack-5xl:  48px;
 
   /* Inline — horizontal spacing between elements */
@@ -285,6 +286,7 @@
     --space-stack-xl:  16px;
     --space-stack-2xl: 20px;
     --space-stack-3xl: 24px;
+    --space-stack-4xl: 32px;
     --space-stack-5xl: 32px;
 
     /* ── Inline (horizontal spacing) ─────────────────────────
@@ -311,6 +313,7 @@
     --radius-l:   12px;
     --radius-xl:  12px;
     --radius-2xl: 16px;
+    --radius-4xl: 32px;  /* footer top corners: 40 desktop → 32 mobile (Marianna) */
 
     /* ── Layout ──────────────────────────────────────────────*/
     --page-margin: 16px;
