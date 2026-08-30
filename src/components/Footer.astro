@@ -115,11 +115,14 @@ const exploreLinks = [
 
   @media (min-width: 768px) {
     .footer__card {
-      padding-inline: var(--container-padding-tablet);
+      padding-inline: var(--container-padding-tablet); /* 32 tablet */
     }
   }
 
-  @media (min-width: 1280px) {
+  /* Desktop = 64px inset from 1024px up (mobile-adaptation "desktop" breakpoint
+     is 1024, and Figma 1126-52940 desktop shows 64 — so 64 applies across all
+     real desktop widths, not only ≥1280). */
+  @media (min-width: 1024px) {
     .footer__card {
       padding-inline: var(--container-padding-desktop); /* 64 per Figma */
     }
