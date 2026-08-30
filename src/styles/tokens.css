@@ -253,10 +253,13 @@
      Consumed by the .dot-pattern utility (global.css). Tune per surface
      by overriding --dot-pattern-color / --dot-pattern-bg on the element.
      -------------------------------------------------------- */
-  --dot-pattern-color:       #6F6F6F;  /* dot fill (node 1117-44596) */
+  /* Dot fill = Figma #6F6F6F but the pattern layer sits at 20% opacity
+     (node 1116-39391 PATTERN fill opacity 0.2), so bake the alpha in — a
+     solid #6F6F6F reads far too bright on the dark hero. */
+  --dot-pattern-color:       rgba(111, 111, 111, 0.2);
   --dot-pattern-bg:          transparent;  /* tile background — set per surface */
-  --dot-pattern-dot-radius:  2px;   /* Figma circle r=2 */
-  --dot-pattern-step:        16px;  /* Figma tile 16×16 */
+  --dot-pattern-dot-radius:  2px;   /* Figma circle r=2 (Ø4) */
+  --dot-pattern-step:        28px;  /* spacing per Marianna (Figma tile reads too dense on screen) */
 }
 
 /* ============================================================

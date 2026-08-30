@@ -1,0 +1,11 @@
+<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+<circle cx="10" cy="10" r="1" fill="#BBBBBB"/>
+<circle cx="13" cy="10" r="1" fill="#BBBBBB"/>
+<circle cx="4" cy="10" r="1" fill="#BBBBBB"/>
+<circle cx="1" cy="1" r="1" transform="matrix(-1 0 0 1 17 9)" fill="#BBBBBB"/>
+<circle cx="1" cy="1" r="1" transform="matrix(-1 0 0 1 14 6)" fill="#BBBBBB"/>
+<circle cx="1" cy="1" r="1" transform="matrix(-1 0 0 1 12 4)" fill="#BBBBBB"/>
+<circle cx="1" cy="1" r="1" transform="matrix(-1 0 0 1 14 12)" fill="#BBBBBB"/>
+<circle cx="1" cy="1" r="1" transform="matrix(-1 0 0 1 12 14)" fill="#BBBBBB"/>
+<circle cx="7" cy="10" r="1" fill="#BBBBBB"/>
+</svg>
