@@ -1,0 +1,157 @@
+---
+/**
+ * CopyEmail.astro — click-to-copy email button (redesign brief §8.4).
+ *
+ * Click → navigator.clipboard.writeText(email) → the visible label swaps to
+ * "Copied" (same text colour as normal — text/light grey on dark, per
+ * Marianna; not green) → reverts after 3s and is clickable again. The label
+ * carries aria-live="polite" so screen readers announce "Copied". Used in
+ * BOTH the dark Contact dropdown (label "Email") and the dark footer
+ * (label = the full address, underlined).
+ *
+ * The copy icon is Icons 20px/Сopy.svg (already #BBBBBB — dark-surface ready);
+ * it stays static (no hover swap — it's a copy affordance, not a nav arrow).
+ *
+ * Styling of the button box is passed in via `class` so each surface matches
+ * its siblings (dropdown item / footer link). Per brief §1.7 no reduced-motion
+ * logic is added.
+ */
+import { Image } from 'astro:assets';
+import copyIcon from '../assets/icons/copy.svg';
+import { CONTACT } from '../lib/config.ts';
+
+interface Props {
+  /** Visible label in the resting state. */
+  label?: string;
+  /** Underline the label (footer address style). */
+  underline?: boolean;
+  /** Extra class on the <button> for per-surface box styling. */
+  class?: string;
+  /** Any extra attributes (e.g. role="menuitem") are spread onto the button. */
+  [key: string]: unknown;
+}
+
+const { label = 'Email', underline = false, class: className, ...rest } = Astro.props;
+---
+
+<button
+  type="button"
+  class:list={['copy-email', 'text-label', className]}
+  data-copy-email={CONTACT.email}
+  aria-label={`Copy email address ${CONTACT.email} to clipboard`}
+  {...rest}
+>
+  <span
+    class:list={['copy-email__label', { 'copy-email__label--underline': underline }]}
+    data-copy-label={label}
+    aria-live="polite"
+  >{label}</span>
+  <Image src={copyIcon} alt="" width={20} height={20} class="copy-email__icon" />
+</button>
+
+<style>
+  /* Self-contained link box — matches the sibling nav/footer links exactly
+     (h32, gap 8, pl4 pr2 py4, rounded 12, light-grey-on-dark). Baked in here
+     because a parent's scoped styles can't reach this component's <button>.
+     Typography comes from the global .text-label utility on the element. */
+  .copy-email {
+    appearance: none;
+    background: none;
+    border: none;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-inset-sm);
+    height: 32px;
+    padding: var(--space-inset-xs) 2px var(--space-inset-xs) var(--space-inset-xs);
+    border-radius: var(--radius-l);
+    color: var(--color-text-light-grey-on-dark);
+    white-space: nowrap;
+    cursor: pointer;
+  }
+
+  .copy-email:focus-visible {
+    outline: 2px solid var(--color-text-light-on-dark);
+    outline-offset: 2px;
+  }
+
+  @media (pointer: coarse) {
+    .copy-email {
+      min-height: 44px;
+    }
+  }
+
+  .copy-email__label {
+    transition: color var(--duration-fast) var(--ease-out);
+  }
+
+  .copy-email__label--underline {
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  /* Hover (Figma Links Mode=Dark hover): text → light-on-dark. Pointer-only.
+     Note: per Marianna the "Copied" label stays the normal text colour
+     (text/light grey on dark) — NOT green. */
+  @media (hover: hover) and (pointer: fine) {
+    .copy-email:hover {
+      color: var(--color-text-light-on-dark);
+    }
+  }
+
+  .copy-email__icon {
+    display: block;
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+  }
+</style>
+
+<script>
+  /*
+   * Copy-to-clipboard for every [data-copy-email] button on the page
+   * (Contact dropdown + footer). Bound on astro:page-load for View
+   * Transitions, guarded against double-binding.
+   */
+  const COPIED_MS = 3000; // brief §8.4 — revert after 3s
+
+  const initCopyEmail = () => {
+    const buttons = document.querySelectorAll<HTMLButtonElement>('[data-copy-email]');
+    buttons.forEach((btn) => {
+      if ((btn as any).__copyBound) return;
+      (btn as any).__copyBound = true;
+
+      const label = btn.querySelector<HTMLElement>('.copy-email__label');
+      const original = label?.dataset.copyLabel ?? label?.textContent ?? '';
+      let timer: number | undefined;
+
+      btn.addEventListener('click', async () => {
+        const email = btn.dataset.copyEmail;
+        if (!email || !label) return;
+        try {
+          await navigator.clipboard.writeText(email);
+        } catch {
+          // Fallback for older/insecure contexts.
+          const ta = document.createElement('textarea');
+          ta.value = email;
+          ta.style.position = 'fixed';
+          ta.style.opacity = '0';
+          document.body.appendChild(ta);
+          ta.select();
+          try { document.execCommand('copy'); } catch { /* give up silently */ }
+          ta.remove();
+        }
+        label.textContent = 'Copied';
+        btn.classList.add('is-copied');
+        window.clearTimeout(timer);
+        timer = window.setTimeout(() => {
+          label.textContent = original;
+          btn.classList.remove('is-copied');
+        }, COPIED_MS);
+      });
+    });
+  };
+
+  document.addEventListener('astro:page-load', initCopyEmail);
+  if (document.readyState !== 'loading') initCopyEmail();
+  else document.addEventListener('DOMContentLoaded', initCopyEmail);
+</script>
