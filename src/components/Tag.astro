@@ -103,4 +103,18 @@ const { label, variant = 'light', dot = false, id } = Astro.props;
     background-color: var(--color-text-light-on-dark); /* #E9E9E9 */
     filter: blur(0.8px);
   }
+
+  /* Light-variant glow — a PURE-WHITE soft dot on the #F2F2F2 pill
+     (Figma "Light spot", Experience tag node 1120-47915): halo 10px blur 5.4,
+     core 6px blur 1. The dark variant's grey dot would read as a dark smudge on
+     the light pill, so the light tag overrides both layers to white. */
+  .tag--light .tag__dot::before {
+    background-color: var(--color-bg-white); /* #FFFFFF */
+  }
+  .tag--light .tag__dot::after {
+    width: 6px;
+    height: 6px;
+    background-color: var(--color-bg-white); /* #FFFFFF */
+    filter: blur(1px);
+  }
 </style>

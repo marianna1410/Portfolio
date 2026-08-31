@@ -1,23 +1,21 @@
 ---
 import { Image } from 'astro:assets';
+import Tag          from './Tag.astro';
 import craftPattern  from '../assets/icons/experience-craft-pattern.svg';
 import bazaPattern   from '../assets/icons/experience-baza-pattern.svg';
 import workBorder    from '../assets/icons/experience-work-border.svg';
-import paperSlice    from '../assets/icons/paper-slice.png';
-import paperTexture  from '../assets/icons/paper-texture.png';
 
 /**
- * Experience section — Figma node 798:12038 (redesign from original 472:16053).
+ * Experience section — Figma node 1120:47026 (dark redesign; prev 798:12038).
  *
- * Layout: single "Work experience" card (light-grey bg, 32px padding) with a
- * two-column grid: Timeline (212px, dates + vertical line + dot) | Companies (1fr).
- * Below the card: Skills grid of paper-textured pills (same as before, 868px).
+ * Layout: "Experience" light Tag → heading → single "Work experience" card
+ * (32px padding) with a two-column grid: Timeline (212px, dates + vertical line
+ * + dot) | Companies (1fr). Section stays on white bg per the redesign.
  *
- * Key changes from v1:
- *  - Content max-width: 800px → 868px
- *  - Experience block: dashed-border cards → single timeline+companies card
- *  - Bullets: arrow SVG → numbered (01, 02…) in Fira Code
- *  - Company meta: added companyType shown after a dot separator
+ * Redesign changes (brief §6.3):
+ *  - Top label: mono {EXPERIENCE} caption → Tag/on page light pill "EXPERIENCE"
+ *  - First job (Craft Innovations): all 4 contribution bullets rewritten
+ *  - Removed the "Skills acquired over time" paper-pill grid entirely
  *
  * Timeline vertical line drawn via ::after on the first aside + ::before on the
  * second aside, so it runs exactly from first-dot-bottom through the job gap to
@@ -37,10 +35,10 @@ const jobs = [
     durationCount: '2 years',
     employmentType: 'full-time',
     contributions: [
-      'Contributed to 8 projects within a design team over two years, including web platforms and e-commerce solutions.',
-      'Conducted a comprehensive UX audit to identify and resolve usability issues, significantly enhancing the overall experience of an online banking platform.',
-      'Key contributor to a full-scale e-commerce store redesign and the development of a large-scale UI kit from scratch, partnering with the team on all stages from user flows to developer handoffs.',
-      "Developed an internal design accessibility guide based on WCAG standards, streamlining the team's workflow and ensuring compliance across the website redesign project.",
+      'Worked on 8 projects across banking, e-commerce, and corporate websites, from early research and user flows through UI design, design systems, and developer handoff.',
+      'Led an independent UX audit of an online banking platform based on established usability heuristics. Converted insights into prioritized recommendations to improve navigation, system consistency, and core user flows.',
+      'Owned key areas of a full-scale e-commerce store redesign, including search, brand pages, and mobile adaptation. Grounded design decisions in Baymard research and competitive analysis, modernizing visuals while maintaining brand recognition.',
+      "Created the team's internal accessibility guide, 55 rules based on WCAG 2.2, and owned the design side of accessibility for a full bank website redesign.",
     ],
   },
   {
@@ -59,12 +57,6 @@ const jobs = [
   },
 ];
 
-const skillRows = [
-  ['Problem-solving', 'UX Research', 'Wireframing', 'AI Prototyping', 'Brainstorming'],
-  ['UX Audit', 'UX Writing', 'Accessibility', 'UI Kits', 'Design Systems'],
-  ['Visual Design', 'Micro-animation', 'Mobile App Design', 'AI Tools'],
-  ['Responsive & Web Design', 'Developer Handoff'],
-];
 ---
 
 <section class="experience" id="experience" aria-labelledby="experience-heading">
@@ -72,7 +64,7 @@ const skillRows = [
 
     <!-- Title block -->
     <header class="experience__title-block">
-      <p class="experience__caption text-caption-mono">{`{EXPERIENCE}`}</p>
+      <Tag label="Experience" variant="light" dot />
       <h2 id="experience-heading" class="experience__heading text-h2">
         2+ years of UX-led design from corporate websites to scalable product platforms
       </h2>
@@ -154,49 +146,10 @@ const skillRows = [
       </div>
     </div>
 
-    <!-- Skills -->
-    <div class="experience__skills">
-      <h3 class="experience__skills-title text-h4-medium">Skills acquired over time</h3>
-      <ul class="experience__skills-rows">
-        {skillRows.map((row) => (
-          <li class="experience__skills-row">
-            <ul class="experience__skills-pills">
-              {row.map((skill, i) => (
-                <li class:list={['skill-pill', i < row.length - 1 && 'skill-pill--overlap']}>
-                  {/* Raw <img> (not Astro Image) — Astro's webp conversion blurs the paper texture */}
-                  <img
-                    src={paperSlice.src}
-                    width={20}
-                    height={44}
-                    class="skill-pill__cap skill-pill__cap--left"
-                    alt=""
-                    aria-hidden="true"
-                    decoding="async"
-                  />
-                  <span class="skill-pill__body">
-                    <span class="skill-pill__text text-caption-regular">{skill}</span>
-                  </span>
-                  <img
-                    src={paperSlice.src}
-                    width={20}
-                    height={44}
-                    class="skill-pill__cap skill-pill__cap--right"
-                    alt=""
-                    aria-hidden="true"
-                    decoding="async"
-                  />
-                </li>
-              ))}
-            </ul>
-          </li>
-        ))}
-      </ul>
-    </div>
-
   </div>
 </section>
 
-<style define:vars={{ paperTextureUrl: `url(${paperTexture.src})` }}>
+<style>
 
   /* ====== Section shell ====== */
   .experience {
@@ -236,11 +189,6 @@ const skillRows = [
     align-items: center;
     text-align: center;
     width: 100%;
-  }
-
-  .experience__caption {
-    color: var(--color-text-grey-muted);
-    margin: 0;
   }
 
   .experience__heading {
@@ -581,120 +529,6 @@ const skillRows = [
     }
     .experience__company--gap {
       padding-top: 0;
-    }
-  }
-
-  /* ====== Skills section ====== */
-  .experience__skills {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-stack-2xl); /* 24px desktop / 20px mobile */
-  }
-
-  .experience__skills-title {
-    color: var(--color-text-black);
-    margin: 0;
-  }
-
-  .experience__skills-rows {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-stack-sm); /* 8px */
-    width: 100%;
-  }
-
-  .experience__skills-row {
-    width: 100%;
-  }
-
-  .experience__skills-pills {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    display: flex;
-    align-items: center;
-    width: 100%;
-  }
-
-  /* ====== Skill pill — paper-textured Label ====== */
-  .skill-pill {
-    flex: 1 1 0;
-    min-width: 0;
-    height: 44px;
-    display: flex;
-    align-items: stretch;
-    position: relative;
-  }
-
-  /* Adjacent pills overlap by 4px (matches Figma negative margin) */
-  .skill-pill--overlap {
-    margin-right: -4px;
-  }
-
-  .skill-pill__cap {
-    width: 20px;
-    height: 44px;
-    flex-shrink: 0;
-    display: block;
-    object-fit: fill;
-  }
-
-  /* FLIP left cap so notches face OUTWARD per Figma.
-     Source slice: rounded LEFT + notches on RIGHT. Flip → notches go LEFT. */
-  .skill-pill__cap--left {
-    transform: scaleX(-1);
-  }
-
-  .skill-pill__body {
-    flex: 1 1 0;
-    min-width: 0;
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-    /*
-      Paper texture rendered larger than the pill body so each pill shows a
-      small, sharp window of the texture (Figma frame-2316 trick: ~309% × 484%).
-    */
-    background-image: var(--paperTextureUrl);
-    background-size: 309% 484%;
-    background-position: center;
-    background-repeat: no-repeat;
-  }
-
-  .skill-pill__text {
-    position: relative;
-    z-index: 1;
-    color: var(--color-text-dark-grey);
-    padding-inline: var(--space-inset-sm); /* 8px */
-    text-align: center;
-    white-space: nowrap;
-  }
-
-  /* Mobile: collapse rows into a single flex-wrap flow */
-  @media (max-width: 767px) {
-    .experience__skills-rows {
-      flex-direction: row;
-      flex-wrap: wrap;
-      gap: 0;
-      row-gap: var(--space-stack-sm); /* 8px between wrap-lines */
-    }
-
-    /* display:contents merges all pills into one continuous wrap flow
-       while preserving list semantics for a11y */
-    .experience__skills-row,
-    .experience__skills-pills {
-      display: contents;
-    }
-
-    .skill-pill {
-      flex: 0 0 auto;
-      margin-right: -4px;
     }
   }
 </style>
