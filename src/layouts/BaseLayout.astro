@@ -4,6 +4,11 @@ import { ClientRouter } from 'astro:transitions';
 import Analytics from '@vercel/analytics/astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
+// Preload the heading fonts so the H1 renders in Inter Tight from the first
+// paint (no FOUT/reflow on hard-refresh). 500 = headings everywhere; the italic
+// is the Hero "UX in mind" accent, so it's preloaded on the home page only.
+import interTight500 from '@fontsource/inter-tight/files/inter-tight-latin-500-normal.woff2';
+import interTight500Italic from '@fontsource/inter-tight/files/inter-tight-latin-500-italic.woff2';
 
 interface Props {
   title: string;
@@ -33,6 +38,10 @@ const {
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <meta name="description" content={description} />
     <meta name="generator" content={Astro.generator} />
+    <link rel="preload" href={interTight500} as="font" type="font/woff2" crossorigin="anonymous" />
+    {headerVariant === 'home' && (
+      <link rel="preload" href={interTight500Italic} as="font" type="font/woff2" crossorigin="anonymous" />
+    )}
     <title>{title}</title>
     <ClientRouter />
   </head>

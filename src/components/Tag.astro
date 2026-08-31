@@ -77,6 +77,10 @@ const { label, variant = 'light', dot = false, id } = Astro.props;
     width: 12px;   /* Figma "Light spot" frame 12px */
     height: 12px;
     flex-shrink: 0;
+    /* Give the dot its own stable compositing layer so the blurred pseudo-
+       elements don't re-rasterize (flicker) during page repaints/animations. */
+    transform: translateZ(0);
+    isolation: isolate;
   }
   .tag__dot::before { /* halo — fuller/brighter than the connector dots */
     content: '';
@@ -85,6 +89,7 @@ const { label, variant = 'light', dot = false, id } = Astro.props;
     border-radius: var(--radius-pill);
     background-color: var(--color-bg-grey-muted); /* #E5E5E5 */
     filter: blur(5.4px);
+    transform: translateZ(0);
   }
   .tag__dot::after { /* core */
     content: '';
