@@ -531,7 +531,9 @@ const navPrefix = variant === 'home' ? '#' : '/#';
      stroke dasharray="0.1 4" round-cap, preserveAspectRatio="none" +
      vector-effect="non-scaling-stroke" so it stretches to any width with a
      uniform dot pattern. Redesign: stroke recoloured to grey-on-dark (#737373)
-     for the dark surface. */
+     for the dark surface. stroke-width bumped to 1.5 (Figma's nominal 1px):
+     the data-URI is rasterised as a background, which softens a 1px round dot
+     to a faint blur — 1.5 renders the dots as crisp/visible as the Figma tab. */
   .header__menu-tab {
     display: flex;
     align-items: center;
@@ -541,7 +543,7 @@ const navPrefix = variant === 'home' ? '#' : '/#';
     border: none;
     border-radius: var(--radius-xl); /* 12px mobile */
     background-color: var(--color-bg-dark-elevated);
-    background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 312 41' preserveAspectRatio='none' fill='none'%3E%3Cpath d='M0.5 12.5C0.5 5.87258 5.87258 0.5 12.5 0.5H299.5C306.127 0.5 311.5 5.87258 311.5 12.5V28.5C311.5 35.1274 306.127 40.5 299.5 40.5H12.5C5.87258 40.5 0.5 35.1274 0.5 28.5V12.5Z' stroke='%23737373' stroke-linecap='round' stroke-dasharray='0.1 4' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 312 41' preserveAspectRatio='none' fill='none'%3E%3Cpath d='M0.5 12.5C0.5 5.87258 5.87258 0.5 12.5 0.5H299.5C306.127 0.5 311.5 5.87258 311.5 12.5V28.5C311.5 35.1274 306.127 40.5 299.5 40.5H12.5C5.87258 40.5 0.5 35.1274 0.5 28.5V12.5Z' stroke='%23737373' stroke-width='1.5' stroke-linecap='round' stroke-dasharray='0.1 4' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E");
     background-size: 100% 100%;
     background-repeat: no-repeat;
     color: var(--color-text-light-grey-on-dark);
@@ -556,8 +558,10 @@ const navPrefix = variant === 'home' ? '#' : '/#';
     list-style: none;
     text-transform: uppercase;
     color: var(--color-text-grey-muted-on-dark);
-    /* Extra top margin to create breathing room after the last tab (Figma: 20px) */
-    margin-top: var(--space-stack-md); /* 8px mobile */
+    /* 20px from the last tab to CONTACT (Figma 647-22439: container gap 20).
+       The grid row-gap already contributes 8px, so add 12px here. Explicit px:
+       the stack tokens step down on mobile while this gap is a constant 20. */
+    margin-top: 12px;
   }
 
   /* ====== Contacts row — horizontal flex inside its <li> wrapper ====== */
@@ -566,7 +570,9 @@ const navPrefix = variant === 'home' ? '#' : '/#';
     align-items: center;
     gap: var(--space-inline-sm); /* 8px between contact links */
     list-style: none;
-    margin-top: var(--space-stack-xs); /* 4px below CONTACT label */
+    /* 4px from CONTACT to the links row (Figma 647-22439: Contacts inner gap 4).
+       The grid row-gap adds 8px, so pull back 4px to land on the 4px target. */
+    margin-top: -4px;
   }
 
   .header__menu-contact-link {
