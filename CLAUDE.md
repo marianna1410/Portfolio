@@ -9,7 +9,9 @@ If you (Claude) are reading this, **also read the 5 spec files in `Portfolio dev
 
 ## Project
 
-Marianna Delihioz designer portfolio. 3 pages (Home `/`, two case studies `/cases/lucida` and `/cases/vaia`), hosted on Vercel, English only, no dark mode. Custom domain not yet (`*.vercel.app`).
+Marianna Delihioz designer portfolio. 3 pages (Home `/`, two case studies `/cases/lucida` and `/cases/vaia`), hosted on Vercel, English only. Custom domain not yet (`*.vercel.app`).
+
+**The site is now DARK** — the full dark redesign shipped to production on `main` (merge commit `eff8ba6`, 2026-09-01). The redesign brief/plan live in the repo at `Portfolio dev planning/redesign-brief.md` + `redesign-plan.md` (source of truth for the dark palette §2, radii §3, per-section changes, animations §8, tech decisions §9). Iron rule from that brief that still applies to any future motion work: **do NOT add new `prefers-reduced-motion` logic** (§1.7) — the header is static on scroll, the footer bird is static. The `redesign` branch is now merged; new work branches off `main`.
 
 **Analytics:** Vercel Web Analytics (cookieless) is live — `@vercel/analytics` `<Analytics />` in `BaseLayout.astro`. (Supersedes the original "no analytics" decision, per Marianna, 2026.) Vercel auto-started collection once the script shipped in a deploy + real traffic hit the site — no manual "Enable" toggle in the dashboard was needed. Data shows in the project's Analytics tab.
 
@@ -95,7 +97,9 @@ Curated copies go into `src/assets/`.
 ## Phase progress (as of last working session)
 
 **Phase 1 — Static skeleton + a11y** — ✅ DONE (all 3 pages built & responsive)
-**Phase 2 — Micro-animations** — 🔄 CURRENT PHASE
+**Phase 2 — Micro-animations** — ✅ DONE
+**Phase 3 — GSAP micro-scope** — ✅ folded into the redesign (hero intro, banner chat loop, travel deck)
+**Dark redesign (Sessions 0–5)** — ✅ SHIPPED TO PRODUCTION (`main` @ `eff8ba6`, 2026-09-01). Whole site is dark now. Details in `Portfolio dev planning/redesign-brief.md` + `redesign-plan.md`. No dedicated a11y (Lighthouse/axe) + cross-browser formal sweep was run in Session 5 — if you want one, it's the natural next task.
 
 ### Phase 1 (complete)
 
