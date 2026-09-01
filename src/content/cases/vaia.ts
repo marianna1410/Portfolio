@@ -22,7 +22,7 @@ import iconJustUseApp from '../../assets/projects/cases/vaia/platforms/just use 
 import iconReddit from '../../assets/projects/cases/vaia/platforms/reddit.png';
 
 // Small preview image for the "Keep reading" card — Vaia points back to Lucida.
-import lucidaPreview from '../../assets/projects/lucida-default.png';
+import lucidaPreview from '../../assets/projects/lucida-small-dark.png';
 
 const vaia: CaseData = {
   slug: 'vaia',

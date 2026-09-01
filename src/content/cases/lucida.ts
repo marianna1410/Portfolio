@@ -27,7 +27,7 @@ import iconReddit from '../../assets/projects/cases/lucida/platforms/reddit.png'
 
 // Small preview image for the "Keep reading" card at the end of this case —
 // points at the NEXT case (Vaia), so we import Vaia's Works-style preview here.
-import vaiaPreview from '../../assets/projects/vaia-default.png';
+import vaiaPreview from '../../assets/projects/vaia-small-dark.png';
 
 const lucida: CaseData = {
   slug: 'lucida',
