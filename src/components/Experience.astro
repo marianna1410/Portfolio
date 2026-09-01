@@ -156,6 +156,9 @@ const jobs = [
     background-color: var(--color-bg-white);
     padding-block: var(--space-section-block); /* 64px desktop / 44px mobile */
     padding-inline: var(--container-padding-desktop);
+    /* White block on the grey page — rounded TOP corners (Figma [40,40,0,0]);
+       the Banner below carries the matching rounded bottom. 40 desktop / 32 mobile. */
+    border-radius: var(--radius-4xl) var(--radius-4xl) 0 0;
   }
 
   @media (min-width: 768px) and (max-width: 1279px) {

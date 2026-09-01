@@ -141,6 +141,9 @@ const pillsRow2 = [
     /* Figma section pad 0/64/64/64 → butts under Experience's bottom padding. */
     padding-block: 0 var(--space-section-block);
     padding-inline: var(--container-padding-desktop);
+    /* Same white block as Experience — rounded BOTTOM corners (Figma [0,0,40,40]).
+       40 desktop / 32 mobile. */
+    border-radius: 0 0 var(--radius-4xl) var(--radius-4xl);
   }
   @media (min-width: 768px) and (max-width: 1279px) {
     .banner { padding-inline: var(--container-padding-tablet); }
