@@ -1,0 +1,554 @@
+---
+import { Image } from 'astro:assets';
+import ArrowSwap from './ArrowSwap.astro';
+import { CONTACT } from '../lib/config';
+import gradientBg from '../assets/projects/banner-gradient-blue.png';
+import aiSign from '../assets/icons/ai-sign.svg';
+import fileIcon from '../assets/icons/banner-file.svg';
+import arrowDotsDark from '../assets/icons/arrow-right-dots-active.svg';       // #4A4A4A — Telegram button
+import arrowDotsUnder from '../assets/icons/arrow-right-dots-under-accent.svg'; // #18242A — send button
+
+/**
+ * Banner (CTA) section — Figma node 1125-49033 (dark redesign, new section).
+ *
+ * Sits between Experience and Behind the Screen. A dark #1D1D1D card holds two
+ * columns:
+ *   Left  (#0F0F0F "cta"): heading + a two-row MARQUEE of skill pills + the
+ *                          white "Chat on Telegram" button (→ t.me/MariannaDeli).
+ *   Right ("animated visual"): a blue-gradient chat card with a static incoming
+ *                          message + PDF attachment, and a LOOPING reply demo
+ *                          (brief §8.2): type "Great, I'm interested!" → send →
+ *                          reply bubble → pause → repeat. Paused off-viewport.
+ *
+ * Pills scroll as an infinite marquee (Marianna's call): row 1 → left,
+ * row 2 → right; the card clips them at its rounded edges.
+ */
+
+const pillsRow1 = [
+  'Clickable Prototypes', 'In-Depth Research', 'Effortless UX', 'Data-Driven Design',
+  'Seamless User Flows', 'Structured Information Architecture', 'Intuitive Navigation',
+];
+const pillsRow2 = [
+  'Polished UI', 'Scalable Design Systems', 'Reusable UI Kits', 'Delightful Animations',
+  'Refined Visuals', 'Responsive Layouts', 'Thoughtful Accessibility',
+];
+---
+
+<section class="banner" aria-label="Let's collaborate">
+  <div class="banner__inner">
+    <div class="banner__card">
+      <div class="banner__con">
+
+        <!-- ── Left: CTA ──────────────────────────────────── -->
+        <div class="banner__cta">
+          <h2 class="banner__heading text-h3">Let's get one step closer<br class="banner__heading-br" /> to a long-term collaboration</h2>
+
+          <!-- Skill pills — two-row infinite marquee (clipped by the card).
+               Each row is duplicated inside the track for a seamless loop;
+               the duplicate is aria-hidden so the labels are read only once. -->
+          <div class="banner__pills" aria-hidden="true">
+            <div class="banner__pill-row">
+              <div class="banner__pill-track banner__pill-track--left">
+                {[...pillsRow1, ...pillsRow1].map((label) => (
+                  <span class="banner__pill">
+                    <img src={aiSign.src} alt="" width="20" height="20" class="banner__pill-icon" />
+                    <span class="banner__pill-text text-caption-regular">{label}</span>
+                  </span>
+                ))}
+              </div>
+            </div>
+            <div class="banner__pill-row">
+              <div class="banner__pill-track banner__pill-track--right">
+                {[...pillsRow2, ...pillsRow2].map((label) => (
+                  <span class="banner__pill">
+                    <img src={aiSign.src} alt="" width="20" height="20" class="banner__pill-icon" />
+                    <span class="banner__pill-text text-caption-regular">{label}</span>
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <a
+            class="banner__tg-btn"
+            href={CONTACT.telegram}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <span class="banner__tg-label text-label">Chat on Telegram</span>
+            <ArrowSwap icon={arrowDotsDark} direction="right" class="banner__tg-arrow" />
+          </a>
+        </div>
+
+        <!-- ── Right: chat card ───────────────────────────── -->
+        <div class="banner__chat">
+          <Image
+            src={gradientBg}
+            alt=""
+            aria-hidden="true"
+            class="banner__chat-bg"
+            width={800}
+            height={720}
+          />
+          <div class="banner__chat-body">
+
+            <!-- Incoming message + attachment grouped (12px apart);
+                 the reply sits 16px below this group (Figma). -->
+            <div class="banner__messages">
+              <!-- Static incoming message -->
+              <div class="banner__msg banner__msg--in">
+                <p class="banner__msg-text text-body-medium-regular">Hello 👋<br />We have an open position on our design team.</p>
+              </div>
+
+              <!-- Static PDF attachment -->
+              <div class="banner__file">
+                <div class="banner__file-con">
+                  <div class="banner__file-info">
+                    <img src={fileIcon.src} alt="" width="30" height="34" class="banner__file-icon" />
+                    <div class="banner__file-details">
+                      <span class="banner__file-name text-caption-regular">UX-UI-Designer.pdf</span>
+                      <span class="banner__file-size">4 MB</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Looping reply bubble (hidden at rest) -->
+            <div class="banner__msg banner__msg--out" data-reply>
+              <p class="banner__msg-text text-body-medium-regular">Great, I'm interested!</p>
+            </div>
+
+            <!-- Input bar (drives the typing animation) -->
+            <div class="banner__input">
+              <span class="banner__input-text text-caption-regular" data-input>Type something</span>
+              <span class="banner__send" data-send>
+                <img src={arrowDotsUnder.src} alt="" width="20" height="20" />
+              </span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<style define:vars={{ gradientBgUrl: `url(${gradientBg.src})` }}>
+  /* ====== Section shell (matches Works/Experience grid) ====== */
+  .banner {
+    background-color: var(--color-bg-white);
+    /* Figma section pad 0/64/64/64 → butts under Experience's bottom padding. */
+    padding-block: 0 var(--space-section-block);
+    padding-inline: var(--container-padding-desktop);
+    /* Same white block as Experience — rounded BOTTOM corners (Figma [0,0,40,40]).
+       40 desktop / 32 mobile. */
+    border-radius: 0 0 var(--radius-4xl) var(--radius-4xl);
+  }
+  @media (min-width: 768px) and (max-width: 1279px) {
+    .banner { padding-inline: var(--container-padding-tablet); }
+  }
+  @media (max-width: 767px) {
+    .banner { padding-inline: var(--container-padding-mobile); }
+  }
+
+  .banner__inner {
+    max-width: var(--container-max-width);
+    margin-inline: auto;
+    width: 100%;
+  }
+
+  /* ====== Outer dark card ====== */
+  .banner__card {
+    background-color: var(--color-bg-dark-elevated); /* #1D1D1D */
+    border-radius: var(--radius-3xl);                /* 24px */
+    padding: var(--space-inset-2xl);                 /* 24px (Figma CTA_banner pad 24) */
+  }
+
+  .banner__con {
+    display: flex;
+    gap: var(--space-inline-xl);   /* 20px */
+    align-items: stretch;
+  }
+
+  /* ====== Left CTA column ====== */
+  .banner__cta {
+    flex: 1 1 0;
+    min-width: 0;
+    background-color: var(--color-bg-deep-black);  /* #0F0F0F */
+    border-radius: var(--radius-xl);               /* 16px */
+    overflow: hidden;                              /* clips the marquee at the edges */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-stack-4xl);                   /* 40px (Figma cta gap) */
+  }
+
+  .banner__heading {
+    color: var(--color-text-light-on-dark);
+    margin: 0;
+    text-align: center;
+    /* Explicit break after "closer" matches Figma's wrap regardless of font
+       metrics: desktop → 2 lines; mobile (narrower max-width) → the second half
+       wraps once more, giving Figma's 3-line layout. */
+    max-width: 460px;
+  }
+
+  /* ====== Skill pills marquee ====== */
+  .banner__pills {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-stack-sm);   /* 8px between the two rows */
+    width: 100%;
+  }
+
+  .banner__pill-row {
+    overflow: hidden;             /* each row clips its own track */
+  }
+
+  .banner__pill-track {
+    display: flex;
+    width: max-content;
+    will-change: transform;
+  }
+  /* -50% == exactly one pill-set (each pill carries its own trailing margin,
+     so the duplicated set lines up seamlessly). */
+  .banner__pill-track--left  { animation: banner-marquee-left  38s linear infinite; }
+  .banner__pill-track--right { animation: banner-marquee-right 38s linear infinite; }
+  @keyframes banner-marquee-left  { from { transform: translateX(0); }      to { transform: translateX(-50%); } }
+  @keyframes banner-marquee-right { from { transform: translateX(-50%); }   to { transform: translateX(0); } }
+
+  /* Pause the marquee while the section is off-screen (set from JS). */
+  .banner:not(.is-visible) .banner__pill-track { animation-play-state: paused; }
+
+  .banner__pill {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-inset-sm);                   /* 8px icon↔text */
+    flex-shrink: 0;
+    margin-right: 9px;                            /* Figma row itemSpacing 9 */
+    padding: var(--space-inset-sm) var(--space-inset-md); /* 8 / 12 */
+    background-color: var(--color-bg-dark-elevated); /* #1D1D1D */
+    border-radius: var(--radius-m);               /* 8px */
+  }
+  .banner__pill-icon { display: block; flex-shrink: 0; }
+  .banner__pill-text {
+    color: var(--color-text-light-grey-on-dark);  /* #BBBBBB */
+    white-space: nowrap;
+  }
+
+  /* ====== Chat on Telegram button ======
+     Same component as the header's white Contact button (Figma
+     "Button/Medium/Primary"): white bg, 1px medium-grey stroke, dark-grey label,
+     h40, radius 12, pad 8/12/8/16. Only the arrow differs — a right-pointing
+     ArrowSwap instead of the header's down chevron. */
+  .banner__tg-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-inset-sm);                   /* 8px */
+    height: 40px;
+    padding: var(--space-inset-sm) var(--space-inset-md) var(--space-inset-sm) var(--space-inset-lg); /* 8/12/8/16 */
+    background-color: var(--color-bg-white);
+    color: var(--color-text-dark-grey);           /* #4A4A4A */
+    border: 1px solid var(--color-stroke-medium-grey);
+    border-radius: var(--radius-l);               /* 12px */
+    text-decoration: none;
+    white-space: nowrap;
+    /* Colour-only transition; the arrow swap is driven by ArrowSwap itself. */
+    transition:
+      background-color var(--duration-fast) var(--ease-out),
+      color var(--duration-fast) var(--ease-out);
+  }
+  .banner__tg-label { color: inherit; }
+
+  /* Hover (pointer only) — Figma Button/Medium/Primary State=Hover:
+     bg #F2F2F2, text #252525 (matches the header button). */
+  @media (hover: hover) and (pointer: fine) {
+    .banner__tg-btn:hover {
+      background-color: var(--color-bg-light-grey);
+      color: var(--color-text-black);
+    }
+  }
+
+  /* Focus outline is LIGHT — the button sits on the dark card, so a black
+     outline would be invisible (same reasoning as the header buttons). */
+  .banner__tg-btn:focus-visible {
+    outline: 2px solid var(--color-text-light-on-dark);
+    outline-offset: 2px;
+  }
+
+  /* 44px minimum tap target on touch devices */
+  @media (pointer: coarse) {
+    .banner__tg-btn { min-height: 44px; }
+  }
+
+  /* ====== Right chat card ====== */
+  .banner__chat {
+    position: relative;
+    flex: 0 0 400px;
+    width: 400px;
+    align-self: stretch;
+    border-radius: var(--radius-xl);              /* 16px */
+    overflow: hidden;
+    background-color: var(--color-bg-under-accent); /* #18242A base under the gradient */
+    isolation: isolate;
+  }
+
+  .banner__chat-bg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 0;
+  }
+
+  .banner__chat-body {
+    position: relative;
+    z-index: 1;
+    height: 100%;
+    min-height: 360px;
+    padding: var(--space-inset-2xl);              /* 24px */
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-stack-lg);                   /* 16px — group → reply gap (Figma) */
+  }
+
+  /* Incoming message + attachment group — 12px between them (Figma mesagges). */
+  .banner__messages {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-stack-md);                   /* 12px */
+  }
+
+  /* Chat bubbles */
+  .banner__msg {
+    max-width: 282px;
+    padding: var(--space-inset-md);               /* 12px */
+    background-color: var(--color-overlay-black-40); /* #0F0F0F @ 40% */
+    backdrop-filter: blur(2px);
+  }
+  .banner__msg--in {
+    align-self: flex-start;
+    border-radius: 12px 12px 12px 0;              /* Figma incoming radii 12/12/12/0 */
+  }
+  .banner__msg--out {
+    align-self: flex-end;
+    max-width: 240px;
+    border-radius: 12px 12px 0 12px;              /* Figma reply radii 12/12/0/12 */
+    /* Hidden at rest; the loop fades it in. */
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 300ms ease, transform 300ms ease;
+  }
+  .banner__msg--out.is-shown { opacity: 1; transform: translateY(0); }
+  .banner__msg-text { color: var(--color-text-light-on-dark); margin: 0; }
+
+  /* PDF attachment */
+  .banner__file {
+    align-self: flex-start;
+    width: 282px;
+    max-width: 100%;
+    padding: var(--space-inset-xs);               /* 4px */
+    background-color: var(--color-overlay-black-40);
+    border-radius: 12px 12px 12px 0;
+    backdrop-filter: blur(2px);
+  }
+  .banner__file-con {
+    padding: var(--space-inset-sm);               /* 8px */
+    background-color: var(--color-overlay-black-20); /* #000 @ 20% */
+    border-radius: var(--radius-m);               /* 8px */
+  }
+  .banner__file-info {
+    display: flex;
+    align-items: center;
+    gap: var(--space-inline-md);                  /* 12px */
+  }
+  .banner__file-icon { display: block; flex-shrink: 0; }
+  .banner__file-details {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;                                     /* box gap (Marianna); leading from lh 1.48 sets the rest */
+    min-width: 0;
+  }
+  .banner__file-name {
+    color: var(--color-text-light-on-dark);
+    font-weight: var(--font-weight-medium);       /* filename is Medium 14 */
+    line-height: var(--line-height-base);         /* Figma 148% — leading sets the gap to "4 MB" */
+  }
+  .banner__file-size {
+    /* Figma "4 MB": Inter Tight Regular 12 — no 12px non-mono token in the set. */
+    font-family: var(--font-family-body);
+    font-weight: var(--font-weight-regular);
+    font-size: 12px;
+    line-height: var(--line-height-base);         /* Figma 148% */
+    color: var(--color-text-light-grey-on-dark); /* #BBBBBB */
+  }
+
+  /* Input bar */
+  .banner__input {
+    align-self: stretch;
+    margin-top: auto;                             /* pin to the card bottom */
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-inset-sm);                   /* 8px */
+    padding: var(--space-inset-sm) 6px var(--space-inset-sm) var(--space-inset-lg); /* 8/6/8/16 */
+    background-color: var(--color-bg-deep-black); /* #0F0F0F */
+    border-radius: var(--radius-xl);              /* 16px */
+  }
+  .banner__input-text {
+    color: var(--color-text-grey-muted-on-dark);  /* #848484 placeholder */
+    white-space: nowrap;
+    overflow: hidden;
+  }
+  .banner__input-text.is-typing { color: var(--color-text-light-on-dark); } /* typed text */
+
+  .banner__send {
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--color-accent-blue);   /* #93C9E2 */
+    border-radius: var(--radius-l);               /* 12px */
+    transition: transform 150ms ease, filter 150ms ease;
+  }
+  .banner__send img { display: block; }
+  .banner__send.is-pressed { transform: scale(0.92); filter: brightness(0.85); }
+
+  /* ====== Mobile (≤767px) — Figma "Mobile_Banner CTA" 1136-22154 ======
+     Columns stack: CTA on top, chat below. Card radius 24→20, con gap 20. */
+  @media (max-width: 767px) {
+    .banner__card {
+      border-radius: 20px; /* Figma mobile card radius (no 20px token on mobile) */
+    }
+    .banner__con {
+      flex-direction: column;
+      gap: 20px;           /* Figma mobile con gap (no 20px gap token on mobile) */
+    }
+
+    /* In a column the main axis is height: flex-basis:0 + overflow:hidden would
+       collapse the CTA to 0. Size it to content with Figma's 360 min-height. */
+    .banner__cta {
+      flex: 0 0 auto;
+      min-height: 360px;
+    }
+
+    /* Mobile heading wrap (Marianna): drop the desktop break and let it flow to
+       "Let's get one step" / "closer to a long-term" / "collaboration". */
+    .banner__heading-br { display: none; }
+    .banner__heading { max-width: 250px; }
+
+    /* Chat card spans full width; Figma mobile height 343. */
+    .banner__chat {
+      flex-basis: auto;
+      width: 100%;
+      border-radius: var(--radius-2xl);   /* 16 on mobile (radius-xl drops to 12) */
+    }
+    .banner__chat-body { min-height: 343px; }
+
+    /* Narrower bubbles so the copy wraps like the mobile mockup. */
+    .banner__msg--in,
+    .banner__file { max-width: 233px; }
+
+    /* ── Inner metrics stay CONSTANT on mobile (Figma keeps them equal to
+       desktop; only card-level padding/radius, cta gap and heading scale).
+       The global mobile token step-down would otherwise shrink these, so
+       restore them with the tokens that resolve to the desktop values on
+       mobile (inset-lg=12, inset-xl=16, radius-2xl=16). ── */
+    .banner__cta { border-radius: var(--radius-2xl); }          /* 16 (not 12) */
+
+    .banner__pill {
+      padding: var(--space-inset-sm) var(--space-inset-lg);     /* 8 / 12 */
+    }
+
+    .banner__tg-btn {
+      padding: var(--space-inset-sm) var(--space-inset-lg) var(--space-inset-sm) var(--space-inset-xl); /* 8/12/8/16 */
+    }
+
+    .banner__msg { padding: var(--space-inset-lg); }            /* 12 (not 8) */
+
+    .banner__file-info { gap: var(--space-inset-lg); }          /* 12 icon↔details */
+
+    .banner__input {
+      padding: var(--space-inset-sm) 6px var(--space-inset-sm) var(--space-inset-xl); /* 8/6/8/16 */
+      border-radius: var(--radius-2xl);                         /* 16 (not 12) */
+    }
+
+    /* Chat vertical rhythm stays constant: group→reply 16, incoming→file 12. */
+    .banner__chat-body { gap: var(--space-inset-xl); }          /* 16 (not 12) */
+    .banner__messages { gap: var(--space-inset-lg); }           /* 12 (not 8) */
+  }
+</style>
+
+<script>
+  // Chat reply loop (brief §8.2). Runs only while the banner is on screen;
+  // re-inits after Astro View Transitions via astro:page-load.
+  function initBanner() {
+    const section = document.querySelector<HTMLElement>('.banner');
+    if (!section || section.dataset.bannerInit === '1') return;
+    section.dataset.bannerInit = '1';
+
+    const input = section.querySelector<HTMLElement>('[data-input]');
+    const send = section.querySelector<HTMLElement>('[data-send]');
+    const reply = section.querySelector<HTMLElement>('[data-reply]');
+    if (!input || !send || !reply) return;
+
+    const PHRASE = "Great, I'm interested!";
+    const PLACEHOLDER = 'Type something';
+    let visible = false;
+    let running = false;
+
+    const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
+    const waitUntilVisible = async () => { while (!visible) await wait(200); };
+
+    async function loop() {
+      if (running) return;
+      running = true;
+      // eslint-disable-next-line no-constant-condition
+      while (true) {
+        await waitUntilVisible();
+        // rest state
+        reply.classList.remove('is-shown');
+        input.classList.remove('is-typing');
+        input.textContent = PLACEHOLDER;
+        await wait(1400);
+        await waitUntilVisible();
+        // type the phrase
+        input.classList.add('is-typing');
+        input.textContent = '';
+        for (const ch of PHRASE) {
+          input.textContent += ch;
+          await wait(55);
+        }
+        await wait(300);
+        // press send
+        send.classList.add('is-pressed');
+        await wait(150);
+        send.classList.remove('is-pressed');
+        // show reply, clear input
+        reply.classList.add('is-shown');
+        input.classList.remove('is-typing');
+        input.textContent = PLACEHOLDER;
+        await wait(2600);
+      }
+    }
+
+    const io = new IntersectionObserver(
+      (entries) => {
+        visible = entries[0].isIntersecting;
+        section.classList.toggle('is-visible', visible);
+      },
+      { threshold: 0.2 }
+    );
+    io.observe(section);
+    loop();
+  }
+
+  document.addEventListener('astro:page-load', initBanner);
+</script>

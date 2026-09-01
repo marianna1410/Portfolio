@@ -1,10 +1,11 @@
 ---
 import { Image } from 'astro:assets';
 import ArrowSwap from './ArrowSwap.astro';
-import logoSvg from '../assets/icons/logo.svg';
-import chevronDownWhite from '../assets/icons/chevron-down-white.svg';
-import diagonalArrow from '../assets/icons/diagonal-arrow-dark-grey.svg';
-import arrowLeftBullet from '../assets/icons/arrow-left-dark-grey.svg';
+import CopyEmail from './CopyEmail.astro';
+import logoDarkSvg from '../assets/icons/logo-dark.svg';
+import chevronDown from '../assets/icons/chevron-down.svg';
+import diagonalArrow from '../assets/icons/diagonal-arrow-light.svg';
+import arrowLeftBullet from '../assets/icons/arrow-left-light.svg';
 import { CONTACT } from '../lib/config.ts';
 
 interface Props {
@@ -23,7 +24,7 @@ const navPrefix = variant === 'home' ? '#' : '/#';
 
     {variant === 'home' ? (
       <a href="/" class="header__logo-link" aria-label="Marianna Delihioz — home">
-        <Image src={logoSvg} alt="" width={40} height={40} class="header__logo" />
+        <Image src={logoDarkSvg} alt="" width={40} height={40} class="header__logo" />
       </a>
     ) : (
       <a href="/" class="header__go-home text-label">
@@ -54,7 +55,7 @@ const navPrefix = variant === 'home' ? '#' : '/#';
         data-contact-trigger
       >
         <span>Contact</span>
-        <ArrowSwap icon={chevronDownWhite} direction="down" class="header__contact-chevron" />
+        <ArrowSwap icon={chevronDown} direction="down" class="header__contact-chevron" />
       </button>
 
       <ul
@@ -65,15 +66,7 @@ const navPrefix = variant === 'home' ? '#' : '/#';
         data-contact-menu
       >
         <li role="none">
-          <a
-            href={`mailto:${CONTACT.email}`}
-            role="menuitem"
-            class="header__contact-menu-link text-label"
-            aria-label={`Email Marianna at ${CONTACT.email} (opens mail client)`}
-          >
-            <span>Email</span>
-            <ArrowSwap icon={diagonalArrow} class="header__contact-menu-arrow" />
-          </a>
+          <CopyEmail label="Email" role="menuitem" />
         </li>
         <li role="none">
           <a
@@ -119,7 +112,7 @@ const navPrefix = variant === 'home' ? '#' : '/#';
         data-menu-trigger
       >
         <span>Menu</span>
-        <Image src={chevronDownWhite} alt="" width={20} height={20} class="header__menu-chevron" />
+        <Image src={chevronDown} alt="" width={20} height={20} class="header__menu-chevron" />
       </button>
     </div>
 
@@ -148,15 +141,7 @@ const navPrefix = variant === 'home' ? '#' : '/#';
 
     {/* Contacts group — horizontal row of 3 inline links with diagonal arrows */}
     <li role="none" class="header__menu-contacts">
-      <a
-        href={`mailto:${CONTACT.email}`}
-        role="menuitem"
-        class="header__menu-contact-link text-label"
-        aria-label={`Email Marianna at ${CONTACT.email} (opens mail client)`}
-      >
-        <span>Email</span>
-        <ArrowSwap icon={diagonalArrow} class="header__menu-contact-arrow" />
-      </a>
+      <CopyEmail label="Email" role="menuitem" />
       <a
         href={CONTACT.linkedin}
         role="menuitem"
@@ -207,33 +192,22 @@ const navPrefix = variant === 'home' ? '#' : '/#';
     }
   }
 
-  /* ====== The centered pill ====== */
+  /* ====== The centered pill ======
+     Redesign (brief §6.7): the header is STATIC — dark pill, no border, no
+     shadow, and NO change on scroll. The old Default↔Scrolling state is
+     dropped entirely. Figma node 1116:42413 → bg dark elevated, radius-2xl,
+     8px inset, 32px gap between logo / tabs / Contact. */
   .header__pill {
     pointer-events: auto;
     display: flex;
     align-items: center;
     gap: var(--space-inline-3xl);
     padding: var(--space-inset-sm);
-    background-color: var(--color-bg-light-grey);
+    background-color: var(--color-bg-dark-elevated);
     border-radius: var(--radius-2xl);
-    /* Default state: transparent border + no shadow. Border kept at 1px
-       transparent so the Scrolling state only animates color (no layout
-       shift). Per animations.md §2 — animate border + box-shadow, 200ms. */
-    border: 1px solid transparent;
-    box-shadow: none;
-    transition:
-      border-color var(--duration-base) var(--ease-out),
-      box-shadow var(--duration-base) var(--ease-out);
   }
 
-  /* Scrolling state (scrollY > 8px) — thin stroke + elevated shadow.
-     Toggled via data-scrolled on .header by the scroll listener below. */
-  .header[data-scrolled="true"] .header__pill {
-    border-color: var(--color-stroke-light);
-    box-shadow: var(--shadow-elevated);
-  }
-
-  /* Case variant: fixed pill width 492 (Figma 472:17103) with content
+  /* Case variant: fixed pill width 492 (Figma 1116:42422) with content
      justified to opposite edges. */
   @media (min-width: 768px) {
     .header[data-variant="case"] .header__pill {
@@ -279,17 +253,17 @@ const navPrefix = variant === 'home' ? '#' : '/#';
     height: 40px;
     padding: var(--space-inset-sm) var(--space-inset-md);
     border-radius: var(--radius-l);
-    color: var(--color-text-dark-grey);
-    background-color: var(--color-bg-light-grey);
+    color: var(--color-text-light-grey-on-dark);
+    background-color: var(--color-bg-dark-elevated);
     white-space: nowrap;
     transition: color var(--duration-fast) var(--ease-out); /* 150ms */
   }
 
-  /* Hover: the hovered tab's text shifts to muted grey; the others stay
-     put. Pointer-only — no hover on touch. */
+  /* Hover: the hovered tab's text brightens (light grey → light on dark);
+     the others stay put. Pointer-only — no hover on touch. */
   @media (hover: hover) and (pointer: fine) {
     .header__nav-link:hover {
-      color: var(--color-text-grey-muted);
+      color: var(--color-text-light-on-dark);
     }
   }
 
@@ -301,7 +275,7 @@ const navPrefix = variant === 'home' ? '#' : '/#';
   }
 
   /* ====== Go Home (Case variant) ======
-     Figma 472:17103 → "Link/Footer": h=32, rounded 12, gap 8.
+     Figma 1116:42422 → "Link/Footer": h=32, rounded 12, gap 8, light on dark.
      Asymmetric padding (pl=4 pr=2 py=4) per Figma spec. */
   .header__go-home {
     display: flex;
@@ -310,7 +284,7 @@ const navPrefix = variant === 'home' ? '#' : '/#';
     height: 32px;
     padding: var(--space-inset-xs) 2px var(--space-inset-xs) var(--space-inset-xs);
     border-radius: var(--radius-l);
-    color: var(--color-text-dark-grey);
+    color: var(--color-text-light-grey-on-dark);
   }
 
   .header__go-home-icon {
@@ -318,7 +292,10 @@ const navPrefix = variant === 'home' ? '#' : '/#';
     flex-shrink: 0;
   }
 
-  /* ====== Desktop Contact button ====== */
+  /* ====== Desktop Contact button ======
+     Inverted (white) button on the dark pill — Figma "Button/Medium/Primary"
+     node 1116:42421: white bg, 1px medium-grey stroke, dark-grey label +
+     chevron, h40, rounded 12. */
   .header__contact-wrapper {
     position: relative; /* anchor for the dropdown */
   }
@@ -336,11 +313,26 @@ const navPrefix = variant === 'home' ? '#' : '/#';
     gap: var(--space-inset-sm);
     height: 40px;
     padding: var(--space-inset-sm) var(--space-inset-md) var(--space-inset-sm) var(--space-inset-lg);
-    background-color: var(--color-bg-black);
-    color: var(--color-text-white);
+    background-color: var(--color-bg-white);
+    color: var(--color-text-dark-grey);
+    border: 1px solid var(--color-stroke-medium-grey);
     border-radius: var(--radius-l);
     cursor: pointer;
     white-space: nowrap;
+    /* Colour-only transition on hover (Figma Button/Medium/Primary Mode=Dark:
+       bg white→light-grey, text dark-grey→black). Arrow swap unchanged. */
+    transition:
+      background-color var(--duration-fast) var(--ease-out),
+      color var(--duration-fast) var(--ease-out);
+  }
+
+  /* Hover state — Figma node 1116:43449 (State=Hover, Mode=Dark):
+     bg #F2F2F2, text #252525, border unchanged. Pointer-only. */
+  @media (hover: hover) and (pointer: fine) {
+    .header__contact-button:hover {
+      background-color: var(--color-bg-light-grey);
+      color: var(--color-text-black);
+    }
   }
 
   /* The chevron is an ArrowSwap (hover = swap-down). The 180° open-rotate
@@ -371,7 +363,9 @@ const navPrefix = variant === 'home' ? '#' : '/#';
     transform: var(--swap-in-start, translate(0, -100%));
   }
 
-  /* ====== Desktop Contact dropdown ====== */
+  /* ====== Desktop Contact dropdown ======
+     Dark dropdown (Figma 1116:44055 dark mode): bg dark elevated, 1px
+     dark-grey stroke, light-on-dark items. */
   .header__contact-menu {
     position: absolute;
     top: calc(100% + var(--space-stack-sm) + var(--space-stack-sm));
@@ -379,10 +373,9 @@ const navPrefix = variant === 'home' ? '#' : '/#';
     z-index: var(--z-dropdown);
     width: 125px;
     padding: var(--space-inset-md);
-    background-color: var(--color-bg-white);
-    border: 1px solid var(--color-stroke-light);
+    background-color: var(--color-bg-dark-elevated);
+    border: 1px solid var(--color-stroke-dark-grey);
     border-radius: var(--radius-l);
-    box-shadow: var(--shadow-elevated);
     /* Closed/closing base state (animations.md §3.2): faded + slid up 8px.
        translateX(-50%) keeps it centred on the trigger. visibility:hidden
        removes it from the a11y tree + tab order when closed; the delayed
@@ -420,7 +413,7 @@ const navPrefix = variant === 'home' ? '#' : '/#';
     height: 32px;
     padding: var(--space-inset-xs) 2px var(--space-inset-xs) var(--space-inset-xs);
     border-radius: var(--radius-l);
-    color: var(--color-text-dark-grey);
+    color: var(--color-text-light-grey-on-dark);
   }
 
   .header__contact-menu-arrow {
@@ -430,7 +423,8 @@ const navPrefix = variant === 'home' ? '#' : '/#';
     flex-shrink: 0;
   }
 
-  /* ====== Mobile Menu button (hidden on desktop) ====== */
+  /* ====== Mobile Menu button (hidden on desktop) ======
+     Inverted (white) — same treatment as Contact (Figma mobile 647:23550). */
   .header__menu-wrapper {
     position: relative;
     display: none; /* hidden on desktop */
@@ -448,11 +442,23 @@ const navPrefix = variant === 'home' ? '#' : '/#';
     gap: var(--space-inset-sm);
     height: 40px;
     padding: var(--space-inset-sm) var(--space-inset-md) var(--space-inset-sm) var(--space-inset-lg);
-    background-color: var(--color-bg-black);
-    color: var(--color-text-white);
+    background-color: var(--color-bg-white);
+    color: var(--color-text-dark-grey);
+    border: 1px solid var(--color-stroke-medium-grey);
     border-radius: var(--radius-l);
     cursor: pointer;
     white-space: nowrap;
+    transition:
+      background-color var(--duration-fast) var(--ease-out),
+      color var(--duration-fast) var(--ease-out);
+  }
+
+  /* Menu button hover — same as Contact (Figma Mode=Dark hover). */
+  @media (hover: hover) and (pointer: fine) {
+    .header__menu-button:hover {
+      background-color: var(--color-bg-light-grey);
+      color: var(--color-text-black);
+    }
   }
 
   .header__menu-chevron {
@@ -472,11 +478,9 @@ const navPrefix = variant === 'home' ? '#' : '/#';
 
   /* ====== Mobile Menu dropdown ======
      Sibling of pill inside .header (sticky positioning context).
-     Position absolute relative to .header padding-box so left/right
-     anchors match the header's padding-inline — guaranteed to align
-     with the pill (no scrollbar 100vw discrepancy). Needs pointer-events:auto
-     because .header has pointer-events:none.
-     Per Figma node 647:22434 — 16px padding, 12px radius, elevated shadow. */
+     Dark surface (Figma mobile 647:23550): bg dark elevated, 1px dark-grey
+     stroke, 12px radius. Position absolute relative to .header padding-box so
+     left/right anchors match the header's padding-inline. */
   .header__menu-dropdown {
     position: absolute;
     top: calc(100% + var(--space-stack-sm) + var(--space-stack-sm)); /* 16px below pill */
@@ -487,10 +491,9 @@ const navPrefix = variant === 'home' ? '#' : '/#';
     z-index: var(--z-dropdown);
     pointer-events: auto;
     padding: var(--space-inset-lg); /* 16px per Figma */
-    background-color: var(--color-bg-white);
-    border: 1px solid var(--color-stroke-light);
+    background-color: var(--color-bg-dark-elevated);
+    border: 1px solid var(--color-stroke-dark-grey);
     border-radius: var(--radius-xl); /* 12px mobile */
-    box-shadow: var(--shadow-elevated);
     display: grid;
     grid-template-columns: 1fr;
     row-gap: var(--space-stack-sm); /* 8px between tabs */
@@ -524,11 +527,13 @@ const navPrefix = variant === 'home' ? '#' : '/#';
   }
 
   /* ====== Nav tab — inline SVG dotted border, full-width, centered text ======
-     Per Figma node 647:22441 (asset Mobile_Tab_border.svg): rounded-rect 12px,
-     stroke dasharray="0.1 4" round-cap. SVG inlined as data URI with
-     preserveAspectRatio="none" + vector-effect="non-scaling-stroke" so it
-     stretches to any tab width while keeping the dot pattern uniform.
-     Inline (vs external import) avoids any path-resolution / cache issues. */
+     Same technique as before (CLAUDE.md decision #16): rounded-rect 12px,
+     stroke dasharray="0.1 4" round-cap, preserveAspectRatio="none" +
+     vector-effect="non-scaling-stroke" so it stretches to any width with a
+     uniform dot pattern. Redesign: stroke recoloured to grey-on-dark (#737373)
+     for the dark surface. stroke-width bumped to 1.5 (Figma's nominal 1px):
+     the data-URI is rasterised as a background, which softens a 1px round dot
+     to a faint blur — 1.5 renders the dots as crisp/visible as the Figma tab. */
   .header__menu-tab {
     display: flex;
     align-items: center;
@@ -537,11 +542,11 @@ const navPrefix = variant === 'home' ? '#' : '/#';
     padding-inline: var(--space-inset-md);
     border: none;
     border-radius: var(--radius-xl); /* 12px mobile */
-    background-color: var(--color-bg-white);
-    background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 312 41' preserveAspectRatio='none' fill='none'%3E%3Cpath d='M0.5 12.5C0.5 5.87258 5.87258 0.5 12.5 0.5H299.5C306.127 0.5 311.5 5.87258 311.5 12.5V28.5C311.5 35.1274 306.127 40.5 299.5 40.5H12.5C5.87258 40.5 0.5 35.1274 0.5 28.5V12.5Z' stroke='%23252525' stroke-linecap='round' stroke-dasharray='0.1 4' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E");
+    background-color: var(--color-bg-dark-elevated);
+    background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 312 41' preserveAspectRatio='none' fill='none'%3E%3Cpath d='M0.5 12.5C0.5 5.87258 5.87258 0.5 12.5 0.5H299.5C306.127 0.5 311.5 5.87258 311.5 12.5V28.5C311.5 35.1274 306.127 40.5 299.5 40.5H12.5C5.87258 40.5 0.5 35.1274 0.5 28.5V12.5Z' stroke='%23737373' stroke-width='1.5' stroke-linecap='round' stroke-dasharray='0.1 4' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E");
     background-size: 100% 100%;
     background-repeat: no-repeat;
-    color: var(--color-text-dark-grey);
+    color: var(--color-text-light-grey-on-dark);
     /* Override .text-label mobile size (14/15px) to match Figma tab spec (16px) */
     font-size: var(--font-size-body-large);
     white-space: nowrap;
@@ -552,9 +557,11 @@ const navPrefix = variant === 'home' ? '#' : '/#';
     /* Override role="separator" defaults */
     list-style: none;
     text-transform: uppercase;
-    color: var(--color-text-grey-muted);
-    /* Extra top margin to create breathing room after the last tab (Figma: 20px) */
-    margin-top: var(--space-stack-md); /* 8px mobile */
+    color: var(--color-text-grey-muted-on-dark);
+    /* 20px from the last tab to CONTACT (Figma 647-22439: container gap 20).
+       The grid row-gap already contributes 8px, so add 12px here. Explicit px:
+       the stack tokens step down on mobile while this gap is a constant 20. */
+    margin-top: 12px;
   }
 
   /* ====== Contacts row — horizontal flex inside its <li> wrapper ====== */
@@ -563,7 +570,9 @@ const navPrefix = variant === 'home' ? '#' : '/#';
     align-items: center;
     gap: var(--space-inline-sm); /* 8px between contact links */
     list-style: none;
-    margin-top: var(--space-stack-xs); /* 4px below CONTACT label */
+    /* 4px from CONTACT to the links row (Figma 647-22439: Contacts inner gap 4).
+       The grid row-gap adds 8px, so pull back 4px to land on the 4px target. */
+    margin-top: -4px;
   }
 
   .header__menu-contact-link {
@@ -573,7 +582,7 @@ const navPrefix = variant === 'home' ? '#' : '/#';
     height: 32px;
     padding: var(--space-inset-xs) 2px var(--space-inset-xs) var(--space-inset-xs);
     border-radius: var(--radius-l);
-    color: var(--color-text-dark-grey);
+    color: var(--color-text-light-grey-on-dark);
     white-space: nowrap;
   }
 
@@ -584,13 +593,42 @@ const navPrefix = variant === 'home' ? '#' : '/#';
     flex-shrink: 0;
   }
 
+  /* ====== Link hover (dropdown + mobile menu tabs/contacts) ======
+     Figma "Links" component Mode=Dark hover (node 1116:43801): text
+     light-grey-on-dark (#BBBBBB) → light-on-dark (#E9E9E9). Colour only —
+     the arrow swap animation is unchanged. Pointer-only. */
+  .header__contact-menu-link,
+  .header__menu-contact-link,
+  .header__menu-tab,
+  .header__go-home {
+    transition: color var(--duration-fast) var(--ease-out);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .header__contact-menu-link:hover,
+    .header__menu-contact-link:hover,
+    .header__menu-tab:hover,
+    .header__go-home:hover {
+      color: var(--color-text-light-on-dark);
+    }
+  }
+
   /* ====== Accessibility — focus + touch targets ======
-     Header used to override focus with the chunky `--shadow-focus` token
-     (4px black halo + 2px white inner). Marianna found it too heavy on
-     the nav tabs and inconsistent with the rest of the site, so we just
-     let the global `:focus-visible` from global.css apply: a flat 2px
-     solid var(--color-bg-black) outline at 2px offset. a11y.md §3.1
-     prescribes exactly that. No overrides needed here. */
+     Global :focus-visible (2px solid --color-bg-black at 2px offset) applies.
+     Everything here sits on the dark pill, so a black outline is low-contrast
+     (dark-on-dark). Use a light outline instead (a11y.md §3.1 contrast) — for
+     both the on-dark links AND the white Contact/Menu buttons: their 2px-offset
+     outline lands on the dark pill, so it needs to be light to be visible. */
+  .header__nav-link:focus-visible,
+  .header__go-home:focus-visible,
+  .header__contact-menu-link:focus-visible,
+  .header__menu-tab:focus-visible,
+  .header__menu-contact-link:focus-visible,
+  .header__contact-button:focus-visible,
+  .header__menu-button:focus-visible {
+    outline: 2px solid var(--color-text-light-on-dark);
+    outline-offset: 2px;
+  }
 
   /* Minimum 44×44 tap target on touch devices */
   @media (pointer: coarse) {
@@ -614,13 +652,17 @@ const navPrefix = variant === 'home' ? '#' : '/#';
    *
    * Features (a11y per accessibility.md):
    *   - aria-expanded toggled on trigger
-   *   - hidden attribute toggled on menu
    *   - First menu item focused on open
    *   - Trigger refocused on close
    *   - Esc closes + returns focus to trigger
    *   - Outside click closes (no focus return)
    *   - Arrow Up/Down navigates between menu items (wraps)
    *   - Home/End jumps to first/last item
+   *
+   * Note: the Email item is now a copy-to-clipboard <button> (CopyEmail.astro),
+   * so menu-item queries match any [role="menuitem"] (link OR button). Clicking
+   * a real link closes the menu; clicking the copy button does NOT (so the
+   * "Copied" feedback stays visible) — the close handler targets a[role].
    *
    * Smooth scroll for any [data-scroll-target] link:
    *   - If link's target section exists on current page → smooth scroll + close menu
@@ -637,26 +679,16 @@ const navPrefix = variant === 'home' ? '#' : '/#';
     const menu = document.querySelector<HTMLUListElement>(menuSelector);
     if (!trigger || !menu) return;
 
-    // Guard against double-binding. initHeader runs from BOTH paths below on
-    // initial page load — the readyState fallback AND astro:page-load (which
-    // ClientRouter fires even for the very first paint). Without this guard,
-    // the trigger ends up with TWO click listeners: the first toggles open,
-    // the second immediately reads the new "open" state and toggles closed,
-    // so every click is a no-op and the dropdown never appears.
+    // Guard against double-binding (initHeader runs from both the readyState
+    // fallback AND astro:page-load).
     if ((trigger as any).__dropdownBound) return;
     (trigger as any).__dropdownBound = true;
 
     const menuItems = () =>
-      Array.from(menu.querySelectorAll<HTMLAnchorElement>('a[role="menuitem"]'));
+      Array.from(menu.querySelectorAll<HTMLElement>('[role="menuitem"]'));
 
     const isOpen = () => trigger.getAttribute('aria-expanded') === 'true';
 
-    // Visibility-based gating (no `hidden`/display:none): the menu is always in
-    // layout (position:absolute, zero reflow cost) and hidden via the CSS base
-    // state (opacity 0 + visibility hidden). This way the open/close transition
-    // always runs — display:none→block would skip the first animation frame.
-    // visibility:hidden still removes the closed menu from the a11y tree and
-    // tab order, and aria-expanded reflects state.
     const open = () => {
       trigger.setAttribute('aria-expanded', 'true');
       menu.classList.add('is-open');
@@ -688,7 +720,7 @@ const navPrefix = variant === 'home' ? '#' : '/#';
     document.addEventListener('keydown', (e) => {
       if (!isOpen()) return;
       const items = menuItems();
-      const currentIdx = items.indexOf(document.activeElement as HTMLAnchorElement);
+      const currentIdx = items.indexOf(document.activeElement as HTMLElement);
 
       switch (e.key) {
         case 'Escape':
@@ -714,7 +746,8 @@ const navPrefix = variant === 'home' ? '#' : '/#';
       }
     });
 
-    // Clicking any menu item closes the menu (link still navigates afterwards)
+    // Clicking a real link menu item closes the menu (link still navigates).
+    // The copy-email <button> is intentionally excluded so "Copied" stays up.
     menu.addEventListener('click', (e) => {
       const target = e.target as HTMLElement;
       if (target.closest('a[role="menuitem"]')) close(false);
@@ -725,7 +758,6 @@ const navPrefix = variant === 'home' ? '#' : '/#';
    * Smooth scroll for [data-scroll-target] links on the SAME page.
    * On case pages, these links point to /#section so the browser navigates
    * to home naturally; smooth scroll only kicks in once on the home page.
-   * Respects prefers-reduced-motion via 'scroll-behavior' CSS being inherited.
    */
   const initSmoothScroll = () => {
     const links = document.querySelectorAll<HTMLAnchorElement>('[data-scroll-target]');
@@ -749,47 +781,10 @@ const navPrefix = variant === 'home' ? '#' : '/#';
     });
   };
 
-  /*
-   * Header Default ↔ Scrolling state (animations.md §2).
-   * scrollY > 8px → data-scrolled="true" (border + shadow fade in, 200ms).
-   * back to 0–7px → default. rAF-throttled so the scroll handler stays cheap.
-   * The CSS transition is killed automatically under prefers-reduced-motion
-   * by the global baseline, so the state swap becomes instant there.
-   */
-  const initScrollState = () => {
-    const THRESHOLD = 8;
-
-    // Query .header fresh each call so it works after Astro swaps <body>
-    // (the header element is recreated, but window persists).
-    const apply = () => {
-      const header = document.querySelector<HTMLElement>('.header');
-      if (!header) return;
-      header.dataset.scrolled = window.scrollY > THRESHOLD ? 'true' : 'false';
-    };
-
-    // Sync current page's header on every page-load.
-    apply();
-
-    // window survives view transitions — bind the scroll listener only once.
-    if ((window as any).__headerScrollBound) return;
-    (window as any).__headerScrollBound = true;
-
-    let ticking = false;
-    window.addEventListener('scroll', () => {
-      if (ticking) return;
-      ticking = true;
-      requestAnimationFrame(() => {
-        ticking = false;
-        apply();
-      });
-    }, { passive: true });
-  };
-
   const initHeader = () => {
     initDropdown({ triggerSelector: '[data-contact-trigger]', menuSelector: '[data-contact-menu]' });
     initDropdown({ triggerSelector: '[data-menu-trigger]',    menuSelector: '[data-menu-menu]'    });
     initSmoothScroll();
-    initScrollState();
   };
 
   // Astro View Transitions fires astro:page-load on every page swap; bind there.

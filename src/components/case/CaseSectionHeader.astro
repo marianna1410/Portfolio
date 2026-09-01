@@ -1,9 +1,9 @@
 ---
 /**
  * CaseSectionHeader.astro — section heading pattern used across every
- * major case-study section ({RESEARCH}, {PROBLEM N}, {SOLUTION N}, {SUMMARY}).
+ * major case-study section (RESEARCH, PROBLEM N, SOLUTION N, SUMMARY).
  *
- *   {CAPTION}                ← caption mono, #737373
+ *   [Tag pill]               ← Tag/on page (light / red / green by tone)
  *   ↕ 16px stack
  *   Headline                 ← h3 32px Inter Tight Medium #252525 (default)
  *
@@ -11,8 +11,10 @@
  * the visual style. `size` swaps the typography for sub-sections that use a
  * smaller headline (Problems & Solutions use 24px/h4 instead of 32px/h3).
  */
+import Tag from '../Tag.astro';
+
 interface Props {
-  caption: string;          // e.g. "{RESEARCH}", "{PROBLEM 1}"
+  caption: string;          // e.g. "{RESEARCH}", "{PROBLEM 1}" (braces stripped)
   headline: string;
   as?: 'h2' | 'h3';
   /**
@@ -21,45 +23,35 @@ interface Props {
    */
   size?: 'h3' | 'h4';
   /**
-   * Caption text color. Default 'muted' (#737373) is used by Research / Overview
-   * / Summary. 'error' (#D9321C) is used by {PROBLEM N} headers.
-   * 'success' (#248434) is used by {SOLUTION N} headers.
+   * Tag colour tone (redesign — Tag/on page 1120-47903):
+   * 'muted' → light grey tag (Research / Overview / Summary)
+   * 'error' → red tag ({PROBLEM N})
+   * 'success' → green tag ({SOLUTION N})
    */
   captionTone?: 'muted' | 'error' | 'success';
   id?: string;
 }
 
-const { caption, headline, as: Tag = 'h2', size = 'h3', captionTone = 'muted', id } = Astro.props;
+const { caption, headline, as: HeadingTag = 'h2', size = 'h3', captionTone = 'muted', id } = Astro.props;
 const headlineClass = size === 'h4' ? 'text-h4-medium' : 'text-h3';
+
+const tagVariant = captionTone === 'error' ? 'red' : captionTone === 'success' ? 'green' : 'light';
+// The tag renders without the old {braces}.
+const tagLabel = caption.replace(/[{}]/g, '').trim();
 ---
 
 <header class="case-section-header" id={id}>
-  <p class:list={['case-section-header__caption', 'text-caption-mono', `case-section-header__caption--${captionTone}`]}>{caption}</p>
-  <Tag class:list={['case-section-header__headline', headlineClass]}>{headline}</Tag>
+  <Tag label={tagLabel} variant={tagVariant} />
+  <HeadingTag class:list={['case-section-header__headline', headlineClass]}>{headline}</HeadingTag>
 </header>
 
 <style>
   .case-section-header {
     display: flex;
     flex-direction: column;
+    align-items: flex-start; /* tag hugs its content, left-aligned */
     gap: var(--space-stack-lg); /* 16px */
     width: 100%;
-  }
-
-  .case-section-header__caption {
-    margin: 0;
-  }
-
-  .case-section-header__caption--muted {
-    color: var(--color-text-grey-muted);
-  }
-
-  .case-section-header__caption--error {
-    color: var(--color-system-error); /* #D9321C — used by {PROBLEM N} headers */
-  }
-
-  .case-section-header__caption--success {
-    color: var(--color-system-success); /* #248434 — used by {SOLUTION N} headers */
   }
 
   .case-section-header__headline {

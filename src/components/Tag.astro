@@ -1,0 +1,120 @@
+---
+/**
+ * Tag.astro — "Tag/on page" pill (Figma component set 1120-47903).
+ *
+ * Small caption-mono pill used for the case-study section labels
+ * (PROJECT OVERVIEW / RESEARCH / SUMMARY → light, PROBLEM N → red,
+ * SOLUTION N → green). Radius 8 (radius-m), padding 4/12, no status dot
+ * (the dot in the component is hidden on these section instances).
+ *
+ * Variant colours (exact from the component set):
+ *   light → bg #F2F2F2, text #737373
+ *   green → bg #E6F5F0, text #238067 (system success)
+ *   red   → bg #FFEFED, text #D0311C (system error)
+ *   dark  → bg #252525, text #BBBBBB (Hero "OPEN TO WORK", node 1117-44891)
+ *
+ * `dot` renders the green status dot with a soft glow before the label
+ * (Figma "Light spot", itemSpacing 6) — used on the Hero dark tag.
+ */
+interface Props {
+  label: string;
+  variant?: 'light' | 'green' | 'red' | 'dark';
+  /** Show the green status dot before the label (Hero OPEN TO WORK). */
+  dot?: boolean;
+  /** Optional id (e.g. for aria-labelledby on the section). */
+  id?: string;
+}
+
+const { label, variant = 'light', dot = false, id } = Astro.props;
+---
+
+<span class:list={['tag', `tag--${variant}`, { 'tag--has-dot': dot }, 'text-caption-mono']} id={id}>
+  {dot && <span class="tag__dot" aria-hidden="true"></span>}
+  {label}
+</span>
+
+<style>
+  .tag {
+    display: inline-flex;
+    align-items: center;
+    width: max-content;
+    padding: var(--space-inset-xs) var(--space-inset-md); /* 4 / 12 */
+    border-radius: var(--radius-m); /* 8px */
+    text-transform: uppercase;
+  }
+
+  /* Gap between status dot and label — Figma itemSpacing 6 (no scale token). */
+  .tag--has-dot {
+    gap: 6px;
+  }
+
+  .tag--light {
+    background-color: var(--color-bg-light-grey);
+    color: var(--color-text-grey-muted);
+  }
+
+  .tag--green {
+    background-color: var(--color-accent-light-green);
+    color: var(--color-system-success);
+  }
+
+  .tag--red {
+    background-color: var(--color-accent-light-red);
+    color: var(--color-system-error);
+  }
+
+  /* Dark variant — Hero "OPEN TO WORK" (Figma node 1117-44891). */
+  .tag--dark {
+    background-color: var(--color-bg-black);        /* #252525 */
+    color: var(--color-text-light-grey-on-dark);    /* #BBBBBB */
+  }
+
+  /* White status dot with a soft blur (Figma "Light spot" 1116-… ):
+     a 6px near-white core (blur 1) over a 10px blurred halo (blur 5.4).
+     Built with two pseudo-elements so each keeps its own layer blur. */
+  .tag__dot {
+    position: relative;
+    width: 12px;   /* Figma "Light spot" frame 12px */
+    height: 12px;
+    flex-shrink: 0;
+    /* Give the dot its own stable compositing layer so the blurred pseudo-
+       elements don't re-rasterize (flicker) during page repaints/animations. */
+    transform: translateZ(0);
+    isolation: isolate;
+  }
+  .tag__dot::before { /* halo — fuller/brighter than the connector dots */
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: var(--radius-pill);
+    background-color: var(--color-bg-grey-muted); /* #E5E5E5 */
+    filter: blur(5.4px);
+    transform: translateZ(0);
+  }
+  .tag__dot::after { /* core */
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 7px;
+    height: 7px;
+    transform: translate(-50%, -50%);
+    border-radius: var(--radius-pill);
+    background-color: var(--color-text-light-on-dark); /* #E9E9E9 */
+    filter: blur(0.8px);
+  }
+
+  /* Light-variant glow — a PURE-WHITE soft dot on the #F2F2F2 pill
+     (Figma "Light spot", Experience tag node 1120-47915): halo 10px blur 5.4,
+     core 6px blur 1. The dark variant's grey dot would read as a dark smudge on
+     the light pill, so the light tag overrides both layers to white. */
+  .tag--light .tag__dot::before {
+    background-color: var(--color-bg-white); /* #FFFFFF */
+  }
+  .tag--light .tag__dot::after {
+    width: 6px;
+    height: 6px;
+    background-color: var(--color-bg-white); /* #FFFFFF */
+    filter: blur(1px);
+  }
+</style>

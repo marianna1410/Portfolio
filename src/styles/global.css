@@ -3,6 +3,7 @@
 /* Fonts (Fontsource — self-hosted, in bundle) */
 @import '@fontsource/inter-tight/400.css';
 @import '@fontsource/inter-tight/500.css';
+@import '@fontsource/inter-tight/500-italic.css'; /* Hero "UX in mind" accent (redesign brief §6.1) */
 @import '@fontsource/inter-tight/600.css';
 @import '@fontsource/fira-code/400.css';
 
@@ -34,7 +35,19 @@ body {
   font-weight: var(--font-weight-regular);
   font-size: var(--font-size-body-medium);
   color: var(--color-text-primary);
-  background-color: var(--color-bg-primary);
+  /* Page background = light grey (Works colour). The dark hero's full-bleed top
+     (pulled under the header) covers this; its rounded BOTTOM corners reveal it,
+     giving the "dark screen on a light page" look. */
+  background-color: var(--color-bg-light-grey);
+}
+
+/* Case study pages sit on a WHITE canvas (Figma "Case study/Lucida_NEW"
+   1126-51651 root fill #FFFFFF) — only the header/footer are dark. The global
+   light-grey body above is the HOME page's colour (revealed by the Hero's
+   rounded bottom); case pages override it to white. BaseLayout tags the body
+   with .is-case-page whenever headerVariant='case'. */
+body.is-case-page {
+  background-color: var(--color-bg-white);
 }
 
 /* Screen-reader only utility (a11y.md 1.5) */
@@ -94,6 +107,25 @@ body {
   .container {
     padding-inline: var(--container-padding-desktop);
   }
+}
+
+/* Dot pattern utility (redesign brief §9.1) — dark-surface ready.
+   Drawn in CSS (radial-gradient + background-size), no PNG. Values sourced
+   from Figma node 1117-44596 via the --dot-pattern-* tokens (tokens.css §10).
+   Apply on an element sitting over a dark background; override
+   --dot-pattern-color / --dot-pattern-bg per surface as needed.
+   Not yet applied to any page (scaffold for Hero + Footer). */
+.dot-pattern {
+  background-color: var(--dot-pattern-bg);
+  /* Feathered stop (solid to r−0.5, transparent at r) so the tiny 4px dot
+     anti-aliases into a round shape instead of a blocky square. */
+  background-image: radial-gradient(
+    circle at center,
+    var(--dot-pattern-color) 0,
+    var(--dot-pattern-color) calc(var(--dot-pattern-dot-radius) - 0.5px),
+    transparent var(--dot-pattern-dot-radius)
+  );
+  background-size: var(--dot-pattern-step) var(--dot-pattern-step);
 }
 
 /* Reduced motion baseline (a11y.md 6.12) */

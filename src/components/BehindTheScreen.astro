@@ -1,31 +1,25 @@
 ---
 import { Image } from 'astro:assets';
-// Raw import so we can inline the border SVG (vector-effect="non-scaling-stroke"
-// renders inconsistently through <img>; inline SVG works reliably everywhere).
-import endBorderSvg       from '../assets/icons/behind-end-border.svg?raw';
-import endBorderMobileSvg from '../assets/icons/behind-end-border-mobile.svg?raw';
-import heartIcon    from '../assets/icons/heart.png';
-import checkboxIcon from '../assets/icons/checkbox-check.svg';
-import buildingImg  from '../assets/behind-the-screen/building.png';
-import fontanImg    from '../assets/behind-the-screen/fontan.png';
-import riverImg     from '../assets/behind-the-screen/river.png';
+import buildingImg from '../assets/behind-the-screen/building.png';
+import riverImg    from '../assets/behind-the-screen/river.png';
+import fontanImg   from '../assets/behind-the-screen/fontan.png';
+import playerImg   from '../assets/behind-the-screen/player-image.png';
+import playerBg    from '../assets/behind-the-screen/music-player-bg.png';
+import folderIcon  from '../assets/behind-the-screen/folder.svg';
 
 /**
- * Behind the Screen section — Figma node 472:16885.
- * Four-card grid:
- *  - About me (col 1, both rows)   — torn-paper-cut card with mono bio text
- *  - Traveling 2025 (cols 2-3, r1) — white card with 3 rotated photos
- *  - Latest books (col 2, r2)      — white card with checklist (line-through)
- *  - That's it (col 3, r2)         — dashed-border closing card
+ * Behind the Screen — Figma node 1125-49034 (dark redesign rebuild).
  *
- * Card grid 3×2, each cell ~424×280, gap 20px, total 1312×580.
+ * Light-grey section, heading + a 3-column row (Cards frame 1312×580, gap 20):
+ *   1. Bio          — white card, dot-pattern bg, Fira Code bio text.
+ *   2. Travelling   — photo fan-out card + music player (built next).
+ *   3. Files        — levitating decorative folders (built next).
  *
- * About-me card uses behind-paper.svg as a backdrop (scalloped top edge).
- * Mobile: cards stack vertically; "That's it" shrinks with heart + text
- * sitting on the same horizontal line.
+ * Books and "That's it" cards from the old design are dropped (brief §6.5).
+ *
+ * Bio text is unchanged except the last line ("→ on the road" → "→ exploring
+ * new places"). Paragraphs are 12px apart (Figma paragraphSpacing).
  */
-
-const books = ['Predictably Irrational', 'Made to Stick', 'The Art of Systems Thinking'];
 
 const bioParagraphs = [
   "Hello! I'm Marianna. Besides being a designer, I consider myself an explorer because curiosity is one of the traits that have paved the way to who I am today.",
@@ -35,7 +29,14 @@ const bioParagraphs = [
   '→ taking new courses',
   '→ listening to music',
   '→ scrolling on Pinterest',
-  '→ on the road',
+  '→ exploring new places',
+];
+
+/* Decorative floating folders (Figma positions as % of the 424×580 Files card). */
+const folders = [
+  { label: 'Final_111', x: '17.2%', y: '15.3%' },
+  { label: 'Final_222', x: '65.6%', y: '37.1%' },
+  { label: 'Final_123', x: '23.1%', y: '67.9%' },
 ];
 ---
 
@@ -44,127 +45,109 @@ const bioParagraphs = [
     <h2 id="behind-heading" class="behind__heading text-h2">Behind the Screen</h2>
 
     <div class="behind__grid">
-      <!-- About me — paper card spanning both rows. The scalloped top
-           edge is a CSS mask on the inner .behind__paper element. The
-           outer <article> holds the filter:drop-shadow only (no mask) —
-           splitting mask and filter onto separate elements is required
-           because Chrome/Opera clip drop-shadow to the mask's bounding
-           box when both are on the same element. -->
-      <article class="behind__card behind__card--about">
-        <div class="behind__paper">
-          <div class="behind__about-text text-body-mono-lg">
-            {bioParagraphs.map((p) => <p>{p}</p>)}
-          </div>
+
+      <!-- ── Card 1: Bio ─────────────────────────────────── -->
+      <article class="behind__card behind__bio dot-pattern">
+        <div class="behind__bio-text text-body-mono-lg">
+          {bioParagraphs.map((p) => <p>{p}</p>)}
         </div>
       </article>
 
-      <!-- Traveling 2025 -->
-      <article class="behind__card behind__card--travel">
-        <div class="behind__travel-head">
-          <div class="behind__travel-info">
-            <p class="text-caption-regular behind__travel-label">Traveling</p>
-            <p class="text-h2 behind__travel-year">2025</p>
-          </div>
-          <span class="behind__travel-tag text-caption-mono">44° 25′ 55″ N</span>
-        </div>
-        {/* Deck of travel photos. Three fixed fan "slots" (front / back-left /
-            back-right) carry the geometry; each photo is assigned to a slot.
-            After the fan-out reveal settles, JS lets the user swipe (touch) or
-            drag (mouse) to rotate the three photos through the slots — like
-            shuffling a fan of cards. slot-* classes are set statically here so
-            the fan renders correctly with no JS; JS only reassigns them. */}
-        <div class="behind__travel-photos" data-fan-photos aria-hidden="true">
-          <div class="behind__photo behind__photo--river slot-bl">
-            <Image src={riverImg} alt="" width={296} height={368} quality={95} draggable={false} />
-          </div>
-          <div class="behind__photo behind__photo--fontan slot-br">
-            <Image src={fontanImg} alt="" width={296} height={368} quality={95} draggable={false} />
-          </div>
-          <div class="behind__photo behind__photo--building slot-front">
-            <Image src={buildingImg} alt="" width={404} height={466} quality={95} draggable={false} />
-          </div>
-        </div>
-      </article>
+      <!-- ── Card 2: Travelling + Music player ────────────── -->
+      <div class="behind__col-mid">
 
-      <!-- Latest books -->
-      <article class="behind__card behind__card--books">
-        <h3 class="behind__books-title text-h4-medium">The latest books I've read</h3>
-        <ul class="behind__books-list" data-strike-list>
-          {books.map((book) => (
-            <li class="behind__book">
-              <Image
-                src={checkboxIcon}
-                alt=""
-                width={20}
-                height={20}
-                class="behind__book-check"
-                aria-hidden="true"
-              />
-              <span class="behind__book-title text-body-large-regular">{book}</span>
-            </li>
-          ))}
-        </ul>
-      </article>
+        <!-- Travelling card: heading + Romania tag + fanned photos -->
+        <article class="behind__card behind__travel">
+          <div class="behind__travel-head">
+            <div class="behind__travel-info">
+              <p class="behind__travel-label text-caption-regular">Traveling</p>
+              <p class="behind__travel-year">2025</p>
+            </div>
+            <span class="behind__travel-tag text-caption-regular">Romania</span>
+          </div>
 
-      <!-- That's it -->
-      <article class="behind__card behind__card--end">
-        {/* Inline SVG borders (class-tagged; styled via :global since Astro's
-            scoped CSS doesn't reach set:html nodes). Desktop uses the
-            pathLength/non-scaling border; mobile swaps to a border drawn at the
-            card's real size (346×66, 16px corners) so the dots wrap the corners
-            cleanly without distortion. Breakpoint toggle is in CSS below. */}
-        <Fragment set:html={endBorderSvg.replace(
-          '<svg',
-          '<svg aria-hidden="true" class="behind__end-border behind__end-border--desktop"'
-        )} />
-        <Fragment set:html={endBorderMobileSvg.replace(
-          '<svg',
-          '<svg aria-hidden="true" class="behind__end-border behind__end-border--mobile"'
-        )} />
-        {/* Raw <img> (not Astro Image) so the dotted-heart PNG stays
-            sharp — Astro's webp conversion softened the dots. */}
-        <img
-          src={heartIcon.src}
-          width={52}
-          height={52}
-          class="behind__end-heart"
-          alt=""
-          aria-hidden="true"
-          decoding="async"
-        />
-        <p class="behind__end-text text-body-mono-lg">
-          That&rsquo;s it <strong>˘ᵕ˘</strong>
-        </p>
-      </article>
+          {/* Deck of travel photos on 3 fan slots (front / back-left /
+              back-right). slot-* classes set statically so the fan renders with
+              no JS; after the fan-out reveal settles JS lets the user swipe /
+              drag to rotate the photos through the slots. Decorative → aria-hidden. */}
+          <div class="behind__photos" data-fan-photos aria-hidden="true">
+            <div class="behind__photo behind__photo--river slot-bl">
+              <Image src={riverImg} alt="" width={296} height={368} quality={95} draggable={false} />
+            </div>
+            <div class="behind__photo behind__photo--fontan slot-br">
+              <Image src={fontanImg} alt="" width={296} height={368} quality={95} draggable={false} />
+            </div>
+            <div class="behind__photo behind__photo--building slot-front">
+              <Image src={buildingImg} alt="" width={404} height={466} quality={95} draggable={false} />
+            </div>
+          </div>
+        </article>
+
+        <!-- Music player: frosted album bg, track info, slider, controls -->
+        <div class="behind__player">
+          <div class="behind__player-body">
+            <div class="behind__player-top">
+              <div class="behind__player-track">
+                <Image src={playerImg} alt="" aria-hidden="true" width={96} height={96} class="behind__player-art" />
+                <div class="behind__player-meta">
+                  <p class="behind__player-title">Yellow</p>
+                  <p class="behind__player-artist text-caption-regular">Coldplay</p>
+                </div>
+              </div>
+              <div class="behind__slider" role="presentation">
+                <div class="behind__slider-track"></div>
+                <div class="behind__slider-fill"></div>
+                <div class="behind__slider-thumb"></div>
+              </div>
+            </div>
+            <div class="behind__controls">
+              <span class="behind__ctrl" aria-hidden="true">
+                <svg viewBox="0 0 16 16" width="16" height="16"><path d="M0.959655 7.17076L6.86184 3.63951C7.00786 3.55067 7.17505 3.50267 7.34596 3.50052C7.51686 3.49838 7.68521 3.54217 7.83341 3.62733C7.99421 3.72096 8.12736 3.85549 8.21935 4.01724C8.31134 4.17898 8.35888 4.3622 8.35716 4.54826V7.01858L14.0047 3.63858C14.1507 3.54973 14.3179 3.50173 14.4888 3.49959C14.6597 3.49744 14.828 3.54124 14.9762 3.62639C15.137 3.72003 15.2702 3.85455 15.3622 4.0163C15.4542 4.17805 15.5017 4.36126 15.5 4.54733V11.4536C15.5018 11.6397 15.4543 11.823 15.3623 11.9848C15.2703 12.1466 15.1371 12.2812 14.9762 12.3748C14.828 12.46 14.6597 12.5038 14.4888 12.5016C14.3179 12.4995 14.1507 12.4515 14.0047 12.3626L8.35716 8.98108V11.4523C8.35919 11.6387 8.31179 11.8222 8.21979 11.9843C8.12778 12.1463 7.99446 12.2811 7.83341 12.3748C7.68521 12.46 7.51686 12.5038 7.34596 12.5016C7.17505 12.4995 7.00786 12.4515 6.86184 12.3626L0.959655 8.83139C0.819344 8.74349 0.703665 8.62139 0.623477 8.47654C0.543289 8.33168 0.501221 8.16883 0.501221 8.00326C0.501221 7.8377 0.543289 7.67484 0.623477 7.52999C0.703665 7.38514 0.819344 7.26303 0.959655 7.17514V7.17076Z"/></svg>
+              </span>
+              <span class="behind__ctrl behind__ctrl--pause" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="24" height="24"><path d="M9.25 4.5C9.94 4.5 10.5 5.06 10.5 5.75V18.25C10.5 18.94 9.94 19.5 9.25 19.5H6.75C6.06 19.5 5.5 18.94 5.5 18.25V5.75C5.5 5.06 6.06 4.5 6.75 4.5H9.25ZM17.25 4.5C17.94 4.5 18.5 5.06 18.5 5.75V18.25C18.5 18.94 17.94 19.5 17.25 19.5H14.75C14.06 19.5 13.5 18.94 13.5 18.25V5.75C13.5 5.06 14.06 4.5 14.75 4.5H17.25Z"/></svg>
+              </span>
+              <span class="behind__ctrl behind__ctrl--next" aria-hidden="true">
+                <svg viewBox="0 0 16 16" width="16" height="16"><path d="M0.959655 7.17076L6.86184 3.63951C7.00786 3.55067 7.17505 3.50267 7.34596 3.50052C7.51686 3.49838 7.68521 3.54217 7.83341 3.62733C7.99421 3.72096 8.12736 3.85549 8.21935 4.01724C8.31134 4.17898 8.35888 4.3622 8.35716 4.54826V7.01858L14.0047 3.63858C14.1507 3.54973 14.3179 3.50173 14.4888 3.49959C14.6597 3.49744 14.828 3.54124 14.9762 3.62639C15.137 3.72003 15.2702 3.85455 15.3622 4.0163C15.4542 4.17805 15.5017 4.36126 15.5 4.54733V11.4536C15.5018 11.6397 15.4543 11.823 15.3623 11.9848C15.2703 12.1466 15.1371 12.2812 14.9762 12.3748C14.828 12.46 14.6597 12.5038 14.4888 12.5016C14.3179 12.4995 14.1507 12.4515 14.0047 12.3626L8.35716 8.98108V11.4523C8.35919 11.6387 8.31179 11.8222 8.21979 11.9843C8.12778 12.1463 7.99446 12.2811 7.83341 12.3748C7.68521 12.46 7.51686 12.5038 7.34596 12.5016C7.17505 12.4995 7.00786 12.4515 6.86184 12.3626L0.959655 8.83139C0.819344 8.74349 0.703665 8.62139 0.623477 8.47654C0.543289 8.33168 0.501221 8.16883 0.501221 8.00326C0.501221 7.8377 0.543289 7.67484 0.623477 7.52999C0.703665 7.38514 0.819344 7.26303 0.959655 7.17514V7.17076Z"/></svg>
+              </span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ── Card 3: Files — checkerboard + decorative folders ── -->
+      <div class="behind__card behind__files" aria-hidden="true">
+        {folders.map((f, i) => (
+          <div class:list={['behind__folder', `behind__folder--${i + 1}`]} style={`left:${f.x}; top:${f.y};`}>
+            <img src={folderIcon.src} alt="" width="100" height="85" class="behind__folder-icon" />
+            <span class="behind__folder-label text-caption-mono">{f.label}</span>
+          </div>
+        ))}
+      </div>
+
     </div>
   </div>
 </section>
 
-<style>
+<style define:vars={{ playerBgUrl: `url(${playerBg.src})` }}>
   /* ====== Section shell ====== */
   .behind {
     background-color: var(--color-bg-light-grey);
-    padding-block: var(--space-section-block); /* 64px desktop / 44px mobile */
+    padding-block: var(--space-section-block);      /* 64 / 44 */
     padding-inline: var(--container-padding-desktop);
   }
-
   @media (min-width: 768px) and (max-width: 1279px) {
-    .behind {
-      padding-inline: var(--container-padding-tablet);
-    }
+    .behind { padding-inline: var(--container-padding-tablet); }
   }
-
   @media (max-width: 767px) {
-    .behind {
-      padding-inline: var(--container-padding-mobile);
-    }
+    .behind { padding-inline: var(--container-padding-mobile); }
   }
 
-  /* ====== Inner column ====== */
   .behind__inner {
     display: flex;
     flex-direction: column;
-    gap: var(--space-stack-5xl); /* 48px desktop / 32px mobile */
+    gap: var(--space-stack-5xl);                    /* 48 / 32 */
     max-width: 1312px;
     margin-inline: auto;
     width: 100%;
@@ -175,691 +158,398 @@ const bioParagraphs = [
     margin: 0;
   }
 
-  /* ====== 3×2 grid ====== */
+  /* ====== 3-column row (Figma Cards frame) ====== */
   .behind__grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    grid-template-rows: 280px 280px;
-    gap: var(--space-stack-xl); /* 20px */
+    grid-template-rows: 580px;
+    gap: var(--space-stack-xl);                      /* 20px */
     width: 100%;
+  }
+
+  /* Middle column stacks the photo card + player (gap 20). */
+  .behind__col-mid {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-stack-xl);                      /* 20px */
+    min-width: 0;
   }
 
   /* ====== Card base ====== */
   .behind__card {
     position: relative;
-    overflow: hidden;
-    border-radius: var(--radius-2xl); /* 20px desktop / 16px mobile */
+    border-radius: var(--radius-2xl);                /* 20 / 16 */
     background-color: var(--color-bg-white);
-    padding: var(--space-inset-2xl); /* 24px desktop / 20px mobile */
   }
 
-  /* ====== About me — paper card (col 1, rows 1-2) ======
-
-     Built as a normal padded container with a CSS mask that cuts circular
-     "teeth" out of the top edge. Mask is a repeated radial-gradient tile:
-     each 37px tile holds one 27px-diameter circle centered on the top
-     edge, leaving 10px of solid paper between circles (per Marianna's
-     spec). Mobile variant: 20px circles → 30px tile.
-
-     Why mask not SVG: the previous SVG overlay didn't adapt cleanly to
-     varying card widths (aspect-ratio mismatch + janky absolute text
-     positioning). A masked container adapts naturally to any width while
-     keeping the same 24px inner padding and consistent scallop density. */
-  .behind__card--about {
-    --scallop-diameter: 27px;
-    --scallop-gap: 10px;
-    --scallop-tile: calc(var(--scallop-diameter) + var(--scallop-gap));
-
-    grid-column: 1;
-    grid-row: 1 / span 2;
-    /* Article itself is transparent — its only visible content is
-       .behind__paper. filter:drop-shadow then casts based on the
-       child's silhouette without being clipped by the child's mask. */
-    background-color: transparent;
-    padding: 0;
-    overflow: visible;
-    /* Exact Figma drop-shadow (node 472:16885). */
-    filter:
-      drop-shadow(-2px 2px 2px rgba(0, 0, 0, 0.05))
-      drop-shadow(-4px 3px 2px rgba(0, 0, 0, 0.01))
-      drop-shadow(-6px 4px 2px rgba(0, 0, 0, 0));
+  /* ====== Card 1: Bio ====== */
+  .behind__bio {
+    overflow: hidden;                                /* clip the dot pattern to the radius */
+    /* Dot-pattern utility, tuned per-surface to the Figma "pattern on white"
+       tile (node 1051:40494): Ø4 dot in near-white #F4F4F3, 16px step —
+       denser and lighter than the default (dark-hero) dot pattern. */
+    --dot-pattern-bg: var(--color-bg-white);
+    --dot-pattern-color: #f4f4f3;
+    --dot-pattern-step: 16px;
   }
-
-  /* Inner paper: holds the white background, scalloped mask, and the
-     padding/content. Filter on the parent casts its shadow off this
-     element's silhouette. */
-  .behind__paper {
-    width: 100%;
-    height: 100%;
-    background-color: var(--color-bg-white);
-    border-radius: var(--radius-2xl); /* 20px desktop / 16px mobile */
-    /* Per Marianna: 40px sides / 44px bottom on desktop. Top padding
-       includes scallop diameter (cutouts eat into the visible area). */
-    padding-inline: 40px;
-    padding-block-end: 44px;
-    padding-block-start: calc(var(--scallop-diameter) + 20px);
-    box-sizing: border-box;
-
-    /* Scalloped top edge with HALF-circles at BOTH top corners (Marianna:
-       torn edges per Figma). Two radial-gradient layers — a disc anchored to
-       each tile's LEFT (0%) and RIGHT (100%) edge — are composited with
-       `intersect` so the cut = union of both discs. Adjacent tiles merge into
-       full teeth at every interior boundary, while the card's own left/right
-       edges clip the outermost discs into clean half-circles.
-       `--teeth` tiles fit exactly across 100% width → corners stay half
-       circles at any card width (desktop ~424px and mobile both use 11). */
-    --teeth: 11;
-    --scallop-r: calc(var(--scallop-diameter) / 2);
-    mask-image:
-      radial-gradient(circle var(--scallop-r) at 0 0,    transparent calc(var(--scallop-r) - 1px), #000 var(--scallop-r)),
-      radial-gradient(circle var(--scallop-r) at 100% 0, transparent calc(var(--scallop-r) - 1px), #000 var(--scallop-r));
-    mask-size: calc(100% / var(--teeth)) 100%;
-    mask-repeat: repeat-x;
-    mask-composite: intersect;
-    -webkit-mask-image:
-      radial-gradient(circle var(--scallop-r) at 0 0,    transparent calc(var(--scallop-r) - 1px), #000 var(--scallop-r)),
-      radial-gradient(circle var(--scallop-r) at 100% 0, transparent calc(var(--scallop-r) - 1px), #000 var(--scallop-r));
-    -webkit-mask-size: calc(100% / var(--teeth)) 100%;
-    -webkit-mask-repeat: repeat-x;
-    -webkit-mask-composite: source-in;
-  }
-
-  .behind__about-text {
-    color: var(--color-text-grey-muted);
-  }
-
-  .behind__about-text p {
-    margin: 0;
-  }
-
-  .behind__about-text p + p {
-    margin-top: var(--space-stack-md); /* 12px */
-  }
-
-  /* ====== Traveling 2025 (cols 2-3, row 1) ====== */
-  .behind__card--travel {
-    grid-column: 2 / span 2;
-    grid-row: 1;
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: var(--space-inline-2xl); /* 24px */
-  }
-
-  .behind__travel-head {
+  .behind__bio-text {
+    /* Figma text inset: 32px top, 40px sides (node 1125-49034 / "About me"). */
+    padding: var(--space-inline-3xl) var(--space-inline-4xl); /* 32 / 40 (→ 24/32 mobile) */
+    color: var(--color-text-grey-muted);             /* #737373 */
     display: flex;
     flex-direction: column;
-    gap: 120px;
-    flex-shrink: 0;
-    width: 135px;
+    gap: 12px;                                        /* Figma paragraphSpacing */
   }
+  .behind__bio-text p { margin: 0; }
 
+  /* ====== Card 2a: Travelling ====== */
+  .behind__travel {
+    flex: 0 0 385px;                                 /* Figma travel card height */
+    padding: var(--space-inset-2xl);                 /* 24 */
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-stack-3xl);                     /* 32 (container gap) */
+    overflow: hidden;
+  }
+  .behind__travel-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: var(--space-inline-lg);
+  }
   .behind__travel-info {
     display: flex;
     flex-direction: column;
-    gap: var(--space-stack-md); /* 12px */
+    gap: var(--space-stack-md);                      /* 12 */
   }
-
-  .behind__travel-label {
-    color: var(--color-text-grey-muted);
-    margin: 0;
-  }
-
+  .behind__travel-label { color: var(--color-text-grey-muted); margin: 0; }
   .behind__travel-year {
-    color: var(--color-text-black);
     margin: 0;
+    font-family: var(--font-family-body);
+    font-weight: var(--font-weight-medium);
+    font-size: var(--font-size-h2);                  /* 40 / 28 */
+    line-height: var(--line-height-tight);
+    color: var(--color-text-black);
   }
-
+  /* Romania — Tag/card: #F2F2F2 pill, r8, pad 8/16, mixed-case (NOT uppercased). */
   .behind__travel-tag {
-    color: var(--color-text-grey-muted);
-    background-color: var(--color-bg-light-grey);
-    padding: var(--space-inset-sm) var(--space-inset-lg);
-    border-radius: var(--radius-l); /* 12px */
     align-self: flex-start;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
+    padding: var(--space-inset-sm) var(--space-inset-lg); /* 8 / 16 */
+    background-color: var(--color-bg-light-grey);
+    border-radius: var(--radius-m);                  /* 8 */
+    color: var(--color-text-grey-muted);
     white-space: nowrap;
   }
 
-  .behind__travel-photos {
+  /* Deck of travel photos on 3 fan slots. A slot fixes HEIGHT + centre-x + tilt
+     + z; each photo keeps its own aspect ratio (baked white frame never crops),
+     so a photo is never stretched or cropped whatever slot it lands in. The
+     three photos rotate through the slots on swipe/drag (ported from the
+     production deck; animations.md §7.1). */
+  .behind__photos {
     position: relative;
-    width: 432px;
-    height: 232px;
+    height: 232px;                                   /* Figma "images" area */
     flex-shrink: 0;
   }
-
-  /* Once the fan-out reveal has settled, JS adds .is-draggable → the deck
-     becomes swipeable. touch-action: pan-y lets a vertical drag scroll the
-     page while we capture horizontal swipes. */
-  .behind__travel-photos.is-draggable {
-    touch-action: pan-y;
-  }
-
-  /* Grab affordance on pointer devices only. */
+  /* Enabled by JS after the fan-out reveal settles. pan-y lets a vertical drag
+     scroll the page while horizontal drags are captured for the shuffle. */
+  .behind__photos.is-draggable { touch-action: pan-y; }
   @media (hover: hover) and (pointer: fine) {
-    .behind__travel-photos.is-draggable { cursor: grab; }
-    .behind__travel-photos.is-dragging  { cursor: grabbing; }
+    .behind__photos.is-draggable { cursor: grab; }
+    .behind__photos.is-dragging  { cursor: grabbing; }
   }
 
-  /* Shared photo box. Specific transforms applied below.
-     The white frame is already baked into the exported PNGs, so NO CSS border
-     here (a CSS border would double the frame thickness). Rounded corners +
-     overflow kept so the box-shadow follows the photo's rounded silhouette. */
+  /* Photo box — the white frame is baked into the PNG (no CSS border). Rounded +
+     overflow so the layered shadow follows the rounded silhouette. Only transform
+     is in the base transition: the reveal animates transform, the shuffle sets a
+     snappier multi-prop transition inline (see JS advance()). */
   .behind__photo {
     position: absolute;
-    border-radius: var(--radius-l); /* 12px */
+    border-radius: var(--radius-l);                  /* 12 */
     overflow: hidden;
     will-change: transform;
-    /* Base transition drives BOTH the fan-out reveal (transform only) and the
-       drag snap-back. The deck-shuffle sets a snappier multi-prop transition
-       inline (see JS advance()). Geometry (left/top/width/height) is NOT in the
-       base list so the reveal animates transform only, exactly as before. */
     transition: transform var(--duration-fan-out-card, 600ms) var(--ease-out);
-    /* Don't let the photos be text-selected or ghost-dragged during a swipe. */
     user-select: none;
     -webkit-user-select: none;
-  }
-
-  .behind__photo :global(img) {
-    display: block;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    /* Pointer events pass through to the container (which owns the drag);
-       also kill the native image ghost-drag on desktop. */
-    pointer-events: none;
-    -webkit-user-drag: none;
-    user-select: none;
-  }
-
-  /* ====== Photo aspect ratios ======
-     Each photo always keeps its own aspect ratio, so its baked-in rounded frame
-     is never cropped or stretched — no matter which slot it lands in after a
-     shuffle. Slots below fix only the HEIGHT; width follows from these ratios. */
-  .behind__photo--building { aspect-ratio: 404 / 466; }
-  .behind__photo--river,
-  .behind__photo--fontan   { aspect-ratio: 296 / 368; }
-
-  /* ====== Fan slots (desktop) ======
-     Positions the photos rotate through when the deck is swiped. A slot sets a
-     fixed HEIGHT (front tier is taller), a CENTRE x (left = centre point;
-     translateX(-50%) keeps the card centred whatever its width), a tilt, a depth
-     and a shadow. Because only height is fixed and width comes from each photo's
-     aspect-ratio, a photo moving between slots is never stretched or cropped.
-
-       slot-front → centre, upright, tallest, on top
-       slot-bl    → back-left, tilted -30°
-       slot-br    → back-right, tilted +30°  */
-  .slot-front {
-    height: 233px;
-    left: 216px;               /* centre x (Figma building centre 115 + 202/2) */
-    top: -1px;
-    border-radius: 14px;
-    transform: translateX(-50%) rotate(0deg);
-    z-index: 3;
-    box-shadow:
-      -8px 132px 37px 0 rgba(102, 102, 102, 0),
-      -5px 84px 34px 0 rgba(102, 102, 102, 0.01),
-      -3px 47px 28px 0 rgba(102, 102, 102, 0.05);
-  }
-
-  .slot-bl {
-    height: 184px;
-    left: 151px;               /* centre x (Figma 77 + 148/2) */
-    top: 19px;
-    transform: translateX(-50%) rotate(-30deg);
-    z-index: 1;
-    box-shadow:
-      -6.667px 110px 30.833px 0 rgba(102, 102, 102, 0),
-      -4.167px 70px 28.333px 0 rgba(102, 102, 102, 0.01),
-      -2.5px 39.167px 23.333px 0 rgba(102, 102, 102, 0.05);
-  }
-
-  .slot-br {
-    height: 184px;
-    left: 280px;               /* centre x (Figma 206 + 148/2) */
-    top: 19px;
-    transform: translateX(-50%) rotate(30deg);
-    z-index: 2;
-    /* Fan-out reveal stagger: the back-right card (fontan on first reveal)
-       fans out 120ms after the back-left one. transition-delay is a separate
-       longhand from the base `transition`, so it layers on without disturbing
-       the property/duration. Shuffle uses an inline transition (delay 0) that
-       overrides this, so the stagger only affects the initial reveal. */
-    transition-delay: 120ms;
     box-shadow:
       -8px 132px 37px 0 rgba(102, 102, 102, 0),
       -5px 84px 34px 0 rgba(102, 102, 102, 0.01),
       -3px 47px 28px 0 rgba(102, 102, 102, 0.05),
       -1px 21px 21px 0 rgba(102, 102, 102, 0.09);
   }
-
-  /* ====== Latest books (col 2, row 2) ====== */
-  .behind__card--books {
-    grid-column: 2;
-    grid-row: 2;
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-stack-lg); /* 16px */
-  }
-
-  .behind__books-title {
-    color: var(--color-text-black);
-    margin: 0;
-  }
-
-  .behind__books-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-stack-sm); /* 8px */
-  }
-
-  .behind__book {
-    display: flex;
-    align-items: center;
-    gap: var(--space-inline-sm); /* 8px */
-  }
-
-  .behind__book-check {
-    width: 20px;
-    height: 20px;
-    flex-shrink: 0;
+  .behind__photo :global(img) {
     display: block;
-    border-radius: 5.5px;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    pointer-events: none;                            /* container owns the drag */
+    -webkit-user-drag: none;
+    user-select: none;
   }
 
-  .behind__book-title {
-    color: var(--color-neutral-grey-200);
-    /* Custom strikethrough (animatable). Native text-decoration: line-through
-       can't be scaled in/out, so we draw a horizontal line via ::after on the
-       title span and animate scaleX from 0 → 1, left-anchored. Per-book
-       stagger lives on :nth-child(n) below. */
-    position: relative;
-    margin: 0;
+  /* Each photo keeps its own aspect ratio; slots fix HEIGHT only, width follows. */
+  .behind__photo--building { aspect-ratio: 404 / 466; }
+  .behind__photo--river,
+  .behind__photo--fontan   { aspect-ratio: 296 / 368; }
+
+  /* Fan slots (centre-x via left:% + translateX(-50%); top in px). Figma
+     rotation is CCW-positive, CSS rotate() CW-positive → CSS angle = −Figma. */
+  .slot-front {                                      /* centre, upright, tallest, top */
+    height: 233px;
+    left: 50%; top: -1px;
+    border-radius: var(--radius-xl);                 /* 14 */
+    transform: translateX(-50%) rotate(0deg);
+    z-index: 3;
+  }
+  .slot-bl {                                         /* back-left, tilted */
+    height: 184px;
+    left: 32.7%; top: 19px;
+    transform: translateX(-50%) rotate(-30deg);
+    z-index: 1;
+  }
+  .slot-br {                                         /* back-right, tilted */
+    height: 184px;
+    left: 67%; top: 19px;
+    transform: translateX(-50%) rotate(30deg);
+    z-index: 2;
+    transition-delay: 120ms;                         /* reveal stagger (fontan +120ms) */
   }
 
-  .behind__book-title::after {
-    content: '';
-    position: absolute;
-    left: 0;
-    right: 0;
-    /* 58% (not 50%) because the span's geometric center sits above the
-       optical middle of the letterforms — line-height pads the bbox top
-       with empty space, so a true 50% reads as "too high" through the text.
-       58% lands the strike through the x-height middle (Marianna's note). */
-    top: 58%;
-    height: 1.5px;
-    background: currentColor;
-    transform-origin: left center;
-    /* Default = revealed (no-JS fallback + post-animation state). JS sets
-       data-strike-state="initial" on the <ul> to hide all lines, then
-       removes it on viewport-enter so the transitions kick in. */
-    transform: translateY(-50%) scaleX(1);
-    transition: transform 700ms var(--ease-out);
-    pointer-events: none;
+  /* Fan-out reveal — initial (stacked) state: JS sets data-fan-state="initial",
+     snapping the side photos onto building's centre with no rotation and no
+     transition; removing it fans them out. Offsets = each photo's centre → the
+     building centre in the 376×232 frame (±65, +5). */
+  .behind__photos[data-fan-state="initial"] .slot-bl {
+    transform: translateX(-50%) translate(65px, 5px) rotate(0deg);
+    transition: none;
   }
-
-  /* Stagger: book #1 → 0ms, #2 → 500ms, #3 → 1000ms (slower-paced reveal
-     per Marianna; was 0/300/600). */
-  .behind__book:nth-child(2) .behind__book-title::after { transition-delay: 500ms; }
-  .behind__book:nth-child(3) .behind__book-title::after { transition-delay: 1000ms; }
-
-  /* Pre-animation state — lines hidden, no transition (so JS toggling the
-     attribute doesn't make them animate OUT, only IN when removed). */
-  .behind__books-list[data-strike-state="initial"] .behind__book-title::after {
-    transform: translateY(-50%) scaleX(0);
+  .behind__photos[data-fan-state="initial"] .slot-br {
+    transform: translateX(-50%) translate(-65px, 5px) rotate(0deg);
     transition: none;
   }
 
-  @media (prefers-reduced-motion: reduce) {
-    .behind__book-title::after {
-      transition: none;
-    }
+  /* ====== Card 2b: Music player ====== */
+  .behind__player {
+    flex: 0 0 175px;                                 /* Figma player height */
+    position: relative;
+    overflow: hidden;
+    border-radius: var(--radius-2xl);                /* 20 / 16 */
+    isolation: isolate;
   }
-
-  /* ====== That's it (col 3, row 2) ====== */
-  .behind__card--end {
-    grid-column: 3;
-    grid-row: 2;
-    background-color: #F0F0EF;
-    /* Native CSS dashed border can't reproduce the Figma 0.1×8 stroke
-       pattern — use Border.svg overlay instead (vector-effect non-scaling
-       so the dot density stays uniform at any card width). */
+  /* Frosted album-art wash: the source image blown up + heavily blurred,
+     then veiled with 60% white (Figma "blur": white @60% + background blur). */
+  .behind__player::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: var(--playerBgUrl);
+    background-size: cover;
+    background-position: center;
+    filter: blur(36px);
+    transform: scale(1.4);
+    z-index: 0;
+  }
+  .behind__player::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-color: var(--color-overlay-white-60); /* #FFFFFF @ 60% */
+    z-index: 1;
+  }
+  .behind__player-body {
+    position: relative;
+    z-index: 2;
+    height: 100%;
+    padding: var(--space-inset-2xl);                 /* 24 */
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    align-items: stretch;
+    /* Minimum gap between the slider and the controls — space-between still
+       spreads them on the tall desktop card, but this keeps ≥8px when the
+       mobile card collapses to content height. */
+    gap: var(--space-inset-sm);                       /* 8 */
   }
-
-  /* Injected via set:html → scoped attrs aren't added to these nodes, so use
-     :global. Desktop border shown by default; mobile border hidden until ≤767px. */
-  :global(.behind__end-border) {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    display: block;
-    z-index: var(--z-base);
+  .behind__player-top {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-inset-sm);                      /* 8 */
   }
-
-  :global(.behind__end-border--mobile) {
-    display: none;
+  .behind__player-track {
+    display: flex;
+    align-items: center;
+    gap: var(--space-inline-md);                     /* 12 */
   }
-
-  .behind__end-heart {
-    width: 52px;
-    height: 52px;
-    align-self: flex-start;
-    display: block;
-    position: relative;
-    z-index: var(--z-elevated);
+  .behind__player-art {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius-pill);
+    object-fit: cover;
+    flex-shrink: 0;
+    /* Slow rotation (brief §8.3). */
+    animation: behind-spin 14s linear infinite;
   }
+  @keyframes behind-spin { to { transform: rotate(360deg); } }
 
-  .behind__end-text {
-    color: var(--color-text-grey-muted);
-    text-align: right;
+  .behind__player-meta { display: flex; flex-direction: column; min-width: 0; }
+  .behind__player-title {
     margin: 0;
-    align-self: stretch;
-    position: relative;
-    z-index: var(--z-elevated);
-  }
-
-  .behind__end-text strong {
+    font-family: var(--font-family-body);
     font-weight: var(--font-weight-semibold);
+    font-size: var(--font-size-body-large);          /* 18 / 16 */
+    line-height: var(--line-height-tight);
+    color: var(--color-text-grey-muted);
+  }
+  .behind__player-artist { margin: 0; color: var(--color-text-grey-muted); }
+
+  /* Slider */
+  .behind__slider { position: relative; height: 17px; }
+  .behind__slider-track,
+  .behind__slider-fill {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 8px;
+    border-radius: var(--radius-pill);
+  }
+  .behind__slider-track { left: 0; right: 0; background-color: var(--color-bg-light-grey); }
+  .behind__slider-fill {
+    left: 0;
+    width: 79%;                                      /* Figma 298/376 */
+    background-image: linear-gradient(90deg, #50869f, #93c9e2); /* Figma slider gradient */
+  }
+  .behind__slider-thumb {
+    position: absolute;
+    left: 79%;
+    top: 50%;
+    width: 17px;
+    height: 17px;
+    box-sizing: border-box;
+    transform: translate(-50%, -50%);
+    border-radius: var(--radius-pill);
+    background-color: var(--color-accent-dark);      /* #397D9C core */
+    border: 5px solid var(--color-bg-white);         /* Figma 5px white inside ring */
   }
 
-  /* ====== Tablet + Mobile (≤1279px) — stacked layout ======
-     The 3-col grid only works when viewport ≥ container-max-width (1280)
-     — at narrower widths the About me column shrinks below the size
-     needed to fit Body/mono/large bio text in 580px height. Below 1280
-     we stack all four cards in a single column. */
-  @media (max-width: 1279px) {
+  /* Controls */
+  .behind__controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: var(--space-stack-sm);                      /* 10 ≈ 8; see note */
+  }
+  .behind__ctrl {
+    width: 40px;
+    height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--color-bg-light-grey);    /* #F2F2F2 */
+    border-radius: var(--radius-l);                  /* 12 */
+  }
+  .behind__ctrl svg { display: block; fill: var(--color-bg-dark-elevated); } /* #1D1D1D */
+  .behind__ctrl--next svg { transform: rotate(180deg); }   /* forward = back flipped */
+
+  /* ====== Card 3: Files — checkerboard + folders ====== */
+  .behind__files {
+    overflow: hidden;
+    /* Transparency-grid motif: 27px squares alternating white / #E9E9E9
+       (Figma "Files" row rectangles), drawn in CSS instead of ~350 nodes. */
+    background-color: var(--color-bg-white);
+    background-image:
+      linear-gradient(45deg, var(--color-stroke-light) 25%, transparent 25%, transparent 75%, var(--color-stroke-light) 75%),
+      linear-gradient(45deg, var(--color-stroke-light) 25%, transparent 25%, transparent 75%, var(--color-stroke-light) 75%);
+    background-size: 54px 54px;                       /* 2 × 27px square */
+    background-position: 0 0, 27px 27px;
+  }
+
+  .behind__folder {
+    position: absolute;
+    width: 108px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-inset-sm);                       /* 8 (icon → label) */
+    pointer-events: none;                             /* decorative only */
+    /* Soft levitation (brief §8.3) — the whole folder (icon + label) drifts,
+       transform-only per the perf rules. Each folder runs a different duration
+       + negative delay so they move out of phase (no synchronized bobbing). */
+    animation: behind-levitate 4.6s ease-in-out infinite;
+    will-change: transform;
+  }
+  .behind__folder--2 { animation-duration: 5.4s; animation-delay: -1.6s; }
+  .behind__folder--3 { animation-duration: 5s;   animation-delay: -0.8s; }
+  @keyframes behind-levitate {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-9px); }
+  }
+  .behind__folder-icon {
+    display: block;
+    width: 100px;
+    height: 85px;
+    filter: drop-shadow(0 10px 16px rgba(37, 37, 37, 0.12));
+  }
+  /* Label = Caption mono (Fira Code 14/140); .text-caption-mono sets the type. */
+  .behind__folder-label {
+    color: var(--color-text-black);                   /* #252525 */
+    white-space: nowrap;
+  }
+
+  /* ====== Mobile (≤767px) — no dedicated frame; adapt per mobile-adaptation.md.
+     Cards stack full-width; the photo deck and folder field scale to the
+     narrower column. ====== */
+  @media (max-width: 767px) {
     .behind__grid {
       grid-template-columns: 1fr;
-      grid-template-rows: none;
-      grid-auto-rows: auto;
+      grid-template-rows: none;                       /* cards size to content */
     }
 
-    /* All cards reset to single column, auto-row */
-    .behind__card--about,
-    .behind__card--travel,
-    .behind__card--books,
-    .behind__card--end {
-      grid-column: 1;
-      grid-row: auto;
+    /* Cards size to their content when stacked (no fixed 385/580 tiers). */
+    .behind__travel,
+    .behind__player { flex: 0 0 auto; }
+
+    /* Photo deck scales to ~0.77× so the fan fits the narrow card. */
+    .behind__photos { height: 180px; }
+    .slot-front { height: 180px; top: 0; }
+    .slot-bl,
+    .slot-br   { height: 142px; top: 15px; }
+    .behind__photos[data-fan-state="initial"] .slot-bl {
+      transform: translateX(-50%) translate(50px, 4px) rotate(0deg);
+    }
+    .behind__photos[data-fan-state="initial"] .slot-br {
+      transform: translateX(-50%) translate(-50px, 4px) rotate(0deg);
     }
 
-    .behind__card {
-      padding: var(--space-inset-xl); /* 16px on mobile */
+    /* Files field: checkerboard + floating folders need an explicit height when
+       the desktop 580 row is gone. */
+    .behind__files {
+      min-height: 360px;
+      /* Whole cells across the full width (no clipped side column): a conic
+         tile is a self-contained 2×2 checker, so sizing it to 100%/6 lays down
+         exactly 12 square cells edge-to-edge — no px value to divide unevenly. */
+      background-image: conic-gradient(
+        var(--color-stroke-light) 90deg,
+        var(--color-bg-white) 90deg 180deg,
+        var(--color-stroke-light) 180deg 270deg,
+        var(--color-bg-white) 270deg
+      );
+      background-size: calc(100% / 6) calc(100% / 6);
+      background-position: 0 0;
     }
 
-    /* About me — full width, auto height, smaller scallops (20px).
-       Padding 0 here (mobile .behind__card rule above sets 16px, but
-       About me uses inner .behind__paper for padding instead). */
-    .behind__card--about {
-      --scallop-diameter: 20px;
-      --scallop-gap: 10px;
-      --scallop-tile: calc(var(--scallop-diameter) + var(--scallop-gap));
-
-      width: 100%;
-      height: auto;
-      min-height: 0;
-      padding: 0;
-    }
-
-    /* Inner paper mobile padding per Marianna: 28 sides, 40 top, 32 bot. */
-    .behind__paper {
-      padding-inline: 28px;
-      padding-block-start: 40px;
-      padding-block-end: 32px;
-    }
-
-    /* Traveling card: stack header above photos */
-    .behind__card--travel {
-      flex-direction: column;
-      align-items: stretch;
-      gap: var(--space-stack-xl); /* 16px */
-    }
-
-    .behind__travel-head {
-      flex-direction: row;
-      align-items: center;
-      justify-content: space-between;
-      gap: var(--space-inline-md);
-      width: 100%;
-    }
-
-    .behind__travel-info {
-      gap: var(--space-stack-xs); /* 4px */
-    }
-
-    .behind__travel-photos {
-      /* Was `transform: scale(0.68)` on a 432×232 frame, but that doubled
-         the rasterization for the rotated photos inside — source 296px →
-         148 CSS box → scaled to 100 visual via transform → upsampled back
-         to ~300 device px on retina mobile. The double sampling softened
-         every photo even though the source was 1:1 sufficient at DPR 3.
-         Now we size the frame directly at the visual mobile dimensions
-         (0.68× of desktop) and shrink each photo's CSS box to match,
-         leaving rotation as the only transform → single-sample chain →
-         retina-sharp on the same source files. */
-      align-self: center;
-      width: 294px;   /* 432 × 0.68 */
-      height: 158px;  /* 232 × 0.68 */
-    }
-
-    /* Photo positions/sizes recomputed at 0.68× of desktop. The math is
-       just (desktop value × 0.68) rounded — kept in comments so a future
-       designer tweak can revert by ratio. */
-    /* Mobile: same centre-based system, 0.68× tier heights. left = centre x. */
-    .slot-front {
-      height: 158px;  left: 146.5px;  top: -1px;   /* centre 78 + 137/2 */
-    }
-    .slot-bl {
-      height: 125px;  left: 102.5px;  top: 13px;   /* centre 52 + 101/2 */
-    }
-    .slot-br {
-      height: 125px;  left: 190.5px;  top: 13px;   /* centre 140 + 101/2 */
-    }
-
-    /* Mobile corner rounding — draw it in CSS instead of relying on the rounding
-       baked into the PNGs. Those baked corners scale down with the (smaller)
-       mobile photos, so they read as ~6px and look too sharp. A white fill
-       behind each photo covers the baked transparent corners, then a fixed 8px
-       radius clips the box — so every card shows an identical, size-independent
-       8px corner. Desktop keeps the baked rounding, which reads fine there. */
-    .behind__photo {
-      background: var(--color-bg-white);
-      border-radius: 8px;
-    }
-
-    /* Fan-out reveal mobile override lives at the END of the stylesheet
-       (after the desktop [data-fan-state="initial"] rule) so it wins by
-       cascade-order. See block near the end of this style. */
-
-    /* Books — heading 18px on mobile per spec (overrides H4 token 20px) */
-    .behind__books-title {
-      font-size: 18px;
-    }
-
-    /* That's it — heart + text on same horizontal line, smaller card */
-    .behind__card--end {
-      flex-direction: row;
-      align-items: center;
-      justify-content: space-between;
-      gap: var(--space-inline-md);
-      padding: var(--space-inset-xl); /* 16px */
-    }
-
-    /* The card is now a short 64px-tall row. Swap to the flat-card border
-       (drawn at 346×66, 16px corners) so the dots wrap the corners — the tall
-       desktop border would leave the flat corners empty here. */
-    :global(.behind__end-border--desktop) { display: none; }
-    :global(.behind__end-border--mobile)  { display: block; }
-
-    .behind__end-heart {
-      width: 32px;
-      height: 32px;
-      flex-shrink: 0;
-      align-self: center;
-    }
-
-    .behind__end-text {
-      text-align: right;
-      flex: 1 1 auto;
-      align-self: center;
-    }
-  }
-
-  /* ====== Travelling fan-out reveal — initial (stacked) state ======
-     animations.md §7.1. JS adds data-fan-state="initial" before observing,
-     which snaps river+fontan onto building's center with NO rotation and
-     NO transition (so it doesn't animate INTO the stacked state). When
-     the section scrolls into view, JS removes the attribute → the
-     default .behind__photo--river/fontan transitions kick in and the
-     cards fan out to their tilted positions (river first, fontan +120ms).
-
-     Translate offsets = distance from each photo's center to building's
-     center (frame 432×232, building center ≈ 216, 115.5):
-       river  center 151,111  → dx +65,  dy +4.5
-       fontan center 280,111  → dx -64,  dy +4.5 */
-  .behind__travel-photos[data-fan-state="initial"] .slot-bl {
-    transform: translateX(-50%) translate(65px, 4.5px) rotate(0deg);
-    transition: none;
-  }
-
-  .behind__travel-photos[data-fan-state="initial"] .slot-br {
-    transform: translateX(-50%) translate(-64px, 4.5px) rotate(0deg);
-    transition: none;
-  }
-
-  /* Reduced motion — final fanned state from the start; no animation.
-     JS already short-circuits (doesn't set the initial attribute), but
-     belt-and-braces: kill the transition so any forced toggle is instant. */
-  @media (prefers-reduced-motion: reduce) {
-    /* No fan-out and no animated shuffle — the deck still reorders on swipe,
-       but instantly (no motion). */
-    .behind__photo {
-      transition: none;
-    }
-  }
-
-  /* Fan-out stacked-state offsets — mobile override.
-     Lives down here (not in the .behind__travel-photos mobile @media block
-     above) so it wins by cascade order against the desktop initial-state
-     rules earlier in the file. Mobile photos are at 0.68× of desktop, so
-     the desktop translate(±65, 4.5) → translate(±44, 2.5) puts each
-     river/fontan center on the building center.
-       river center mobile:    (52+50.5, 13+62.5) = (102, 75.5)
-       fontan center mobile:   (140+50.5, 13+62.5) = (190, 75.5)
-       building center mobile: (78+68.5, -1+79)   = (146, 78) */
-  @media (max-width: 1279px) {
-    .behind__travel-photos[data-fan-state="initial"] .slot-bl {
-      transform: translateX(-50%) translate(44px, 2.5px) rotate(0deg);
-    }
-    .behind__travel-photos[data-fan-state="initial"] .slot-br {
-      transform: translateX(-50%) translate(-44px, 2.5px) rotate(0deg);
-    }
+    /* Folders scale to 0.75× (whole-pixel). */
+    .behind__folder { width: 81px; gap: 6px; }
+    .behind__folder-icon { width: 75px; height: 64px; }
   }
 </style>
 
 <script>
-  /* Behind-the-Screen animations.
-     1) Travelling fan-out reveal (animations.md §7.1) — river + fontan
-        emerge from behind the building card when the photos enter view.
-     2) Books strikethrough reveal — three list lines draw L→R with a
-        stagger, but ONLY after the fan-out has settled (Marianna's note —
-        otherwise both animations fight for attention). The wait is
-        implemented via a shared Promise reset per page mount. */
-
-  // Reset per page mount — otherwise on a second visit (Astro ClientRouter)
-  // the previously-resolved promise would let the books strike fire
-  // immediately, skipping the wait.
-  let fanoutDoneResolve: (() => void) | undefined;
-  let fanoutDone: Promise<void>;
-  // Set by initTravelDeck. Attached to every fresh promise below so that
-  // whichever promise the reveal actually resolves (initBehindAnimations can
-  // run twice — once on load, once on astro:page-load — recreating it) still
-  // enables the deck. Reading the module var at resolve time avoids capturing
-  // a stale promise/closure.
-  let enableDeck: (() => void) | undefined;
-  function resetFanoutPromise() {
-    fanoutDone = new Promise<void>((r) => { fanoutDoneResolve = r; });
-    fanoutDone.then(() => enableDeck?.());
-  }
-  resetFanoutPromise();
-
-  // Fan-out timing matches the CSS: river at delay 0 + 600ms, fontan at
-  // delay 120ms + 600ms. The last card finishes at 720ms after IO fires.
-  const FANOUT_TOTAL_MS = 720;
-
-  function initTravelFanOut() {
-    const photos = document.querySelector<HTMLElement>('[data-fan-photos]');
-    if (!photos || photos.dataset.fanInit === '1') return;
-    photos.dataset.fanInit = '1';
-
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      fanoutDoneResolve?.();
-      return;
-    }
-
-    photos.setAttribute('data-fan-state', 'initial');
-
-    const io = new IntersectionObserver((entries, obs) => {
-      for (const entry of entries) {
-        if (entry.isIntersecting) {
-          requestAnimationFrame(() => {
-            photos.removeAttribute('data-fan-state');
-            setTimeout(() => fanoutDoneResolve?.(), FANOUT_TOTAL_MS);
-          });
-          obs.unobserve(entry.target);
-        }
-      }
-    }, { threshold: 0.4 });
-
-    io.observe(photos);
-  }
-
-  function initBooksStrike() {
-    const list = document.querySelector<HTMLElement>('[data-strike-list]');
-    if (!list || list.dataset.strikeInit === '1') return;
-    list.dataset.strikeInit = '1';
-
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-
-    list.setAttribute('data-strike-state', 'initial');
-
-    const io = new IntersectionObserver((entries, obs) => {
-      for (const entry of entries) {
-        if (entry.isIntersecting) {
-          // Wait until the fan-out reveal has settled before drawing the
-          // strikethrough lines (so the eye doesn't track both at once).
-          fanoutDone.then(() => {
-            requestAnimationFrame(() => list.removeAttribute('data-strike-state'));
-          });
-          obs.unobserve(entry.target);
-        }
-      }
-    }, { threshold: 0.4 });
-
-    io.observe(list);
-  }
-
-  /* Travelling deck — swipe (touch) / drag (mouse) to rotate the three photos
-     through the three fan slots, like shuffling a fan of cards. The three
-     .slot-* classes carry the geometry; we just reassign which photo has which.
-     Enabled only after the fan-out reveal settles (fanoutDone), so a swipe
-     can't collide with the intro animation. Decorative (container is
-     aria-hidden) → pointer/touch only, no keyboard affordance needed. */
-  function initTravelDeck() {
-    const container = document.querySelector<HTMLElement>('[data-fan-photos]');
-    if (!container || container.dataset.deckInit === '1') return;
-    container.dataset.deckInit = '1';
+  // Travelling photo deck — fan-out reveal (once/session) + swipe/drag shuffle,
+  // ported from the production site (animations.md §7.1). Folder levitation and
+  // the album spin are pure CSS. No reduced-motion special-casing (brief §1.7).
+  function initBehindTravel() {
+    const container = document.querySelector<HTMLElement>('.behind__photos');
+    if (!container || container.dataset.travelInit === '1') return;
+    container.dataset.travelInit = '1';
 
     const river    = container.querySelector<HTMLElement>('.behind__photo--river');
     const fontan   = container.querySelector<HTMLElement>('.behind__photo--fontan');
@@ -868,15 +558,10 @@ const bioParagraphs = [
     const photos = [river, fontan, building];
 
     // Ring positions map to slot classes. Rotating ringPos by ±1 cycles the
-    // three photos through the fan. Order chosen so the front card, when tossed,
-    // travels toward the side it was dragged: drag-left → back-left, etc.
+    // three photos through the fan; order chosen so the front card, when tossed,
+    // travels toward the side it was dragged.
     const RING = ['slot-front', 'slot-bl', 'slot-br'];
-    const ringPos = new Map<HTMLElement, number>([
-      [building, 0], // front
-      [river, 1],    // back-left
-      [fontan, 2],   // back-right
-    ]);
-
+    const ringPos = new Map<HTMLElement, number>([[building, 0], [river, 1], [fontan, 2]]);
     const applySlots = () => {
       for (const el of photos) {
         el.classList.remove('slot-front', 'slot-bl', 'slot-br');
@@ -885,7 +570,7 @@ const bioParagraphs = [
     };
     const frontEl = () => photos.find((el) => ringPos.get(el) === 0)!;
 
-    const THRESHOLD = 48; // px of horizontal travel to commit a shuffle
+    const THRESHOLD = 48;   // px of horizontal travel to commit a shuffle
     const SHUFFLE_MS = 450;
     const SHUFFLE_TRANSITION =
       `transform ${SHUFFLE_MS}ms var(--ease-out), left ${SHUFFLE_MS}ms var(--ease-out),` +
@@ -893,7 +578,7 @@ const bioParagraphs = [
 
     let enabled = false;
     let dragging = false;
-    let decided = false;   // have we locked horizontal-vs-vertical intent yet?
+    let decided = false;
     let horiz = false;
     let captured = false;
     let pointerId = -1;
@@ -902,7 +587,7 @@ const bioParagraphs = [
 
     const snapBack = () => {
       if (!dragEl) return;
-      dragEl.style.transition = `transform 300ms var(--ease-out)`;
+      dragEl.style.transition = 'transform 300ms var(--ease-out)';
       dragEl.style.transform = '';
       const el = dragEl;
       window.setTimeout(() => { el.style.transition = ''; }, 320);
@@ -910,7 +595,7 @@ const bioParagraphs = [
 
     const advance = (dir: number) => {
       for (const el of photos) el.style.transition = SHUFFLE_TRANSITION;
-      if (dragEl) dragEl.style.transform = ''; // animate from dragged pos → new slot
+      if (dragEl) dragEl.style.transform = '';   // animate from dragged pos → new slot
       for (const el of photos) ringPos.set(el, (ringPos.get(el)! + dir + 3) % 3);
       applySlots();
       window.setTimeout(() => { for (const el of photos) el.style.transition = ''; }, SHUFFLE_MS + 30);
@@ -934,58 +619,57 @@ const bioParagraphs = [
         if (Math.abs(dx) < 6 && Math.abs(dy) < 6) return;
         decided = true;
         horiz = Math.abs(dx) > Math.abs(dy);
-        if (!horiz) { endDrag(e, /*cancel*/ true); return; } // vertical → let page scroll
-        // Only now capture the pointer — capturing on pointerdown would let a
-        // vertical touch get swallowed instead of scrolling the page.
+        if (!horiz) { endDrag(e, true); return; }   // vertical → let the page scroll
         container.classList.add('is-dragging');
         try { container.setPointerCapture(e.pointerId); captured = true; } catch {}
       }
-      // Front card tracks the pointer with a slight tilt for tactile feedback.
-      // translateX(-50%) preserves the slot's horizontal centring while dragging.
+      // Front card tracks the pointer with a slight tilt; translateX(-50%) keeps
+      // the slot centring while dragging.
       dragEl.style.transform = `translate(calc(-50% + ${dx}px), 0) rotate(${dx * 0.03}deg)`;
     };
 
-    const endDrag = (e: PointerEvent, cancel = false) => {
+    function endDrag(e: PointerEvent, cancel = false) {
       if (!dragging) return;
       dragging = false;
       container.classList.remove('is-dragging');
       if (captured) { try { container.releasePointerCapture(pointerId); } catch {} captured = false; }
       const dx = e.clientX - startX;
       if (!cancel && horiz && Math.abs(dx) > THRESHOLD) {
-        advance(dx < 0 ? 1 : -1); // drag left → next; drag right → previous
+        advance(dx < 0 ? 1 : -1);                    // drag left → next; right → previous
       } else {
         snapBack();
       }
       dragEl = null;
-    };
+    }
 
     container.addEventListener('pointerdown', onDown);
     container.addEventListener('pointermove', onMove);
     container.addEventListener('pointerup', (e) => endDrag(e));
     container.addEventListener('pointercancel', (e) => endDrag(e, true));
 
-    const enable = () => { enabled = true; container.classList.add('is-draggable'); };
-    // Enable once the fan-out reveal settles. resetFanoutPromise wires the
-    // current promise's resolution to this via the module-level enableDeck, so
-    // the double-init (load + astro:page-load) can't leave us gated on a stale
-    // promise. Reduced-motion resolves the promise immediately in
-    // initTravelFanOut, so this fires right away in that case too.
-    enableDeck = enable;
+    const enableDrag = () => { enabled = true; container.classList.add('is-draggable'); };
+
+    // Fan-out reveal — once per session (window flag survives SPA nav, resets on
+    // hard refresh). Then enable the deck once it settles.
+    const FANOUT_TOTAL_MS = 720;   // river 0 + 600, fontan 120 + 600
+    if (window.__behindFanPlayed) {
+      enableDrag();
+    } else {
+      container.setAttribute('data-fan-state', 'initial');
+      const io = new IntersectionObserver((entries, obs) => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue;
+          window.__behindFanPlayed = true;
+          requestAnimationFrame(() => {
+            container.removeAttribute('data-fan-state');
+            window.setTimeout(enableDrag, FANOUT_TOTAL_MS);
+          });
+          obs.unobserve(entry.target);
+        }
+      }, { threshold: 0.4 });
+      io.observe(container);
+    }
   }
 
-  function initBehindAnimations() {
-    resetFanoutPromise();
-    initTravelFanOut();
-    initBooksStrike();
-    initTravelDeck();
-  }
-
-  // Initial page load.
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initBehindAnimations);
-  } else {
-    initBehindAnimations();
-  }
-  // Astro View Transitions: re-init on each client-side navigation.
-  document.addEventListener('astro:page-load', initBehindAnimations);
+  document.addEventListener('astro:page-load', initBehindTravel);
 </script>

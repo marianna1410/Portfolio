@@ -1,7 +1,11 @@
 ---
 import { Image } from 'astro:assets';
-import lucidaDefault from '../assets/projects/lucida-default.png';
-import vaiaDefault   from '../assets/projects/vaia-default.png';
+// Dark preview images (redesign brief §6.2 — Selected Works/*Dark.png).
+// Hover = gentle Ken-Burns zoom on this single image (Marianna's Phase 2 call,
+// kept for the redesign — a two-image cross-fade "ghosts" between the differing
+// UI states and reads as a pulse, so the smooth scale is preferred).
+import lucidaDefaultDark from '../assets/projects/lucida-default-dark.png';
+import vaiaDefaultDark    from '../assets/projects/vaia-default-dark.png';
 
 /**
  * Selected Works data — kept inline here since there are only 2 cases.
@@ -12,13 +16,13 @@ const works = [
     slug: 'lucida',
     tags: ['Mobile App', 'Language Learning', 'Redesign Concept'],
     title: 'Bringing structure and confidence to speaking practice through proven learning patterns',
-    defaultImg: lucidaDefault,
+    defaultImg: lucidaDefaultDark,
   },
   {
     slug: 'vaia',
     tags: ['Mobile App', 'EdTech', 'Redesign Concept'],
     title: "Restoring students' control and transparency over automated exam preparation",
-    defaultImg: vaiaDefault,
+    defaultImg: vaiaDefaultDark,
   },
 ];
 ---
@@ -185,13 +189,13 @@ const works = [
     text-wrap: balance;
   }
 
-  /* ====== Image area with hover zoom (Ken-Burns, matches Next-case card) ====== */
+  /* ====== Image area with hover cross-fade (animations.md 5.1) ====== */
   .works__image {
     position: relative;
     flex: 1 1 auto;
     min-height: 0;
     overflow: hidden;
-    border-radius: var(--radius-l); /* 12px */
+    border-radius: var(--radius-l); /* 12px — unchanged per brief §6.2 */
     background-color: var(--color-bg-light-grey); /* fallback while images load */
   }
 
@@ -204,8 +208,11 @@ const works = [
     }
   }
 
-  /* Single image fills the rounded frame; the frame's overflow:hidden crops
-     the gentle Ken-Burns zoom on hover (same effect as the Next-case card). */
+  /* Two dark variants stacked in the same rounded frame; default sits on top
+     (opacity 1), hover underneath (opacity 0). On hover they cross-fade. */
+  /* Single dark image; the frame's overflow:hidden crops the gentle Ken-Burns
+     zoom on hover. Transform-based, so it stays on the GPU and reads smooth
+     (matches the production site + the Next-case card). */
   .works__image-img {
     position: absolute;
     inset: 0;
@@ -214,20 +221,13 @@ const works = [
     object-fit: cover;
     object-position: center;
     display: block;
-    transition: transform var(--duration-medium) var(--ease-out); /* 250ms */
+    transition: transform var(--duration-medium) var(--ease-out); /* 250ms ease-out */
   }
 
   /* Hover: image grows ~6%. Pointer-only — no hover on touch. */
   @media (hover: hover) and (pointer: fine) {
     .works__card:hover .works__image-img {
       transform: scale(1.06);
-    }
-  }
-
-  /* Respect prefers-reduced-motion — no zoom. */
-  @media (prefers-reduced-motion: reduce) {
-    .works__image-img {
-      transition: none;
     }
   }
 

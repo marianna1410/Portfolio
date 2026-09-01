@@ -2,7 +2,7 @@ import { PROTOTYPES } from '../../lib/config';
 import type { CaseData } from './types';
 
 // Hero + section assets
-import heroImage from '../../assets/projects/cases/lucida/hero.png';
+import heroImage from '../../assets/projects/cases/lucida/hero-dark.png';
 import userFeedbackImage from '../../assets/projects/cases/lucida/user-feedback.png';
 import problem1Image from '../../assets/projects/cases/lucida/Problem 1.png';
 import problem2Image from '../../assets/projects/cases/lucida/Problem 2.png';
@@ -27,7 +27,7 @@ import iconReddit from '../../assets/projects/cases/lucida/platforms/reddit.png'
 
 // Small preview image for the "Keep reading" card at the end of this case —
 // points at the NEXT case (Vaia), so we import Vaia's Works-style preview here.
-import vaiaPreview from '../../assets/projects/vaia-default.png';
+import vaiaPreview from '../../assets/projects/vaia-small-dark.png';
 
 const lucida: CaseData = {
   slug: 'lucida',

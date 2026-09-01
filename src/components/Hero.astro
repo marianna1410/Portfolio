@@ -1,756 +1,856 @@
 ---
+/**
+ * Hero.astro — dark AI-workspace hero (redesign brief §6.1, Figma 1116-39390).
+ *
+ * Desktop (≥1280px): free-positioned composition — AI Chat (left) + Profile
+ * (centre) + Info card (Source / Data accuracy, right), joined by dashed
+ * connector lines with glowing end dots.
+ * Below 1280px (tablet + mobile, per Marianna): stacked layout matching the
+ * mobile frame 647-23550 — Profile (full width) + a Source | Data accuracy
+ * row, NO AI Chat card, two curved mobile connectors.
+ *
+ * This file renders the FINAL (loaded) state as the default DOM so the content
+ * is present without JS. The one-time intro animation (§8.1) is layered on in
+ * a later step and only overrides this to the loading state before playing.
+ */
 import { Image } from 'astro:assets';
-// Hero assets
-import skyBg     from '../assets/hero/hero-sky-bg.png';
-import avatar    from '../assets/hero/hero-avatar.png';
-import heroPaper from '../assets/hero/hero-paper.svg';
-// Arrow icon for the button
-import diagonalArrow from '../assets/icons/diagonal-arrow.svg';
-import ArrowSwap from './ArrowSwap.astro';
-// Decorative icons — desktop set (10 icons, 256px sources for 4x retina at 64px display)
-import iconClaude         from '../assets/icons/icon-claude.png';
-import iconClever         from '../assets/icons/icon-clever.png';
-import iconEye            from '../assets/icons/icon-eye.png';
-import iconFigma          from '../assets/icons/icon-figma.png';
-import iconFlash          from '../assets/icons/icon-flash.png';
-import iconFlower         from '../assets/icons/icon-flower.png';
-import iconGemini         from '../assets/icons/icon-gemini.png';
-import iconGoogleCalendar from '../assets/icons/icon-google-calendar.png';
-import iconNotion         from '../assets/icons/icon-notion.png';
-import iconSlack          from '../assets/icons/icon-slack.png';
-// Decorative icons — mobile set (6 icons, 192px sources for 4x retina at 48px display).
-// Mobile uses a different visual layout (3 top + 3 bottom around the card).
-import iconClaudeM  from '../assets/icons/icon-claude-mobile.png';
-import iconEyeM     from '../assets/icons/icon-eye-mobile.png';
-import iconFigmaM   from '../assets/icons/icon-figma-mobile.png';
-import iconFlowerM  from '../assets/icons/icon-flower-mobile.png';
-import iconGeminiM  from '../assets/icons/icon-gemini-mobile.png';
-import iconNotionM  from '../assets/icons/icon-notion-mobile.png';
-
+import Tag from './Tag.astro';
 import { RESUME_URL } from '../lib/config.ts';
+
+import avatar from '../assets/hero/avatar-marianna.png';
+// Icons
+import aiSign from '../assets/icons/ai-sign.svg';
+import checkIcon from '../assets/icons/check.svg';
+import diagonalArrowLight from '../assets/icons/diagonal-arrow-light.svg';
+import sendArrowLight from '../assets/icons/arrow-right-dots-light.svg';
+import sendArrowActive from '../assets/icons/arrow-right-dots-active.svg'; // pressed state (#4A4A4A)
+// Connector line SVGs
+import lineStraight from '../assets/hero/line-connector.svg';
+import lineCurvedUpper from '../assets/hero/line-curved-upper.svg';
+import lineCurvedBottom from '../assets/hero/line-curved-bottom.svg';
+import lineCurvedLeftM from '../assets/hero/line-curved-left-mobile.svg';
+import lineCurvedRightM from '../assets/hero/line-curved-right-mobile.svg';
+
+// Profile checklist (Figma Card_about me items).
+const profileItems = [
+  { label: 'Experience:', rest: ' 2.5 years' },
+  { label: 'Domains:', rest: '  EdTech, E-commerce, Banking, B2C Services' },
+  { label: 'Strengths:', rest: ' Data-Driven Design, AI-Based Workflow, Polished UI, Smooth Handoff' },
+  { label: 'Tools:', rest: '  Figma, Claude, Recraft, Midjourney, Gemini, Vercel' },
+];
 ---
 
-<section class="hero" id="hero" aria-labelledby="hero-heading">
+<section class="hero dot-pattern" id="hero" aria-labelledby="hero-heading">
   <div class="hero__inner">
 
     <!-- ─── Title + tag ──────────────────────────────────── -->
     <div class="hero__title-group">
-      <p class="hero__tag text-caption-mono">{`{OPEN TO WORK}`}</p>
+      <Tag label="OPEN TO WORK" variant="dark" dot />
       <h1 id="hero-heading" class="hero__heading text-h1">
-        Designer Who Creates Digital Experiences for Humans
+        Designer Who Creates Digital Interfaces with <span class="hero__accent">UX in mind</span>
       </h1>
     </div>
 
-    <!-- ─── Card area: icons + resume card ───────────────── -->
-    <div class="hero__card-area">
+    <!-- ─── Animated cards composition ───────────────────── -->
+    <div class="hero__cards">
 
-      <!-- Decorative icons — DESKTOP set (10 icons around the card).
-           Hidden on mobile via CSS; mobile uses a separate 6-icon set below.
-           Render at 128px (2x retina from 256px source); CSS displays at 64px. -->
-      <div class="hero__icons hero__icons--desktop" aria-hidden="true">
-        <!-- top row -->
-        <Image src={iconClever}         alt="" width={128} height={128} quality={90} class="hero__icon hero__icon--clever" />
-        <Image src={iconGoogleCalendar} alt="" width={128} height={128} quality={90} class="hero__icon hero__icon--google-calendar" />
-        <!-- upper sides -->
-        <Image src={iconFlower}         alt="" width={128} height={128} quality={90} class="hero__icon hero__icon--flower" />
-        <Image src={iconFigma}          alt="" width={128} height={128} quality={90} class="hero__icon hero__icon--figma" />
-        <!-- middle sides -->
-        <Image src={iconGemini}         alt="" width={128} height={128} quality={90} class="hero__icon hero__icon--gemini" />
-        <Image src={iconEye}            alt="" width={128} height={128} quality={90} class="hero__icon hero__icon--eye" />
-        <!-- lower sides -->
-        <Image src={iconClaude}         alt="" width={128} height={128} quality={90} class="hero__icon hero__icon--claude" />
-        <Image src={iconNotion}         alt="" width={128} height={128} quality={90} class="hero__icon hero__icon--notion" />
-        <!-- bottom row -->
-        <Image src={iconFlash}          alt="" width={128} height={128} quality={90} class="hero__icon hero__icon--flash" />
-        <Image src={iconSlack}          alt="" width={128} height={128} quality={90} class="hero__icon hero__icon--slack" />
+      <!-- Desktop connector LINES — sit UNDER the cards (z-index 1). The lines
+           run in the gaps between cards; their ends tuck at the card edges. -->
+      <div class="hero__lines hero__lines--desktop" aria-hidden="true">
+        <Image src={lineStraight} alt="" class="hero__line hero__line--straight" />
+        <Image src={lineCurvedUpper} alt="" class="hero__line hero__line--upper" />
+        <Image src={lineCurvedBottom} alt="" class="hero__line hero__line--bottom" />
+      </div>
+      <!-- Desktop connector DOTS — sit ABOVE the cards (z-index 4), centred on
+           the line at each card edge. -->
+      <div class="hero__dots hero__dots--desktop" aria-hidden="true">
+        <span class="hero__dot hero__dot--d1"></span>
+        <span class="hero__dot hero__dot--d2"></span>
+        <span class="hero__dot hero__dot--d3"></span>
+        <span class="hero__dot hero__dot--d4"></span>
+        <span class="hero__dot hero__dot--d5"></span>
       </div>
 
-      <!-- Decorative icons — MOBILE set (6 icons: 3 top + 3 bottom).
-           Hidden on desktop via CSS. Visual layout per Figma node 647:23550.
-           Render at 96px (2x retina from 192px source); CSS displays at 48px. -->
-      <div class="hero__icons hero__icons--mobile" aria-hidden="true">
-        <!-- top trio: flower (left) · gemini (center, raised) · claude (right) -->
-        <Image src={iconFlowerM} alt="" width={96} height={96} quality={90} class="hero__icon-m hero__icon-m--flower" />
-        <Image src={iconGeminiM} alt="" width={96} height={96} quality={90} class="hero__icon-m hero__icon-m--gemini" />
-        <Image src={iconClaudeM} alt="" width={96} height={96} quality={90} class="hero__icon-m hero__icon-m--claude" />
-        <!-- bottom trio: figma (left) · eye (center, lowered) · notion (right) -->
-        <Image src={iconFigmaM}  alt="" width={96} height={96} quality={90} class="hero__icon-m hero__icon-m--figma" />
-        <Image src={iconEyeM}    alt="" width={96} height={96} quality={90} class="hero__icon-m hero__icon-m--eye" />
-        <Image src={iconNotionM} alt="" width={96} height={96} quality={90} class="hero__icon-m hero__icon-m--notion" />
+      <!-- Mobile/tablet connectors — a strip in the gap between profile and the
+           Source|Data row (2 curves fanning down + 3 dots). -->
+      <div class="hero__connectors--mobile" aria-hidden="true">
+        <Image src={lineCurvedLeftM} alt="" class="hero__line hero__line--mleft" />
+        <Image src={lineCurvedRightM} alt="" class="hero__line hero__line--mright" />
+        <span class="hero__dot hero__dot--m1"></span>
+        <span class="hero__dot hero__dot--m2"></span>
+        <span class="hero__dot hero__dot--m3"></span>
       </div>
 
-      <!-- ─── Resume card ──────────────────────────────── -->
-      <div class="hero__card">
-
-        <!-- Sky background layer (decorative).
-             Render at 522×662 (2x retina from 1044×1324 source); CSS displays at 261×331. -->
-        <div class="hero__sky-wrap" aria-hidden="true">
-          <Image src={skyBg} alt="" width={522} height={662} quality={90} class="hero__sky-img" />
-        </div>
-
-        <!-- Paper layer (card face with shadow).
-             box-shadow is on the IMG (filter: drop-shadow) so the shadow follows
-             the SVG silhouette including the punched circle holes — per Figma. -->
-        <div class="hero__paper-wrap">
-          {/* White fill behind the two punched circles in the paper SVG.
-              Sky-wrap starts at x=39 within the card, but the punches are at
-              x=26 → without these, orbiting icons (which sit behind the card)
-              show through the holes. Painted BEFORE the paper image so they
-              live behind it; the paper SVG's own drop-shadow still renders
-              into the hole rims so they keep their "punched" look. */}
-          <span class="hero__paper-hole hero__paper-hole--top" aria-hidden="true"></span>
-          <span class="hero__paper-hole hero__paper-hole--bottom" aria-hidden="true"></span>
-          <Image
-            src={heroPaper}
-            alt=""
-            width={338}
-            height={330}
-            class="hero__paper-img"
-            aria-hidden="true"
-          />
-
-          <!-- Avatar — 224×224 source rendered for 2x retina at 112px display -->
-          <div class="hero__avatar" aria-hidden="true">
-            <Image
-              src={avatar}
-              alt=""
-              width={224}
-              height={224}
-              quality={90}
-              class="hero__avatar-img"
-            />
+      <!-- ── AI Chat card (desktop only) ── -->
+      <article class="hero__card hero__card--ai" aria-label="AI Chat prompt">
+        <header class="hero__card-head">
+          <Image src={aiSign} alt="" width={20} height={20} class="hero__ai-icon" />
+          <span class="hero__card-head-label text-caption-regular">AI Chat</span>
+        </header>
+        <div class="hero__card-body hero__ai-body">
+          <p class="hero__ai-prompt text-body-medium-regular"><span class="hero__ai-s1">Find a Middle product-minded UX/UI designer for a remote role. Data-driven decision-maker who builds AI into their </span><span class="hero__ai-s2">design workflow, ships polished mobile and web interfaces.</span></p>
+          <div class="hero__ai-actions">
+            <span class="hero__ai-websearch text-caption-regular">Web Search</span>
+            <span class="hero__ai-send" aria-hidden="true">
+              <Image src={sendArrowLight} alt="" width={20} height={20} class="hero__ai-send-icon hero__ai-send-icon--rest" />
+              <Image src={sendArrowActive} alt="" width={20} height={20} class="hero__ai-send-icon hero__ai-send-icon--active" />
+            </span>
           </div>
-
-          <!-- Open Resume button -->
-          <a
-            href={RESUME_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            class="hero__resume-btn text-label"
-            aria-label="Open Resume (opens in new tab)"
-          >
-            <span>Open Resume</span>
-            <ArrowSwap icon={diagonalArrow} class="hero__resume-btn-icon" />
-          </a>
-
-          <!-- Caption -->
-          <p class="hero__caption text-caption-mono">
-            UX/UI Designer · 2+ years crafting<br />user&#8209;friendly interfaces
-          </p>
         </div>
+      </article>
+
+      <!-- ── Profile card ── -->
+      <article class="hero__card hero__card--profile">
+        <header class="hero__card-head hero__profile-head hero__reveal">
+          <div class="hero__avatar">
+            <Image src={avatar} alt="Marianna Delihioz" width={128} height={128} quality={90} class="hero__avatar-img" />
+            <span class="hero__avatar-status" aria-hidden="true"></span>
+          </div>
+          <div class="hero__profile-name">
+            <span class="hero__profile-name-main text-body-medium-semibold">Marianna Delihioz</span>
+            <span class="hero__profile-role text-body-medium-regular">UX/UI Designer</span>
+          </div>
+        </header>
+        <div class="hero__card-body hero__profile-body">
+          <ul class="hero__profile-list hero__reveal">
+            {profileItems.map((item) => (
+              <li class="hero__profile-item">
+                <Image src={checkIcon} alt="" width={24} height={24} class="hero__check-icon" />
+                <span class="hero__profile-text text-body-medium-regular">
+                  <strong class="hero__profile-label">{item.label}</strong>{item.rest}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <!-- Skeleton overlay (intro state) — mirrors the profile layout:
+             avatar + name, then a checklist of items. -->
+        <div class="hero__skel hero__skel--profile" aria-hidden="true">
+          <div class="hero__skel-prow">
+            <span class="skel skel-circle"></span>
+            <div class="hero__skel-plines">
+              <span class="skel skel-bar" style="width: 62%"></span>
+              <span class="skel skel-bar" style="width: 44%"></span>
+            </div>
+          </div>
+          <div class="hero__skel-pitems">
+            <div class="hero__skel-item">
+              <span class="skel skel-dot"></span>
+              <span class="skel skel-bar" style="width: 55%"></span>
+            </div>
+            <div class="hero__skel-item">
+              <span class="skel skel-dot"></span>
+              <div class="hero__skel-ilines">
+                <span class="skel skel-bar" style="width: 90%"></span>
+                <span class="skel skel-bar" style="width: 48%"></span>
+              </div>
+            </div>
+            <div class="hero__skel-item">
+              <span class="skel skel-dot"></span>
+              <div class="hero__skel-ilines">
+                <span class="skel skel-bar" style="width: 88%"></span>
+                <span class="skel skel-bar" style="width: 90%"></span>
+                <span class="skel skel-bar" style="width: 40%"></span>
+              </div>
+            </div>
+            <div class="hero__skel-item">
+              <span class="skel skel-dot"></span>
+              <div class="hero__skel-ilines">
+                <span class="skel skel-bar" style="width: 80%"></span>
+                <span class="skel skel-bar" style="width: 52%"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- ── Info card: Source + Data accuracy ── -->
+      <div class="hero__info">
+        <article class="hero__card hero__card--source">
+          <header class="hero__card-head hero__info-head">
+            <span class="hero__card-head-label text-caption-regular">Source</span>
+          </header>
+          <div class="hero__card-body hero__info-body">
+            <a
+              href={RESUME_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="hero__cv-btn text-label hero__reveal"
+              aria-label="Download CV (opens in new tab)"
+            >
+              <span>Download CV</span>
+              <Image src={diagonalArrowLight} alt="" width={20} height={20} class="hero__cv-icon" />
+            </a>
+            <div class="hero__skel hero__skel--source" aria-hidden="true">
+              <span class="skel skel-btn"></span>
+            </div>
+          </div>
+        </article>
+
+        <article class="hero__card hero__card--data">
+          <header class="hero__card-head hero__info-head">
+            <span class="hero__card-head-label text-caption-regular">Data accuracy</span>
+          </header>
+          <div class="hero__card-body hero__data-body">
+            <div class="hero__ring hero__reveal" role="img" aria-label="Data accuracy 100 percent">
+              <svg class="hero__ring-svg" viewBox="0 0 72 72" aria-hidden="true">
+                <defs>
+                  <linearGradient id="hero-ring-grad" x1="36" y1="2" x2="36" y2="70" gradientUnits="userSpaceOnUse">
+                    <stop offset="0" stop-color="#3EDA96" />
+                    <stop offset="1" stop-color="#288C61" />
+                  </linearGradient>
+                </defs>
+                <circle class="hero__ring-track" cx="36" cy="36" r="34" />
+                <circle class="hero__ring-fill" cx="36" cy="36" r="34" pathLength="100" />
+              </svg>
+              <span class="hero__ring-value">100%</span>
+            </div>
+            <div class="hero__skel hero__skel--data" aria-hidden="true">
+              <span class="skel skel-ring"></span>
+            </div>
+          </div>
+        </article>
       </div>
-      <!-- end .hero__card -->
 
     </div>
-    <!-- end .hero__card-area -->
-
+    <!-- end .hero__cards -->
   </div>
 </section>
 
+{/* Early inline script — runs during parse (before paint) so there's no flash
+    of the final state. Adds `.is-intro` (loading) ONLY on a fresh full load;
+    the window flag persists across internal View-Transition nav, so returning
+    from a case never replays. No-JS keeps the final state. */}
+<script is:inline>
+  (function () {
+    if (window.__heroIntroPlayed) return;      // internal nav or already played → skip
+    var hero = document.getElementById('hero');
+    if (!hero) return;
+    // Scope the loading class to the cards only, so toggling it never triggers a
+    // style recalc / repaint of the H1 or header (avoids a flicker in some
+    // browsers, e.g. Opera).
+    var cards = hero.querySelector('.hero__cards');
+    if (cards) cards.classList.add('is-intro');
+    var s2 = hero.querySelector('.hero__ai-s2');
+    if (s2) { s2.setAttribute('data-full', s2.textContent); s2.textContent = ''; }
+    var rv = hero.querySelector('.hero__ring-value');
+    if (rv) rv.textContent = '0%';
+    var rf = hero.querySelector('.hero__ring-fill');
+    if (rf) rf.style.strokeDashoffset = '100';
+    // Send button starts active (white) — only when the prompt will type (≥1280).
+    if (window.matchMedia('(min-width: 1280px)').matches) {
+      var sb = hero.querySelector('.hero__ai-send');
+      if (sb) sb.classList.add('hero__ai-send--active');
+    }
+  })();
+</script>
+
 <style>
-  /* ====== Section shell ====== */
+  /* ============================================================
+     Section shell
+     ============================================================ */
   .hero {
-    min-height: 800px;
-    padding-top: 145px;      /* content starts at y=145 per Figma */
-    padding-bottom: 64px;
+    background-color: var(--color-bg-deep-black); /* #0F0F0F */
+    --dot-pattern-bg: var(--color-bg-deep-black);
+    /* Pull the dark hero up under the sticky header (header flow height = 56px:
+       40px pill content + 8px inset ×2) so its dark bg reaches the very top —
+       no light strip shows above the floating header. */
+    margin-top: -56px;
+    /* Tag sits 83px below the header's visual bottom (80px), i.e. y=163.
+       With the −56 pull-up the hero box starts at y=0, so padding-top = 163px. */
+    padding-top: 163px;
+    padding-bottom: var(--space-section-block); /* 64 desktop / 44 mobile */
     padding-inline: var(--container-padding-desktop);
+    /* Rounded bottom (Figma section rBR/rBL 40 desktop / 32 mobile = radius-4xl).
+       Reveals the light page background beneath — see body bg in global.css. */
+    border-bottom-left-radius: var(--radius-4xl);
+    border-bottom-right-radius: var(--radius-4xl);
   }
 
   @media (min-width: 768px) and (max-width: 1279px) {
-    .hero {
-      padding-inline: var(--container-padding-tablet);
-    }
+    .hero { padding-inline: var(--container-padding-tablet); }
   }
 
   @media (max-width: 767px) {
     .hero {
-      min-height: auto;
-      /* Visual gap of 48px between Header pill bottom and {OPEN TO WORK}.
-         Header is position:sticky with top:20px (mobile), so it overlaps hero
-         by 20px in the layout flow. To get 48px visual gap: padding-top = 48 + 20 = 68. */
-      padding-top: 68px;
-      padding-bottom: var(--space-stack-5xl); /* 32px mobile — matches Works section */
+      /* Tag 40px below header visual bottom (76px) → y=116. With the −56
+         pull-up (base rule) the hero box starts at y=0 → padding-top = 116px. */
+      padding-top: 116px;
       padding-inline: var(--container-padding-mobile);
     }
   }
 
-  /* ====== Inner flex column ====== */
+  /* ============================================================
+     Inner column
+     ============================================================ */
   .hero__inner {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 48px;
+    gap: var(--space-stack-5xl); /* 48px desktop / 32px mobile */
   }
 
-  /* ====== Title + tag ====== */
   .hero__title-group {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: var(--space-stack-xl);
+    gap: var(--space-stack-xl); /* 20px desktop / 16px mobile */
     text-align: center;
-    max-width: 766px;
-    width: 100%;
+    max-width: 650px;
   }
 
-  .hero__tag {
-    color: var(--color-text-grey-muted);
+  @media (max-width: 767px) {
+    .hero__title-group { gap: var(--space-stack-lg); } /* 12px mobile (Figma) */
   }
 
-  .hero__heading {
-    color: var(--color-text-black);
+  .hero__heading { color: var(--color-text-light-on-dark); }
+
+  /* "UX in mind" — italic accent-blue on an under-accent plate.
+     inline-block + line-height:1 keeps the plate close to the text height
+     (Figma ≈52px on 48px type) instead of filling the whole line box, so it
+     no longer overlaps the line above. */
+  .hero__accent {
+    display: inline-block;
+    font-style: italic;
+    color: var(--color-accent-blue);          /* #93C9E2 */
+    background-color: var(--color-bg-under-accent); /* #18242A */
+    border-radius: var(--radius-l);           /* 12px */
+    line-height: 1;
+    padding: 0.05em 0.17em;                     /* ≈2.5px / 8px on 48px */
+    white-space: nowrap;
+    vertical-align: baseline;
   }
 
-  /* ====== Card area (icons + card container) ====== */
-  .hero__card-area {
+  /* ============================================================
+     Cards composition — desktop (≥1280): free positioning
+     ============================================================ */
+  .hero__cards {
     position: relative;
-    width: 679px;
-    height: 348px;
-    flex-shrink: 0;
+    width: 1110px;
+    height: 371px;
   }
 
-  /* ====== Decorative icons — desktop (64px) ====== */
-  .hero__icons {
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-  }
-
-  .hero__icon {
-    position: absolute;
-    width: 64px;
-    height: 64px;
-    display: block;
-    /* Parent .hero__icons has pointer-events:none so clicks pass through to
-       the resume card. Icons themselves opt back in so the orbit-pause +
-       scale-up hover (animations.md §4.2) can fire. */
-    pointer-events: auto;
-    will-change: transform;
-  }
-
-  /* Absolute positions per Figma node 472:16030 */
-  .hero__icon--clever          { left: 226px; top: 0;     }
-  .hero__icon--google-calendar { left: 388px; top: 0;     }
-  .hero__icon--flower          { left: 68px;  top: 30px;  }
-  .hero__icon--figma           { left: 546px; top: 30px;  }
-  .hero__icon--gemini          { left: 0;     top: 130px; }
-  .hero__icon--eye             { left: 615px; top: 130px; }
-  .hero__icon--claude          { left: 68px;  top: 230px; }
-  .hero__icon--notion          { left: 546px; top: 230px; }
-  .hero__icon--flash           { left: 226px; top: 284px; }
-  .hero__icon--slack           { left: 388px; top: 284px; }
-
-  /* ====== Resume card ====== */
+  /* Shared card chrome */
   .hero__card {
-    position: absolute;
-    left: 170px;  /* centers the 338px card within 679px container */
-    top: 0;
-    width: 338px;
-    height: 349px;
-  }
-
-  /* Sky background (behind the paper card) */
-  .hero__sky-wrap {
-    position: absolute;
-    left: 39px;
-    top: 0;
-    width: 261px;
-    height: 331px;
-    border-radius: var(--radius-xl);
+    position: relative; /* positioning context for the skeleton overlay */
+    background-color: var(--color-bg-dark-elevated); /* #1D1D1D */
+    border: 1px solid var(--color-stroke-black-on-dark); /* #333 */
+    border-radius: var(--radius-2xl); /* 20px */
     overflow: hidden;
   }
 
-  .hero__sky-img {
-    display: block;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: var(--radius-xl);
+  .hero__card-head {
+    display: flex;
+    align-items: center;
+    gap: var(--space-inline-sm); /* 8px */
+    padding: var(--space-inset-2xl) var(--space-inset-2xl) var(--space-inset-xl); /* 24 24 20 */
+    border-bottom: 1px solid var(--color-stroke-black-on-dark);
   }
 
-  /* Paper layer — white card face with shadow.
-     border-radius removed from wrapper (paper SVG has its own rounded shape).
-     Shadow is on the IMG via filter: drop-shadow — this follows the SVG
-     silhouette so the shadow also appears INSIDE the two punched holes
-     (matches Figma "paper" effect). */
-  .hero__paper-wrap {
+  .hero__card-head-label { color: var(--color-text-light-grey-on-dark); } /* #BBBBBB */
+
+  .hero__card-body {
+    padding: var(--space-inset-xl) var(--space-inset-2xl) var(--space-inset-2xl); /* 20 24 24 */
+  }
+
+  /* ── AI Chat card ── */
+  .hero__card--ai {
     position: absolute;
     left: 0;
-    top: 19px;
-    width: 338px;
-    height: 330px;
+    top: 48px;
+    width: 320px;
   }
+  .hero__ai-icon { display: block; width: 20px; height: 20px; }
+  .hero__ai-body { display: flex; flex-direction: column; gap: var(--space-stack-md); } /* 12 */
+  .hero__ai-prompt { color: var(--color-text-light-grey-on-dark); } /* #BBBBBB */
 
-  /* Hole-fillers. Coords come straight from the SVG (viewBox 338×330):
-     centers at (26, 26) and (26, 62), each with radius 10. The 20×20
-     square is offset 10px back from the center → top-left at (16, 16)
-     and (16, 52). Mobile paper-wrap is 292×289 (≈0.864× scale), so
-     mobile values are scaled proportionally below. */
-  .hero__paper-hole {
-    position: absolute;
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    background-color: var(--color-bg-white);
-    pointer-events: none;
+  .hero__ai-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
   }
-  .hero__paper-hole--top    { left: 16px; top: 16px; }
-  .hero__paper-hole--bottom { left: 16px; top: 52px; }
-
-  .hero__paper-img {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    display: block;
-    /* Chained drop-shadows mirror --shadow-card from tokens.css.
-       Third layer (rgba 0) skipped — would be invisible. */
-    filter:
-      drop-shadow(-2px 2px 2px rgba(0, 0, 0, 0.05))
-      drop-shadow(-4px 3px 2px rgba(0, 0, 0, 0.012));
-  }
-
-  /* Avatar circle */
-  .hero__avatar {
-    position: absolute;
-    left: 50%;
-    top: 32px;
-    transform: translateX(-50%);
-    width: 112px;
-    height: 112px;
-    border-radius: var(--radius-pill);
-    overflow: hidden;
-    background-color: var(--color-bg-grey-muted);
-    flex-shrink: 0;
-  }
-
-  .hero__avatar-img {
-    display: block;
-    width: 112px;
-    height: 112px;
-    object-fit: cover;
-    object-position: top center;
-  }
-
-  /* Open Resume button */
-  .hero__resume-btn {
-    position: absolute;
-    left: 50%;
-    top: 172px;
-    transform: translateX(-50%);
+  .hero__ai-websearch {
     display: inline-flex;
     align-items: center;
-    gap: var(--space-inset-sm);  /* 8px */
-    height: 32px;
-    padding-top: var(--space-inset-xs);
-    padding-bottom: var(--space-inset-xs);
-    padding-left: var(--space-inset-lg);
-    padding-right: var(--space-inset-md);
-    background-color: var(--color-bg-white);
-    border: 1px solid var(--color-stroke-medium-grey);
-    border-radius: var(--radius-l);
-    color: var(--color-text-dark-grey);
+    padding: var(--space-inset-xs) var(--space-inset-sm); /* 4 8 */
+    border: 1px solid var(--color-stroke-dark-grey); /* #4A4A4A */
+    border-radius: var(--radius-m); /* 8 */
+    color: var(--color-text-grey-muted-on-dark); /* #848484 */
     white-space: nowrap;
-    transition: border-color var(--duration-fast) var(--ease-out); /* 150ms */
   }
-
-  /* Hover: border darkens to stroke/dark-grey. Pointer-only — no hover
-     on touch. */
-  @media (hover: hover) and (pointer: fine) {
-    .hero__resume-btn:hover {
-      border-color: var(--color-stroke-dark-grey);
-    }
+  /* Decorative send button — resting state (#404040 + light arrow). */
+  .hero__ai-send {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-l); /* 12 */
+    background-color: #404040; /* Figma button_decorative fill (no token) */
+    flex-shrink: 0;
+    transition: background-color var(--duration-fast) var(--ease-out),
+                transform var(--duration-fast) var(--ease-out);
   }
+  .hero__ai-send-icon { display: block; width: 20px; height: 20px; }
+  /* Rest = light arrow on #404040; active (pressed) = dark arrow on white. */
+  .hero__ai-send-icon--active { display: none; }
+  .hero__ai-send--active {
+    background-color: var(--color-bg-white);
+  }
+  .hero__ai-send--active .hero__ai-send-icon--rest   { display: none; }
+  .hero__ai-send--active .hero__ai-send-icon--active { display: block; }
+  /* Brief "press" scale used during the intro auto-click. */
+  .hero__ai-send--press { transform: scale(0.9); }
 
-  .hero__resume-btn-icon {
-    display: block;
-    width: 20px;
-    height: 20px;
+  /* ── Profile card ── */
+  .hero__card--profile {
+    position: absolute;
+    left: 406px;
+    top: 0;
+    width: 320px;
+  }
+  .hero__profile-head { gap: var(--space-inline-md); } /* 12 */
+  .hero__avatar {
+    position: relative;
+    width: 64px;
+    height: 64px;
+    border-radius: var(--radius-pill);
+    overflow: visible;
     flex-shrink: 0;
   }
+  .hero__avatar-img {
+    width: 64px;
+    height: 64px;
+    border-radius: var(--radius-pill);
+    object-fit: cover;
+    object-position: top center;
+    display: block;
+  }
+  .hero__avatar-status {
+    position: absolute;
+    right: 1px;
+    bottom: 1px;
+    width: 13px;
+    height: 13px;
+    border-radius: var(--radius-pill);
+    background-color: #34B67E; /* Figma online dot (no token) */
+    border: 2px solid var(--color-text-white);
+  }
+  .hero__profile-name { display: flex; flex-direction: column; }
+  .hero__profile-name-main { color: var(--color-text-light-grey-on-dark); }
+  .hero__profile-role { color: var(--color-text-light-grey-on-dark); }
 
-  /* Optical text alignment — Inter Tight has tall ascenders, so flex-centered
-     text reads ~1-2px higher than the mathematical center of the line-box.
-     translateY pulls the text down so its visual center (between cap-line and
-     baseline) aligns with the icon's visual center (matches Figma). */
-  .hero__resume-btn span {
-    transform: translateY(1px);
+  .hero__profile-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-stack-sm); /* 8 */
+  }
+  .hero__profile-item {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-inline-sm); /* 8 */
+  }
+  .hero__check-icon { display: block; width: 24px; height: 24px; flex-shrink: 0; }
+  .hero__profile-text { color: var(--color-text-light-grey-on-dark); }
+  .hero__profile-label {
+    color: var(--color-text-light-grey-on-dark);
+    font-weight: var(--font-weight-semibold);
   }
 
-  /* Touch devices: intentionally NO min-height override here. WCAG 2.5.5
-     recommends 44×44 tap targets, but Marianna's call is to keep the
-     32px height on phones too — the button sits in the centre of the
-     hero card with no neighbouring clickable elements, so accidental
-     mis-taps aren't a risk and the optical mismatch between desktop
-     (32px) and Android (was 44px) goes away. */
+  /* ── Info card: Source + Data ── */
+  .hero__info {
+    position: absolute;
+    left: 890px;
+    top: 20px;
+    width: 220px;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-stack-xl); /* 20 */
+  }
+  /* Source/Data head paddings are 20/20/16 (tighter than AI/profile 24). */
+  .hero__info-head {
+    padding: var(--space-inset-xl) var(--space-inset-xl) var(--space-inset-lg); /* 20 20 16 */
+  }
+  .hero__info-body {
+    position: relative; /* so the skeleton overlay centres in the BODY, not the card */
+    display: flex;
+    justify-content: center;
+    padding: var(--space-inset-xl) var(--space-inset-2xl) var(--space-inset-2xl);
+  }
 
-  /* Caption */
-  .hero__caption {
+  /* Download CV — Button/Medium/Secondary (dark). */
+  .hero__cv-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-inset-sm); /* 8 */
+    padding: var(--space-inset-sm) var(--space-inset-md) var(--space-inset-sm) var(--space-inset-lg); /* 8 12 8 16 */
+    background-color: var(--color-bg-black); /* #252525 */
+    border: 1px solid var(--color-stroke-dark-grey); /* #4A4A4A */
+    border-radius: var(--radius-l); /* 12 */
+    color: var(--color-text-light-grey-on-dark);
+    white-space: nowrap;
+    transition: border-color var(--duration-fast) var(--ease-out);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .hero__cv-btn:hover { border-color: var(--color-stroke-grey-on-dark); } /* #737373 */
+  }
+  .hero__cv-btn:focus-visible {
+    outline: 2px solid var(--color-text-light-on-dark);
+    outline-offset: 2px;
+  }
+  .hero__cv-icon { display: block; width: 20px; height: 20px; flex-shrink: 0; }
+
+  /* ── Data accuracy ring ── */
+  .hero__data-body {
+    position: relative; /* so the skeleton overlay centres in the BODY, not the card */
+    display: flex;
+    justify-content: center;
+    padding: var(--space-inset-xl) var(--space-inset-2xl) var(--space-inset-2xl);
+  }
+  .hero__ring { position: relative; width: 72px; height: 72px; }
+  .hero__ring-svg { display: block; }
+  .hero__ring-track {
+    fill: none;
+    stroke: var(--color-stroke-black-on-dark); /* #333 track (hidden at 100%) */
+    stroke-width: 4;
+  }
+  .hero__ring-fill {
+    fill: none;
+    stroke: url(#hero-ring-grad); /* #3EDA96 → #288C61 (Figma gradient) */
+    stroke-width: 4;
+    stroke-linecap: round;
+    /* pathLength=100 → dashoffset 0 = full ring (default/final), 100 = empty.
+       The intro sets it to 100 then tweens to 0 ("draws" the ring). */
+    stroke-dasharray: 100;
+    stroke-dashoffset: 0;
+  }
+  .hero__ring-value {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* Figma: Fira Code Regular 18px, #E9E9E9 (fixed — ring is 72px both sizes). */
+    font-family: var(--font-family-mono);
+    font-weight: var(--font-weight-regular);
+    font-size: 18px;
+    letter-spacing: var(--letter-spacing-normal);
+    color: var(--color-text-light-on-dark); /* #E9E9E9 */
+  }
+
+  /* ============================================================
+     Connectors — desktop (over the 1110×371 area, cards-relative
+     coords from Figma 1118:45481). Three z-layers:
+       lines (z1)  ── UNDER the cards, running in the gaps
+       cards (z2)
+       dots  (z4)  ── ABOVE the cards, centred on the line at each edge
+     ============================================================ */
+  .hero__card--ai,
+  .hero__card--profile,
+  .hero__info { z-index: 2; }
+
+  .hero__lines,
+  .hero__dots {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+  .hero__lines { z-index: 1; }
+  .hero__dots  { z-index: 4; }
+  .hero__connectors--mobile { display: none; }
+
+  .hero__line { position: absolute; display: block; }
+  /* Straight: AI right edge (x320) → profile left edge (x406) at line y188. */
+  .hero__line--straight { left: 320px; top: 187px; width: 85px; height: 2px; }
+  /* Upper curve: profile right (726,188) → Source left (890,86). */
+  .hero__line--upper    { left: 725px; top: 86px;  width: 166px; height: 103px; }
+  /* Bottom curve: profile right (726,188) → Data left (890,273). */
+  .hero__line--bottom   { left: 725px; top: 187px; width: 167px; height: 88px; }
+
+  /* Glowing connector dot — Figma "light circle": a bright ~8px core (blur .8)
+     over a blurred halo (blur 5). Positioned by CENTRE (translate −50%,−50%)
+     so left/top are the exact junction point. */
+  .hero__dot {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    transform: translate(-50%, -50%);
+  }
+  .hero__dot::before { /* halo — Figma light circle: 10px #D9D9D9 @ .8, blur 5.4 */
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: var(--radius-pill);
+    background-color: #D9D9D9; /* Figma light-circle glow (no token) */
+    opacity: 0.8;
+    filter: blur(5.4px);
+  }
+  .hero__dot::after { /* core — Figma: 6px #D9D9D9, blur 1 */
+    content: '';
     position: absolute;
     left: 50%;
-    top: 274px;
-    transform: translateX(-50%);
-    width: 306px;
-    text-align: center;
-    color: var(--color-text-grey-muted);
+    top: 50%;
+    width: 6px;
+    height: 6px;
+    transform: translate(-50%, -50%);
+    border-radius: var(--radius-pill);
+    background-color: #D9D9D9;
+    filter: blur(1px);
   }
+  /* Centres (cards-relative) — on the card edge, on the line. */
+  .hero__dot--d1 { left: 320px; top: 188px; } /* AI right */
+  .hero__dot--d2 { left: 406px; top: 188px; } /* profile left */
+  .hero__dot--d3 { left: 726px; top: 188px; } /* profile right (shared) */
+  .hero__dot--d4 { left: 890px; top: 86px;  } /* Source left */
+  .hero__dot--d5 { left: 890px; top: 273px; } /* Data left */
 
   /* ============================================================
-     Desktop / Mobile icon-set toggle
+     Stacked layout — tablet + mobile (<1280px), per Figma 647-23550.
+     Profile full width, then Source | Data row. NO AI Chat card.
      ============================================================ */
-  .hero__icons--mobile { display: none; } /* hidden on desktop */
-
-  /* ============================================================
-     Mobile (≤767px) — per Figma node 647:23550 (375px frame).
-     Card 294×304px, card-area 343×490px (icons extend above and
-     below the card visually). All coordinates match Figma exactly.
-     ============================================================ */
-
-  @media (max-width: 767px) {
-    /* Inner column gap on mobile — 32px between title group and card area
-       (per Figma node 647:21901: title-group bottom y=134, resume-card-icons y=166 → 32px) */
-    .hero__inner {
-      gap: 32px;
+  @media (max-width: 1279px) {
+    .hero__cards {
+      width: 100%;
+      max-width: 375px;
+      height: auto;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0; /* the connector strip provides the profile→row spacing */
     }
 
-    /* Title group gap between {OPEN TO WORK} tag and h1 (Figma: 12px) */
-    .hero__title-group {
-      gap: var(--space-stack-md); /* 8px mobile — close to Figma 12px */
-    }
+    .hero__card--ai { display: none; }
+    .hero__lines--desktop,
+    .hero__dots--desktop { display: none; }
 
-    /* Card-area: full container width 343px (=375 viewport - 2×16 page margin)
-       Height 490px accommodates icons that visually extend past the card.
-       Per Figma frame 647:21905. */
-    .hero__card-area {
-      width: 343px;
-      height: 490px;
-    }
+    /* Reorder so the mobile connector strip sits between profile and the row
+       (DOM order puts it first). */
+    .hero__card--profile { order: 1; position: relative; left: auto; top: auto; width: 100%; }
+    .hero__connectors--mobile { order: 2; }
+    .hero__info { order: 3; }
 
-    /* Swap icon sets: hide desktop 10-icon set, show mobile 6-icon set */
-    .hero__icons--desktop { display: none; }
-
-    /* Mobile icons skip the orbital wobble — desktop-only animation. */
-    .hero__icon-m {
-      pointer-events: auto;
-    }
-    .hero__icons--mobile  { display: block; }
-
-    /* Mobile icons base: 48px (sourced from 192px PNG for 4x retina) */
-    .hero__icon-m {
-      position: absolute;
-      width: 48px;
-      height: 48px;
+    /* Connector strip: a 57px-tall relative band (Figma gap profile→row).
+       z-index 4 lifts its dots ABOVE the profile/row cards; the curves live in
+       the gap so they don't cross card faces. */
+    .hero__connectors--mobile {
       display: block;
+      position: relative;
+      inset: auto;
+      width: 100%;
+      height: 57px;
+      z-index: 4;
     }
+    .hero__line--mleft  { left: auto; right: 50%; top: 0; width: 92px; height: 58px; }
+    .hero__line--mright { left: 50%; right: auto; top: 0; width: 92px; height: 58px; }
+    /* Dots centred (base translate −50%,−50%): m1 = profile bottom centre,
+       m2 = Source top, m3 = Data top. */
+    .hero__dot--m1 { left: 50%;                top: 0;    }
+    .hero__dot--m2 { left: calc(50% - 90px);   top: 56px; }
+    .hero__dot--m3 { left: calc(50% + 90px);   top: 56px; }
 
-    /* Mobile icon positions per Figma frames 647:21921 (top) + 647:22186 (bottom).
-       All Y coords use a +10 shift from raw Figma (raw top-icons frame y=-10)
-       so nothing is negative in CSS. Card top also gets +10 (y=88 vs Figma 78).
-       Gap between top icons bottom and card top = 10px (matches Figma). */
-    /* Top trio — flower (left) · gemini (raised center) · claude (right) */
-    .hero__icon-m--flower { left: 24px;  top: 30px;  }
-    .hero__icon-m--gemini { left: 148px; top: 0;     }
-    .hero__icon-m--claude { left: 270px; top: 30px;  }
-    /* Bottom trio — figma (left) · eye (lowered center) · notion (right) */
-    .hero__icon-m--figma  { left: 25px;  top: 412px; }
-    .hero__icon-m--eye    { left: 147px; top: 442px; }
-    .hero__icon-m--notion { left: 270px; top: 412px; }
-
-    /* Gentle bottom-up float (Marianna): each icon drifts ~6px (≈12% of
-       its 48px size) over 4s, ease-in-out. Per-icon negative delays
-       distribute the phases across the cycle so the six icons read as
-       independent floats — like bubbles on water — instead of moving
-       in lockstep. Pure CSS; cheaper than a JS RAF loop on mobile.
-       transform-only animation keeps it on the GPU. */
-    .hero__icon-m {
-      animation: hero-mobile-float 4s ease-in-out infinite;
-      will-change: transform;
+    .hero__info {
+      position: static;
+      width: 100%;
+      flex-direction: row;
+      gap: var(--space-inline-md); /* 12 */
     }
-    .hero__icon-m--flower { animation-delay: 0s;    }
-    .hero__icon-m--gemini { animation-delay: -0.7s; }
-    .hero__icon-m--claude { animation-delay: -1.4s; }
-    .hero__icon-m--figma  { animation-delay: -2.0s; }
-    .hero__icon-m--eye    { animation-delay: -2.7s; }
-    .hero__icon-m--notion { animation-delay: -3.3s; }
-
-    @media (prefers-reduced-motion: reduce) {
-      .hero__icon-m { animation: none; }
-    }
+    .hero__info > .hero__card { flex: 1 1 0; }
   }
 
-  /* Keyframes need to live OUTSIDE the @media block because some browsers
-     scope @keyframes by media context. Putting them in the global scope
-     guarantees the animation reference resolves on mobile. */
-  @keyframes hero-mobile-float {
-    0%, 100% { transform: translateY(0); }
-    50%      { transform: translateY(-6px); }
-  }
-
-  /* (Re-open the mobile @media so the closing brace below still matches.
-     Trailing rules continue inside the same media query below.) */
+  /* ── Mobile-only (≤767px) ──
+     Head/body paddings already scale to Figma mobile values via the spacing
+     tokens (head 20/20/16→16/16/12, body 20/24/24→16/20/20), so only the
+     profile width, ring size and "100%" size need overriding here. */
   @media (max-width: 767px) {
+    /* Profile card capped at Figma 311px, centred (per Marianna). The
+       Source|Data row stays full container width. */
+    .hero__card--profile { max-width: 311px; margin-inline: auto; }
 
-    /* Card: positioned at x=24, y=88 within card-area (Figma y=78, shifted +10
-       to leave room for top icons which extended above the original Figma frame) */
-    .hero__card {
-      position: absolute;
-      left: 24px;
-      top: 88px;
-      width: 294px;
-      height: 304px;
-    }
+    .hero__ring { width: 60px; height: 60px; } /* Figma mobile ring */
+    .hero__ring-value { font-size: 16px; }      /* Figma mobile "100%" */
 
-    /* Sky background: 206×300, centered in 294px card (left:44, gap each side 44).
-       Figma spec: 206×304, but paper SVG (viewBox 338×330) preserves aspect ratio
-       inside the 292×289 paper-wrap and renders ~285px tall. Sky shortened to 300
-       so its bottom matches paper's visual bottom — no blue strip leaking below. */
-    .hero__sky-wrap {
-      left: 44px;
-      top: 0;
-      width: 206px;
-      height: 300px;
+    /* Source/Data bodies — Figma uses a FIXED 77px body with content centred
+       (head 47 + body 77 = 124). Because the button (40) and ring (60) differ
+       in size, centring gives each a DIFFERENT visual padding (Source roomier,
+       Data tighter) — exactly as in the design. Horizontal padding (20) stays. */
+    .hero__info-body,
+    .hero__data-body {
+      height: 77px;
+      padding-top: 0;
+      padding-bottom: 0;
+      align-items: center;
     }
+  }
 
-    /* Paper layer: 292×289 at x=1, y=15 within card */
-    .hero__paper-wrap {
-      left: 1px;
-      top: 15px;
-      width: 292px;
-      height: 289px;
-    }
+  /* ============================================================
+     Intro animation (§8.1) — loading → reveal.
+     Default DOM = FINAL state. An early inline script adds `.is-intro`
+     only on a fresh full load (never on internal View-Transition nav),
+     flipping to the loading state; the JS timeline then adds `.is-revealed`.
+     No-JS keeps the final state (nothing hidden).
+     ============================================================ */
 
-    /* Hole-fillers scale to paper (0.864× of desktop SVG): 17px ⌀,
-       centers at (22.5, 22.5) and (22.5, 54.3) → top-left rounded. */
-    .hero__paper-hole {
-      width: 17px;
-      height: 17px;
-    }
-    .hero__paper-hole--top    { left: 14px; top: 14px; }
-    .hero__paper-hole--bottom { left: 14px; top: 46px; }
+  /* Reveal targets — visible by default; hidden during intro; fade in on reveal. */
+  .hero__reveal { transition: opacity var(--duration-slow) var(--ease-out); }
+  .hero__cards.is-intro .hero__reveal { opacity: 0; }
+  .hero__cards.is-intro.is-revealed .hero__reveal { opacity: 1; }
 
-    /* Avatar: 92×92 at x=100, y=28 within paper (centered: 100+46=146=292/2) */
-    .hero__avatar {
-      top: 28px;
-      width: 92px;
-      height: 92px;
-    }
+  /* Skeleton overlays — hidden by default; shown during intro; fade out on reveal. */
+  .hero__skel {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--duration-slow) var(--ease-out);
+  }
+  .hero__cards.is-intro .hero__skel { opacity: 1; }
+  .hero__cards.is-intro.is-revealed .hero__skel { opacity: 0; }
 
-    .hero__avatar-img {
-      width: 92px;
-      height: 92px;
-    }
+  /* Shimmer shapes (ref 21st.dev v-skeleton-8). */
+  .skel {
+    display: block;
+    border-radius: var(--radius-s);
+    /* Base a step lighter than the #1D1D1D card so the shapes stay visible
+       between shimmer passes; a brighter band sweeps across. */
+    background: linear-gradient(100deg,
+      #2c2c2c 30%,
+      #3a3a3a 50%,
+      #2c2c2c 70%);
+    background-size: 200% 100%;
+    animation: hero-shimmer 1.4s ease-in-out infinite;
+  }
+  @keyframes hero-shimmer {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+  .skel-bar    { height: 12px; }
+  .skel-circle { width: 64px; height: 64px; border-radius: var(--radius-pill); flex-shrink: 0; }
+  .skel-dot    { width: 16px; height: 16px; border-radius: var(--radius-pill); flex-shrink: 0; }
+  .skel-btn    { width: 170px; height: 40px; border-radius: var(--radius-l); }
+  .skel-ring   { width: 72px; height: 72px; border-radius: var(--radius-pill); }
 
-    /* "Open Resume" button: top:140 within paper. Width auto-sizes to content. */
-    .hero__resume-btn {
-      top: 140px;
-      gap: var(--space-inset-xs);
-      padding-left: var(--space-inset-md);
-      padding-right: var(--space-inset-sm);
-    }
-
-    /* Arrow shrinks to 16px on mobile. ArrowSwap renders its own scoped
-       elements, so reach into them with :global from the (scoped) button. */
-    .hero__resume-btn-icon,
-    .hero__resume-btn :global(.arrow-swap),
-    .hero__resume-btn :global(.arrow-swap-icon) {
-      width: 16px;
-      height: 16px;
-    }
-
-    /* Caption: 268px wide at x=12, y=243 within paper.
-       Font-size 12px via --font-size-caption-mono mobile override. */
-    .hero__caption {
-      top: 243px;
-      width: 268px;
-    }
+  /* Skeleton layouts — mirror each card's padding so shapes sit where the
+     real content will. */
+  .hero__skel--profile {
+    display: flex;
+    flex-direction: column;
+  }
+  /* prow mirrors the head padding, pitems the body padding, so the shapes land
+     exactly where the avatar/name and the checklist appear. */
+  .hero__skel-prow {
+    display: flex;
+    align-items: center;
+    gap: var(--space-inline-md); /* 12 */
+    padding: var(--space-inset-2xl) var(--space-inset-2xl) var(--space-inset-xl); /* head 24 24 20 */
+  }
+  .hero__skel-plines { display: flex; flex-direction: column; gap: 12px; flex: 1; }
+  .hero__skel-pitems {
+    display: flex;
+    flex-direction: column;
+    gap: 14px; /* between items (real item gap + breathing room) */
+    padding: var(--space-inset-xl) var(--space-inset-2xl) var(--space-inset-2xl); /* body 20 24 24 */
+  }
+  .hero__skel-item   { display: flex; align-items: flex-start; gap: var(--space-inline-sm); } /* 8 */
+  /* Line pitch ≈ the real 16px/1.48 text line-height (bar 12 + gap 13 ≈ 25). */
+  .hero__skel-ilines { display: flex; flex-direction: column; gap: 13px; flex: 1; }
+  .hero__skel--source,
+  .hero__skel--data { display: flex; align-items: center; justify-content: center; }
+  @media (max-width: 767px) {
+    .hero__skel--data .skel-ring { width: 60px; height: 60px; } /* match mobile ring */
   }
 </style>
 
 <script>
-  /* Hero icon orbit (animations.md §4.1 + §4.2).
-     All 10 desktop icons share ONE elliptical orbit (rx=290, ry=145)
-     around the resume card's center. Two non-obvious things in here:
+  /* Hero intro animation (§8.1). Plays ONCE per session — on a fresh full load
+     / hard-refresh, never on internal View-Transition nav (the window flag
+     survives the client-side swap). The early inline script already flipped the
+     hero into the loading state (`.is-intro`); here we run the timeline.
 
-     1) ARC-LENGTH parameterization. A naïve (rx·cos t, ry·sin t) at
-        constant dt/dt moves the icon FASTER near the short-axis ends and
-        SLOWER near the long-axis ends (because the ellipse stretches the
-        parameter space). Visually adjacent icons appeared to "breathe"
-        — distance swelling and shrinking each lap, sometimes overlapping.
-        Fix: pre-compute an arc-length table and step every icon by equal
-        ARC LENGTH per frame. Then the chord between adjacent icons
-        stays roughly constant (~140px for 10 slots on this ellipse).
-
-     2) Even arc-length slots, NOT even angles. Icons are sorted by their
-        Figma angular position and assigned slots 0..9 in that order; each
-        slot lives at slot/N of the total perimeter. Preserves rough order
-        so the initial snap-in is minimal.
-
-     Hover: pause the master tween (one tween drives all icons), scale
-     the hovered icon 1.15× (250ms ease-out). Leave: reverse + resume.
-     Mobile icons stay static. Reduced motion: no snap-in, no orbit, no
-     hover scale — icons stay at Figma positions per accessibility.md. */
+     Desktop: typewriter (2nd sentence) → send button auto-press → active →
+     skeleton reveal + ring draw + counter 0→100 → send inactive.
+     Mobile: skeleton ~3s → reveal + ring draw + counter (no typewriter). */
   import { gsap } from 'gsap';
 
-  type OrbitTween = ReturnType<typeof gsap.to>;
-  let orbitTweens: OrbitTween[] = [];
+  function runHeroIntro() {
+    const hero = document.getElementById('hero');
+    if (!hero || window.__heroIntroPlayed) return;
+    const cards = hero.querySelector<HTMLElement>('.hero__cards');
+    if (!cards || !cards.classList.contains('is-intro')) return; // inline didn't arm it → skip
+    window.__heroIntroPlayed = true;
 
-  const RX = 290;             // px — horizontal semi-axis
-  const RY = 145;             // px — vertical semi-axis
-  const BASE_PERIOD = 22;     // s — full revolution (meditative pace)
-  const SNAP_DURATION = 0.8;  // s — initial slide from Figma → orbit
-  const HOVER_SCALE = 1.15;
-  const HOVER_DURATION = 0.25;
-  const ARC_SAMPLES = 360;    // resolution of arc-length lookup table
+    const isNarrow = window.matchMedia('(max-width: 1279px)').matches;
+    const s2 = hero.querySelector<HTMLElement>('.hero__ai-s2');
+    const send = hero.querySelector<HTMLElement>('.hero__ai-send');
+    const ringFill = hero.querySelector<SVGElement>('.hero__ring-fill');
+    const ringValue = hero.querySelector<HTMLElement>('.hero__ring-value');
+    const fullText = s2 ? (s2.getAttribute('data-full') ?? s2.textContent ?? '') : '';
 
-  function killOrbit() {
-    orbitTweens.forEach((t) => t.kill());
-    orbitTweens = [];
-  }
+    // Loading baseline (inline script set these too, but be safe on re-entry).
+    if (s2) s2.textContent = '';
+    if (ringValue) ringValue.textContent = '0%';
+    if (ringFill) (ringFill as unknown as HTMLElement).style.strokeDashoffset = '100';
 
-  type ArcSample = { t: number; s: number };
-  function buildArcTable(rx: number, ry: number, samples: number): { table: ArcSample[]; total: number } {
-    const dt = (2 * Math.PI) / samples;
-    const table: ArcSample[] = [{ t: 0, s: 0 }];
-    let s = 0;
-    let prevX = rx;
-    let prevY = 0;
-    for (let i = 1; i <= samples; i++) {
-      const t = i * dt;
-      const x = rx * Math.cos(t);
-      const y = ry * Math.sin(t);
-      s += Math.hypot(x - prevX, y - prevY);
-      table.push({ t, s });
-      prevX = x;
-      prevY = y;
-    }
-    return { table, total: s };
-  }
+    const tl = gsap.timeline();
 
-  // Binary-search the arc table for parameter t at a given arc length s.
-  function paramAtArcLength(table: ArcSample[], total: number, targetS: number): number {
-    let s = targetS % total;
-    if (s < 0) s += total;
-    let lo = 0;
-    let hi = table.length - 1;
-    while (lo < hi) {
-      const mid = (lo + hi) >> 1;
-      if (table[mid].s < s) lo = mid + 1;
-      else hi = mid;
-    }
-    if (lo === 0) return 0;
-    const a = table[lo - 1];
-    const b = table[lo];
-    const frac = (s - a.s) / (b.s - a.s || 1);
-    return a.t + frac * (b.t - a.t);
-  }
-
-  function initHeroOrbit() {
-    const cardArea = document.querySelector<HTMLElement>('.hero__card-area');
-    const icons = Array.from(
-      document.querySelectorAll<HTMLElement>('.hero__icons--desktop .hero__icon'),
-    );
-    if (!cardArea || icons.length === 0) return;
-
-    killOrbit();
-    icons.forEach((el) => gsap.set(el, { clearProps: 'transform' }));
-
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-
-    const rect = cardArea.getBoundingClientRect();
-    const centerX = rect.width / 2;
-    const centerY = rect.height / 2;
-
-    const { table: arcTable, total: arcLength } = buildArcTable(RX, RY, ARC_SAMPLES);
-
-    type IconInfo = {
-      el: HTMLElement;
-      cssX: number;
-      cssY: number;
-      originalAngle: number;
-      offsetS: number;          // arc-length offset = this icon's slot * (arcLength / N)
-      targetX: number;
-      targetY: number;
-    };
-    const data: IconInfo[] = icons.map((el) => {
-      const cssX = el.offsetLeft + el.offsetWidth / 2 - centerX;
-      const cssY = el.offsetTop + el.offsetHeight / 2 - centerY;
-      let angle = Math.atan2(cssY, cssX);
-      if (angle < 0) angle += Math.PI * 2;
-      return { el, cssX, cssY, originalAngle: angle, offsetS: 0, targetX: 0, targetY: 0 };
-    });
-
-    // Assign arc-length slots in original-angle order so each icon barely shifts.
-    [...data]
-      .sort((a, b) => a.originalAngle - b.originalAngle)
-      .forEach((item, slot) => {
-        item.offsetS = (slot / icons.length) * arcLength;
-        const t = paramAtArcLength(arcTable, arcLength, item.offsetS);
-        item.targetX = RX * Math.cos(t);
-        item.targetY = RY * Math.sin(t);
-      });
-
-    // Phase 1: per-icon snap-in from Figma → orbit slot.
-    data.forEach((info) => {
-      gsap.fromTo(
-        info.el,
-        { x: 0, y: 0 },
-        {
-          x: info.targetX - info.cssX,
-          y: info.targetY - info.cssY,
-          duration: SNAP_DURATION,
-          ease: 'power2.out',
+    // Desktop only: the send button is ACTIVE (white) while the prompt types;
+    // when typing finishes it presses, then goes inactive as the cards load.
+    if (!isNarrow && s2 && fullText) {
+      if (send) send.classList.add('hero__ai-send--active');
+      tl.to({ i: 0 }, {
+        i: fullText.length,
+        duration: 1.3,
+        ease: 'none',
+        onUpdate() {
+          const n = Math.round((this.targets()[0] as { i: number }).i);
+          s2.textContent = fullText.slice(0, n);
         },
-      );
-    });
-
-    // Phase 2: ONE master tween advances arc-length progress; onUpdate
-    // positions every icon. Single tween = clean pause/resume on hover.
-    const state = { progress: 0 };
-    const masterTween = gsap.to(state, {
-      progress: 1,
-      duration: BASE_PERIOD,
-      ease: 'none',           // linear — ease-in-out hitches at the loop seam
-      repeat: -1,
-      delay: SNAP_DURATION,
-      onUpdate: () => {
-        const advance = state.progress * arcLength;
-        for (const info of data) {
-          const s = info.offsetS + advance;
-          const t = paramAtArcLength(arcTable, arcLength, s);
-          const x = RX * Math.cos(t);
-          const y = RY * Math.sin(t);
-          gsap.set(info.el, { x: x - info.cssX, y: y - info.cssY });
-        }
-      },
-    });
-    orbitTweens.push(masterTween);
-
-    data.forEach(({ el }) => {
-      el.addEventListener('mouseenter', () => {
-        masterTween.pause();
-        gsap.to(el, {
-          scale: HOVER_SCALE,
-          duration: HOVER_DURATION,
-          ease: 'power2.out',
-          overwrite: 'auto',
-        });
       });
-      el.addEventListener('mouseleave', () => {
-        gsap.to(el, {
-          scale: 1,
-          duration: HOVER_DURATION,
-          ease: 'power2.out',
-          overwrite: 'auto',
-        });
-        masterTween.resume();
-      });
-    });
+      if (send) {
+        // Quick "press" gesture right after typing.
+        tl.call(() => send.classList.add('hero__ai-send--press'), undefined, '+=0.15');
+        tl.call(() => send.classList.remove('hero__ai-send--press'), undefined, '+=0.12');
+      }
+    } else {
+      // Mobile: hold the skeleton ~1.5s.
+      tl.to({}, { duration: 1.5 });
+    }
+
+    // The "send" completes → button goes inactive and the cards load in:
+    // skeleton → content, ring draws + counter 0→100 (all together).
+    tl.addLabel('reveal', '+=0.1');
+    if (!isNarrow && send) {
+      tl.call(() => send.classList.remove('hero__ai-send--active'), undefined, 'reveal');
+    }
+    tl.call(() => cards.classList.add('is-revealed'), undefined, 'reveal');
+    if (ringFill) {
+      tl.to(ringFill, { strokeDashoffset: 0, duration: 1.1, ease: 'power1.inOut' }, 'reveal');
+    }
+    if (ringValue) {
+      tl.to({ v: 0 }, {
+        v: 100,
+        duration: 1.1,
+        ease: 'power1.inOut',
+        onUpdate() {
+          ringValue.textContent = Math.round((this.targets()[0] as { v: number }).v) + '%';
+        },
+      }, 'reveal');
+    }
+
+    // Clean up the intro classes and lock in the final values.
+    tl.call(() => {
+      cards.classList.remove('is-intro', 'is-revealed');
+      if (s2) s2.textContent = fullText;
+      if (ringValue) ringValue.textContent = '100%';
+      if (ringFill) (ringFill as unknown as HTMLElement).style.strokeDashoffset = '0';
+    }, undefined, '+=0.1');
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initHeroOrbit);
-  } else {
-    initHeroOrbit();
-  }
-  document.addEventListener('astro:page-load', initHeroOrbit);
+  if (document.readyState !== 'loading') runHeroIntro();
+  else document.addEventListener('DOMContentLoaded', runHeroIntro);
+  document.addEventListener('astro:page-load', runHeroIntro);
 </script>

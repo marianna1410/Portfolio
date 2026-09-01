@@ -12,9 +12,13 @@
 
   /* Backgrounds */
   --color-bg-white:       #FFFFFF;
-  --color-bg-light-grey:  #F4F4F3;
+  --color-bg-light-grey:  #F2F2F2;  /* Changed (was #F4F4F3) — redesign brief §2, Figma background/light grey */
   --color-bg-grey-muted:  #E5E5E5;
   --color-bg-black:       #252525;
+  /* Dark backgrounds (New — redesign brief §2) */
+  --color-bg-dark-elevated:  #1D1D1D;  /* background/dark elevated */
+  --color-bg-deep-black:     #0F0F0F;  /* background/deep black */
+  --color-bg-under-accent:   #18242A;  /* background/under accent */
 
   /* Texts */
   --color-text-black:       #252525;
@@ -22,11 +26,18 @@
   --color-text-grey-muted:  #737373;
   --color-text-white:       #FFFFFF;
   --color-text-disabled:    #BBBBBB;
+  /* On-dark text (New — redesign brief §2) */
+  --color-text-light-on-dark:       #E9E9E9;  /* text/light on dark */
+  --color-text-light-grey-on-dark:  #BBBBBB;  /* text/light grey on dark */
+  --color-text-grey-muted-on-dark:  #848484;  /* text/grey muted on dark */
 
   /* Strokes */
   --color-stroke-light:        #E9E9E9;
   --color-stroke-medium-grey:  #BBBBBB;
   --color-stroke-dark-grey:    #4A4A4A;
+  /* On-dark strokes (New — redesign brief §2) */
+  --color-stroke-grey-on-dark:   #737373;  /* stroke/grey on dark */
+  --color-stroke-black-on-dark:  #333333;  /* stroke/black on dark */
 
   /* Neutrals */
   --color-neutral-grey-100:  #BBBBBB;
@@ -36,24 +47,32 @@
 
   /* Labels */
   --color-label-dark-grey:  #4A4A4A;
-  --color-label-blue:       #0778D5;
+  /* --color-label-blue #0778D5 removed — redesign brief §2 Deleted (was unused). */
 
-  /* Accents */
-  --color-accent-yellow:  #E39B23;
-  --color-accent-red:     #E85949;
+  /* Accents (redesign brief §2 — colourful bold accents removed; blue pair + green kept) */
+  --color-accent-blue:    #93C9E2;  /* New — accent bold/accent blue */
+  --color-accent-dark:    #397D9C;  /* New — accent bold/dark accent */
+  --color-accent-green:   #3EDA96;  /* Changed value — accent bold/green (added; was not in CSS) */
+  /* Light accent tints (brief §2 "без змін") — Tag/on page backgrounds */
+  --color-accent-light-green:  #E6F5F0;  /* accent light/green — Solution tag bg */
+  --color-accent-light-red:    #FFEFED;  /* accent light/red — Problem tag bg */
+  /* Removed (unused): --color-accent-red #E85949 (brief §2 Deleted);
+     --color-accent-yellow #E39B23 + --color-accent alias (per §2 intent to drop
+     colourful bold accents — Marianna approved). */
 
   /* System */
-  --color-system-success:  #248434;
-  --color-system-error:    #D9321C;
+  --color-system-success:  #238067;  /* Changed (was #248434) — redesign brief §2 */
+  --color-system-error:    #D0311C;  /* Changed (was #D9321C) — redesign brief §2 */
 
   /* Decorative */
   --color-overlay-black-20:  rgba(0, 0, 0, 0.2);
+  --color-overlay-black-40:  rgba(15, 15, 15, 0.4);    /* New — overlay/40% black (#0F0F0F @ 40%) */
+  --color-overlay-white-60:  rgba(255, 255, 255, 0.6); /* New — overlay/60% white (#FFFFFF @ 60%) */
   --color-grey-blue-100:     #DEE1E7;
 
   /* Semantic aliases (used across the site) */
   --color-bg-primary:    var(--color-bg-white);
   --color-text-primary:  var(--color-text-black);
-  --color-accent:        var(--color-accent-yellow);
 
   /* --------------------------------------------------------
      2. Typography (Figma Text Styles)
@@ -115,6 +134,7 @@
   --space-stack-xl:   20px;
   --space-stack-2xl:  24px;
   --space-stack-3xl:  32px;
+  --space-stack-4xl:  40px;  /* footer pb desktop (Figma 1126-52940); fills the scale gap */
   --space-stack-5xl:  48px;
 
   /* Inline — horizontal spacing between elements */
@@ -137,6 +157,8 @@
   --radius-l:     12px;
   --radius-xl:    16px;
   --radius-2xl:   20px;
+  --radius-3xl:   24px;  /* New — redesign brief §3 (Figma 311-9600) */
+  --radius-4xl:   40px;  /* New — redesign brief §3 (Figma 311-9600) */
   --radius-pill:  999px;
 
   /* --------------------------------------------------------
@@ -222,6 +244,22 @@
   /* Section vertical padding — applies to ALL main sections except Hero.
      Hero has its own bespoke top padding (sticky header compensation). */
   --space-section-block:  64px;
+
+  /* --------------------------------------------------------
+     10. Dot pattern (redesign brief §9.1)
+     Values read from Figma "dot pattern_on black" (node 1117-44596):
+     16×16px tile, centred dot r=2px (Ø4px), fill #6F6F6F.
+     Drawn in CSS via radial-gradient — NOT exported as PNG.
+     Consumed by the .dot-pattern utility (global.css). Tune per surface
+     by overriding --dot-pattern-color / --dot-pattern-bg on the element.
+     -------------------------------------------------------- */
+  /* Dot fill = Figma #6F6F6F but the pattern layer sits at 20% opacity
+     (node 1116-39391 PATTERN fill opacity 0.2), so bake the alpha in — a
+     solid #6F6F6F reads far too bright on the dark hero. */
+  --dot-pattern-color:       rgba(111, 111, 111, 0.2);
+  --dot-pattern-bg:          transparent;  /* tile background — set per surface */
+  --dot-pattern-dot-radius:  2px;   /* Figma circle r=2 (Ø4) */
+  --dot-pattern-step:        28px;  /* spacing per Marianna (Figma tile reads too dense on screen) */
 }
 
 /* ============================================================
@@ -254,6 +292,7 @@
     --space-stack-xl:  16px;
     --space-stack-2xl: 20px;
     --space-stack-3xl: 24px;
+    --space-stack-4xl: 32px;
     --space-stack-5xl: 32px;
 
     /* ── Inline (horizontal spacing) ─────────────────────────
@@ -280,6 +319,7 @@
     --radius-l:   12px;
     --radius-xl:  12px;
     --radius-2xl: 16px;
+    --radius-4xl: 32px;  /* footer top corners: 40 desktop → 32 mobile (Marianna) */
 
     /* ── Layout ──────────────────────────────────────────────*/
     --page-margin: 16px;
