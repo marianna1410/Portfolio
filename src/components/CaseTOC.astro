@@ -120,16 +120,6 @@ const {
     position: sticky;
     top: 24px;
     align-self: start;
-
-    /* Multi-layer drop shadow from Figma "Small elements" effect — used on
-       BOTH the FAB and the popup TOC in popup mode so they read as one
-       lifted-from-page system. Declared once here, consumed twice below. */
-    --shadow-fab:
-      0  1px 1px 0 rgba(186, 186, 186, 0.10),
-      0  3px 3px 0 rgba(186, 186, 186, 0.09),
-      0  6px 4px 0 rgba(186, 186, 186, 0.05),
-      0 11px 4px 0 rgba(186, 186, 186, 0.01),
-      0 17px 5px 0 rgba(186, 186, 186, 0.00);
   }
 
   .case-toc {
@@ -239,7 +229,6 @@ const {
       border: 1px solid var(--color-stroke-dark-grey);
       border-radius: var(--radius-pill);
       cursor: pointer;
-      box-shadow: var(--shadow-fab);
       /* Pinned to bottom-right of viewport. Mobile values; tablet override
          below bumps these to 40px. */
       position: fixed;
@@ -282,7 +271,6 @@ const {
          paired when both are on screen. */
       border: 1px solid var(--color-stroke-dark-grey); /* #4A4A4A */
       border-radius: var(--radius-l); /* 12px */
-      box-shadow: var(--shadow-fab);
       gap: var(--space-stack-sm); /* 8px */
       z-index: 50;
       /* Hidden until .is-open is applied. */
