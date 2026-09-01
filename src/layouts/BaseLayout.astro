@@ -45,7 +45,7 @@ const {
     <title>{title}</title>
     <ClientRouter />
   </head>
-  <body>
+  <body class:list={[{ 'is-case-page': headerVariant === 'case' }]}>
     <a href="#main" class="skip-link">Skip to main content</a>
     <Header variant={headerVariant} />
     <main id="main">
