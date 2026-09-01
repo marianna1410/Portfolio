@@ -2,7 +2,7 @@ import { PROTOTYPES } from '../../lib/config';
 import type { CaseData } from './types';
 
 // Hero + section assets
-import heroImage from '../../assets/projects/cases/vaia/hero.png';
+import heroImage from '../../assets/projects/cases/vaia/hero-dark.png';
 import userFeedbackImage from '../../assets/projects/cases/vaia/user-feedback.png';
 import problem1Image from '../../assets/projects/cases/vaia/Problem 1.png';
 import problem2Image from '../../assets/projects/cases/vaia/Problem 2.png';

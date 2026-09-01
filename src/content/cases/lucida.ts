@@ -2,7 +2,7 @@ import { PROTOTYPES } from '../../lib/config';
 import type { CaseData } from './types';
 
 // Hero + section assets
-import heroImage from '../../assets/projects/cases/lucida/hero.png';
+import heroImage from '../../assets/projects/cases/lucida/hero-dark.png';
 import userFeedbackImage from '../../assets/projects/cases/lucida/user-feedback.png';
 import problem1Image from '../../assets/projects/cases/lucida/Problem 1.png';
 import problem2Image from '../../assets/projects/cases/lucida/Problem 2.png';
