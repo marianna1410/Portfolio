@@ -66,13 +66,20 @@ const folders = [
             <span class="behind__travel-tag text-caption-regular">Romania</span>
           </div>
 
-          <div class="behind__photos">
-            <Image src={riverImg}    alt="A river and bridge in Romania" width={296} height={368}
-                   class="behind__photo behind__photo--left" />
-            <Image src={fontanImg}   alt="A fountain square in Romania" width={296} height={368}
-                   class="behind__photo behind__photo--right" />
-            <Image src={buildingImg} alt="A historic building and street in Bucharest" width={404} height={466}
-                   class="behind__photo behind__photo--front" />
+          {/* Deck of travel photos on 3 fan slots (front / back-left /
+              back-right). slot-* classes set statically so the fan renders with
+              no JS; after the fan-out reveal settles JS lets the user swipe /
+              drag to rotate the photos through the slots. Decorative → aria-hidden. */}
+          <div class="behind__photos" data-fan-photos aria-hidden="true">
+            <div class="behind__photo behind__photo--river slot-bl">
+              <Image src={riverImg} alt="" width={296} height={368} quality={95} draggable={false} />
+            </div>
+            <div class="behind__photo behind__photo--fontan slot-br">
+              <Image src={fontanImg} alt="" width={296} height={368} quality={95} draggable={false} />
+            </div>
+            <div class="behind__photo behind__photo--building slot-front">
+              <Image src={buildingImg} alt="" width={404} height={466} quality={95} draggable={false} />
+            </div>
           </div>
         </article>
 
@@ -234,43 +241,91 @@ const folders = [
     white-space: nowrap;
   }
 
-  /* Fanned photos — Building upright in front, River tilted left, Fontan
-     tilted right behind it (Figma "images" 376×232). */
+  /* Deck of travel photos on 3 fan slots. A slot fixes HEIGHT + centre-x + tilt
+     + z; each photo keeps its own aspect ratio (baked white frame never crops),
+     so a photo is never stretched or cropped whatever slot it lands in. The
+     three photos rotate through the slots on swipe/drag (ported from the
+     production deck; animations.md §7.1). */
   .behind__photos {
     position: relative;
-    flex: 1 1 auto;
-    min-height: 0;
+    height: 232px;                                   /* Figma "images" area */
+    flex-shrink: 0;
   }
+  /* Enabled by JS after the fan-out reveal settles. pan-y lets a vertical drag
+     scroll the page while horizontal drags are captured for the shuffle. */
+  .behind__photos.is-draggable { touch-action: pan-y; }
+  @media (hover: hover) and (pointer: fine) {
+    .behind__photos.is-draggable { cursor: grab; }
+    .behind__photos.is-dragging  { cursor: grabbing; }
+  }
+
+  /* Photo box — the white frame is baked into the PNG (no CSS border). Rounded +
+     overflow so the layered shadow follows the rounded silhouette. Only transform
+     is in the base transition: the reveal animates transform, the shuffle sets a
+     snappier multi-prop transition inline (see JS advance()). */
   .behind__photo {
     position: absolute;
-    display: block;
-    object-fit: cover;
     border-radius: var(--radius-l);                  /* 12 */
-    box-shadow: 0 8px 20px rgba(37, 37, 37, 0.12);
-    transform-origin: center;
+    overflow: hidden;
+    will-change: transform;
+    transition: transform var(--duration-fan-out-card, 600ms) var(--ease-out);
+    user-select: none;
+    -webkit-user-select: none;
+    box-shadow:
+      -8px 132px 37px 0 rgba(102, 102, 102, 0),
+      -5px 84px 34px 0 rgba(102, 102, 102, 0.01),
+      -3px 47px 28px 0 rgba(102, 102, 102, 0.05),
+      -1px 21px 21px 0 rgba(102, 102, 102, 0.09);
   }
-  /* Positioned by CENTER (% of the 376×232 images area) + rotate about center,
-     matching Figma exactly. Building upright front; River +30° / Fontan −30°
-     fanned behind (Figma z-order: Fontan, River, Building). */
-  .behind__photo--front {  /* Building — center (50%, 50%), 0° */
-    width: 202px; height: 233px;
-    left: 50%; top: 50%;
-    transform: translate(-50%, -50%);
-    border-radius: var(--radius-xl);                 /* 14 ≈ 16 (front photo r14) */
+  .behind__photo :global(img) {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    pointer-events: none;                            /* container owns the drag */
+    -webkit-user-drag: none;
+    user-select: none;
+  }
+
+  /* Each photo keeps its own aspect ratio; slots fix HEIGHT only, width follows. */
+  .behind__photo--building { aspect-ratio: 404 / 466; }
+  .behind__photo--river,
+  .behind__photo--fontan   { aspect-ratio: 296 / 368; }
+
+  /* Fan slots (centre-x via left:% + translateX(-50%); top in px). Figma
+     rotation is CCW-positive, CSS rotate() CW-positive → CSS angle = −Figma. */
+  .slot-front {                                      /* centre, upright, tallest, top */
+    height: 233px;
+    left: 50%; top: -1px;
+    border-radius: var(--radius-xl);                 /* 14 */
+    transform: translateX(-50%) rotate(0deg);
     z-index: 3;
   }
-  /* Figma rotation is CCW-positive; CSS rotate() is CW-positive → CSS = −Figma. */
-  .behind__photo--left {   /* River — center (32.7%, 47.8%), Figma +30° */
-    width: 148px; height: 184px;
-    left: 32.7%; top: 47.8%;
-    transform: translate(-50%, -50%) rotate(-30deg);
-    z-index: 2;
-  }
-  .behind__photo--right {  /* Fontan — center (67%, 47.8%), Figma −30° */
-    width: 148px; height: 184px;
-    left: 67%; top: 47.8%;
-    transform: translate(-50%, -50%) rotate(30deg);
+  .slot-bl {                                         /* back-left, tilted */
+    height: 184px;
+    left: 32.7%; top: 19px;
+    transform: translateX(-50%) rotate(-30deg);
     z-index: 1;
+  }
+  .slot-br {                                         /* back-right, tilted */
+    height: 184px;
+    left: 67%; top: 19px;
+    transform: translateX(-50%) rotate(30deg);
+    z-index: 2;
+    transition-delay: 120ms;                         /* reveal stagger (fontan +120ms) */
+  }
+
+  /* Fan-out reveal — initial (stacked) state: JS sets data-fan-state="initial",
+     snapping the side photos onto building's centre with no rotation and no
+     transition; removing it fans them out. Offsets = each photo's centre → the
+     building centre in the 376×232 frame (±65, +5). */
+  .behind__photos[data-fan-state="initial"] .slot-bl {
+    transform: translateX(-50%) translate(65px, 5px) rotate(0deg);
+    transition: none;
+  }
+  .behind__photos[data-fan-state="initial"] .slot-br {
+    transform: translateX(-50%) translate(-65px, 5px) rotate(0deg);
+    transition: none;
   }
 
   /* ====== Card 2b: Music player ====== */
@@ -309,6 +364,10 @@ const folders = [
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    /* Minimum gap between the slider and the controls — space-between still
+       spreads them on the tall desktop card, but this keeps ≥8px when the
+       mobile card collapses to content height. */
+    gap: var(--space-inset-sm);                       /* 8 */
   }
   .behind__player-top {
     display: flex;
@@ -411,6 +470,17 @@ const folders = [
     align-items: center;
     gap: var(--space-inset-sm);                       /* 8 (icon → label) */
     pointer-events: none;                             /* decorative only */
+    /* Soft levitation (brief §8.3) — the whole folder (icon + label) drifts,
+       transform-only per the perf rules. Each folder runs a different duration
+       + negative delay so they move out of phase (no synchronized bobbing). */
+    animation: behind-levitate 4.6s ease-in-out infinite;
+    will-change: transform;
+  }
+  .behind__folder--2 { animation-duration: 5.4s; animation-delay: -1.6s; }
+  .behind__folder--3 { animation-duration: 5s;   animation-delay: -0.8s; }
+  @keyframes behind-levitate {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-9px); }
   }
   .behind__folder-icon {
     display: block;
@@ -424,11 +494,182 @@ const folders = [
     white-space: nowrap;
   }
 
-  /* ====== Mobile (built in a later pass) ====== */
+  /* ====== Mobile (≤767px) — no dedicated frame; adapt per mobile-adaptation.md.
+     Cards stack full-width; the photo deck and folder field scale to the
+     narrower column. ====== */
   @media (max-width: 767px) {
     .behind__grid {
       grid-template-columns: 1fr;
-      grid-template-rows: none;
+      grid-template-rows: none;                       /* cards size to content */
     }
+
+    /* Cards size to their content when stacked (no fixed 385/580 tiers). */
+    .behind__travel,
+    .behind__player { flex: 0 0 auto; }
+
+    /* Photo deck scales to ~0.77× so the fan fits the narrow card. */
+    .behind__photos { height: 180px; }
+    .slot-front { height: 180px; top: 0; }
+    .slot-bl,
+    .slot-br   { height: 142px; top: 15px; }
+    .behind__photos[data-fan-state="initial"] .slot-bl {
+      transform: translateX(-50%) translate(50px, 4px) rotate(0deg);
+    }
+    .behind__photos[data-fan-state="initial"] .slot-br {
+      transform: translateX(-50%) translate(-50px, 4px) rotate(0deg);
+    }
+
+    /* Files field: checkerboard + floating folders need an explicit height when
+       the desktop 580 row is gone. */
+    .behind__files {
+      min-height: 360px;
+      /* Whole cells across the full width (no clipped side column): a conic
+         tile is a self-contained 2×2 checker, so sizing it to 100%/6 lays down
+         exactly 12 square cells edge-to-edge — no px value to divide unevenly. */
+      background-image: conic-gradient(
+        var(--color-stroke-light) 90deg,
+        var(--color-bg-white) 90deg 180deg,
+        var(--color-stroke-light) 180deg 270deg,
+        var(--color-bg-white) 270deg
+      );
+      background-size: calc(100% / 6) calc(100% / 6);
+      background-position: 0 0;
+    }
+
+    /* Folders scale to 0.75× (whole-pixel). */
+    .behind__folder { width: 81px; gap: 6px; }
+    .behind__folder-icon { width: 75px; height: 64px; }
   }
 </style>
+
+<script>
+  // Travelling photo deck — fan-out reveal (once/session) + swipe/drag shuffle,
+  // ported from the production site (animations.md §7.1). Folder levitation and
+  // the album spin are pure CSS. No reduced-motion special-casing (brief §1.7).
+  function initBehindTravel() {
+    const container = document.querySelector<HTMLElement>('.behind__photos');
+    if (!container || container.dataset.travelInit === '1') return;
+    container.dataset.travelInit = '1';
+
+    const river    = container.querySelector<HTMLElement>('.behind__photo--river');
+    const fontan   = container.querySelector<HTMLElement>('.behind__photo--fontan');
+    const building = container.querySelector<HTMLElement>('.behind__photo--building');
+    if (!river || !fontan || !building) return;
+    const photos = [river, fontan, building];
+
+    // Ring positions map to slot classes. Rotating ringPos by ±1 cycles the
+    // three photos through the fan; order chosen so the front card, when tossed,
+    // travels toward the side it was dragged.
+    const RING = ['slot-front', 'slot-bl', 'slot-br'];
+    const ringPos = new Map<HTMLElement, number>([[building, 0], [river, 1], [fontan, 2]]);
+    const applySlots = () => {
+      for (const el of photos) {
+        el.classList.remove('slot-front', 'slot-bl', 'slot-br');
+        el.classList.add(RING[ringPos.get(el)!]);
+      }
+    };
+    const frontEl = () => photos.find((el) => ringPos.get(el) === 0)!;
+
+    const THRESHOLD = 48;   // px of horizontal travel to commit a shuffle
+    const SHUFFLE_MS = 450;
+    const SHUFFLE_TRANSITION =
+      `transform ${SHUFFLE_MS}ms var(--ease-out), left ${SHUFFLE_MS}ms var(--ease-out),` +
+      ` top ${SHUFFLE_MS}ms var(--ease-out), height ${SHUFFLE_MS}ms var(--ease-out)`;
+
+    let enabled = false;
+    let dragging = false;
+    let decided = false;
+    let horiz = false;
+    let captured = false;
+    let pointerId = -1;
+    let startX = 0, startY = 0;
+    let dragEl: HTMLElement | null = null;
+
+    const snapBack = () => {
+      if (!dragEl) return;
+      dragEl.style.transition = 'transform 300ms var(--ease-out)';
+      dragEl.style.transform = '';
+      const el = dragEl;
+      window.setTimeout(() => { el.style.transition = ''; }, 320);
+    };
+
+    const advance = (dir: number) => {
+      for (const el of photos) el.style.transition = SHUFFLE_TRANSITION;
+      if (dragEl) dragEl.style.transform = '';   // animate from dragged pos → new slot
+      for (const el of photos) ringPos.set(el, (ringPos.get(el)! + dir + 3) % 3);
+      applySlots();
+      window.setTimeout(() => { for (const el of photos) el.style.transition = ''; }, SHUFFLE_MS + 30);
+    };
+
+    const onDown = (e: PointerEvent) => {
+      if (!enabled || dragging) return;
+      if (e.pointerType === 'mouse' && e.button !== 0) return;
+      dragging = true; decided = false; horiz = false; captured = false;
+      pointerId = e.pointerId;
+      startX = e.clientX; startY = e.clientY;
+      dragEl = frontEl();
+      dragEl.style.transition = 'none';
+    };
+
+    const onMove = (e: PointerEvent) => {
+      if (!dragging || !dragEl) return;
+      const dx = e.clientX - startX;
+      const dy = e.clientY - startY;
+      if (!decided) {
+        if (Math.abs(dx) < 6 && Math.abs(dy) < 6) return;
+        decided = true;
+        horiz = Math.abs(dx) > Math.abs(dy);
+        if (!horiz) { endDrag(e, true); return; }   // vertical → let the page scroll
+        container.classList.add('is-dragging');
+        try { container.setPointerCapture(e.pointerId); captured = true; } catch {}
+      }
+      // Front card tracks the pointer with a slight tilt; translateX(-50%) keeps
+      // the slot centring while dragging.
+      dragEl.style.transform = `translate(calc(-50% + ${dx}px), 0) rotate(${dx * 0.03}deg)`;
+    };
+
+    function endDrag(e: PointerEvent, cancel = false) {
+      if (!dragging) return;
+      dragging = false;
+      container.classList.remove('is-dragging');
+      if (captured) { try { container.releasePointerCapture(pointerId); } catch {} captured = false; }
+      const dx = e.clientX - startX;
+      if (!cancel && horiz && Math.abs(dx) > THRESHOLD) {
+        advance(dx < 0 ? 1 : -1);                    // drag left → next; right → previous
+      } else {
+        snapBack();
+      }
+      dragEl = null;
+    }
+
+    container.addEventListener('pointerdown', onDown);
+    container.addEventListener('pointermove', onMove);
+    container.addEventListener('pointerup', (e) => endDrag(e));
+    container.addEventListener('pointercancel', (e) => endDrag(e, true));
+
+    const enableDrag = () => { enabled = true; container.classList.add('is-draggable'); };
+
+    // Fan-out reveal — once per session (window flag survives SPA nav, resets on
+    // hard refresh). Then enable the deck once it settles.
+    const FANOUT_TOTAL_MS = 720;   // river 0 + 600, fontan 120 + 600
+    if (window.__behindFanPlayed) {
+      enableDrag();
+    } else {
+      container.setAttribute('data-fan-state', 'initial');
+      const io = new IntersectionObserver((entries, obs) => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue;
+          window.__behindFanPlayed = true;
+          requestAnimationFrame(() => {
+            container.removeAttribute('data-fan-state');
+            window.setTimeout(enableDrag, FANOUT_TOTAL_MS);
+          });
+          obs.unobserve(entry.target);
+        }
+      }, { threshold: 0.4 });
+      io.observe(container);
+    }
+  }
+
+  document.addEventListener('astro:page-load', initBehindTravel);
+</script>
